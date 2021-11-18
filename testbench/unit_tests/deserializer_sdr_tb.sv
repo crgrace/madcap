@@ -15,12 +15,13 @@ logic reset_n;
 logic clk;
 logic enable;
 logic load_serializer;
-logic dout; // SDR output
-logic dout_symbol; // forwarded symbol marker
-logic symbol_start; // high for first bit in 8b10b symbol
-logic symbol_start_fsm; // 8b10b symbol marker from comma detect
-logic external_sync; // high for external first bit in 8b10b symbol
-logic start_sync;       // external signal to force sync
+logic dout;                 // SDR output
+logic dout_symbol;          // forwarded symbol marker
+logic symbol_start;         // high for first bit in 8b10b symbol
+logic symbol_start_fsm;     // 8b10b symbol marker from comma detect
+logic comma_found;          // high when comma (K28.5) found
+logic external_sync;        // high for external first bit in 8b10b symbol
+logic start_sync;           // external signal to force sync
 logic [3:0] serializer_cnt;
 logic ready_to_load;
 logic dataword_ready;
@@ -122,10 +123,11 @@ deserializer_sdr
     .reset_n        (reset_n)
     );
 
-comma_detect_fsm
-    comma_detect_fsm_inst (
+comma_detect
+    comma_detect_inst (
     .symbol_start   (symbol_start_fsm),
     .symbol_locked  (symbol_locked),
+    .comma_found    (comma_found),
     .dataword       (dataword),
     .dataword_ready (dataword_ready),
     .start_sync     (start_sync),
