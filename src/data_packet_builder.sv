@@ -8,7 +8,7 @@
 //              testmode[2:0] | Description
 //             ------------------------------------
 //              000     Normal operaton
-//              001     Low-Frequency test Patter (K28.7)
+//              001     Low-Frequency test pattern (K28.7)
 //              010     Mixed-Frequency test pattern (K28.5)
 //              011     High-Frequency test pattern (D21.5)
 //              100     Alternate comma (K28.3)
@@ -18,9 +18,15 @@
 //
 //              Marker codes:
 //              Idle code (comma)               : K28.5  (K_K)
-//              Start byte                      : K28.7  (K_F)
+//              Start byte ( nomial data packet): K28.7  (K_F)
+//              In data packets:
+//              Config half-full marker symbol  : K29.7  (K_T)
+//              Config full marker symbol       : K27.7  (K_S)
+//              
+//              In idle packets
 //              Config half-full marker symbol  : K28.3  (K_A)
 //              Config full marker symbol       : K28.4  (K_Q)
+//
 //
 //              Outputs are registered to avoid glitches and to
 //              standardize input and output delay constraints.

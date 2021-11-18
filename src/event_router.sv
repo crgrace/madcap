@@ -29,11 +29,11 @@ logic [NUMCHANNELS-1:0] veto_event;       // high if already dealing with it
 
 // state machine
 enum logic [2:0] // explicit state definitions 
-            {READY = 3'h0,
-            READ_EVENT = 3'h1,
-            VETO_CHECK = 3'h2,
-            LATCH_EVENT = 3'h3,
-            WAIT_STATE = 3'h4} State, Next;
+            {READY          = 3'h0,
+            READ_EVENT      = 3'h1,
+            VETO_CHECK      = 3'h2,
+            LATCH_EVENT     = 3'h3,
+            WAIT_STATE      = 3'h4} State, Next;
 
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)

@@ -6,96 +6,114 @@
 //              and assembles configuration packets and then either:
 //              1. loads data into config registers
 //              2. dumps LArPix config data into the config FIFO
+//              3. puts requested madcap config data into data FIFO
 //     
 ///////////////////////////////////////////////////////////////////
 `include "../testbench/tasks/k_codes.sv"
 module config_packet_builder 
-    (output logic [63:0] larpix_packet, // config packet for LArPix
-    output logic [67:0] madcap_packet, // return MADCAP config data
-    output logic symbol_locked,         // deserializer synchronized
-    output logic [7:0] regmap_write_data, // data to write to regmap
-    output logic [7:0] regmap_address, // regmap addr to write
-    output logic write_regmap,    // active high to load register data
-    output logic read_regmap,       // active high to read register data    
-    input logic [7:0] dataword      ,   // current 8b symbol
-    input logic [7:0] regmap_read_data, // data to read from regmap
-    input logic k_in,                   // high to indicate k code
-    input logic clk,                    // MADCAP primary clk
-    input logic reset_n);               // digital reset (active low)
+    (output logic [63:0] larpix_packet,     // config packet for LArPix
+    output logic [67:0] madcap_packet,      // return MADCAP config data
+    output logic [7:0] regmap_write_data,   // data to write to regmap
+    output logic [7:0] regmap_address,      // regmap addr to write
+    output logic write_regmap,      // active high to load register data
+    output logic read_regmap,       // active high to read register data
+    output logic load_event_n_config, // low to put data into config FIFO
+    output logic load_event_n_data,   // low to put data into data FIFO
+    output logic madcap_packet_ready,       // high if packet ready    
+    input logic [7:0] dataword      ,       // current 8b symbol
+    input logic [7:0] regmap_read_data,     // data to read from regmap
+    input logic k_in,                       // high to indicate k code
+    input logic comma_found,        // high when comma (K28.5) found    
+    input logic clk,                        // MADCAP primary clk
+    input logic reset_n);                   // digital reset (active low)
 
-    
-logic [3:0] bit_cnt;            // bit counter
-logic [3:0] symbol_start_loc;    // where is the symbol edge
-logic comma_found;              // high if K28.5 detected
 
-// bit counter
+// local signals
+logic done;                 // high if new packet received
+logic [31:0] rcvd_packet;   // packet received from PACMAN
+logic [2:0] byte_cnt;       // which byte in packet just received
+
+// byte counter
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
-        bit_cnt <= '0;
+        byte_cnt <= '0;
     end
     else begin
-        if ( external_sync || (bit_cnt == 4'b1001) )
-            bit_cnt <= '0;
-        else if (!external_sync)
-            bit_cnt <= bit_cnt + 1'b1;
+        if (byte_cnt_en)  
+            byte_cnt <= byte_cnt + 1'b1;
+        else
+            byte_cnt <= '0;
     end
 end // always_ff
 
-// symbol start selector
-always_comb
-    if (bit_cnt == symbol_start_loc)
-        symbol_start = 1'b1;
-    else
-        symbol_start = 1'b0;
+always_comb begin
+    done = (byte_cnt == 3'b100);
 
 // state machine
 enum logic [2:0] // explicit state definitions 
-            {RESET = 3'h0,
-            CHECK_FOR_DATA  = 3'h1,
-            GET_DATA        = 3'h2,
-            CHECK_SYMBOL    = 3'h3,
-            UPDATE_START    = 3'h4,
-            DONE = 3'h5} State, Next;
+            {WAIT_FOR_COMMA     = 3'h0,
+            GET_NEXT_BYTE       = 3'h1,
+            BUILD_MADCAP        = 3'h2,
+            WRITE_REGMAP        = 3'h3,
+            READ_REGMAP         = 3'h4
+            BUILD_LARPIX        = 3'h5,
+            LOAD_FIFO           = 3'h6} State, Next;
 
 
 always_ff @(posedge clk or negedge reset_n) begin
-    if (!reset_n || start_sync)
-        State <= RESET;
+    if (!reset_n)
+        State <= WAIT_FOR_COMMA;
     else
         State <= Next;
 end // always_ff
 
-always_comb 
-    comma_found = ((dataword == `K_K_DISP_N) || (dataword == `K_K_DISP_P));
 
 always_comb begin
-    Next = RESET;
+    Next = WAIT_FOR_COMMA;
     case (State)
-        RESET:      if (external_sync)  Next = RESET;             
-                else                    Next = CHECK_FOR_DATA;
-        CHECK_FOR_DATA: if (dataword_ready) Next = CHECK_SYMBOL;
-                else                    Next = CHECK_FOR_DATA;
-        CHECK_SYMBOL:                   Next = UPDATE_START;
-        UPDATE_START: if (comma_found)  Next = DONE;    
-                else                    Next = CHECK_FOR_DATA;
-        DONE:                           Next = DONE;
-        default:                        Next = RESET;
+        WAIT_FOR_COMMA: if (comma_found)  Next = GET_NEXT_BYTE;
+                else                    Next = WAIT_FOR_COMMA;
+        GET_NEXT_BYTE: if (done && rcvd_packet[1] == 1'b0) 
+                                        Next = BUILD_LARPIX;
+                else if (done && rcvd_packet[1] == 1'b1) 
+                                        Next = BUILD_MADCAP;
+                else                    Next = GET_NEXT_BYTE;
+        BUILD_MADCAP if (rcvd_packet[0] == 1'b0):
+                                        Next = WRITE_REGMAP;
+                     else
+                                        Next = READ_REGMAP;
+        WRITE_REGMAP:                   Next = WAIT_FOR_COMMMA;
+        READ_REGMAP:                    Next = LOAD_FIFO            
+        BUILD_LARPIX:                   Next = LOAD_FIFO;
+        LOAD_FIFO:                      Next = WAIT_FOR_COMMA:    
+        default:                        Next = WAIT_FOR_COMMA;
     endcase
 end // always
 
 // registered outputs
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
-        symbol_locked <= 1'b0;
-        symbol_start_loc <= 1'b0;
+        done <= 1'b0;
+        byte_cnt_en <= 1'b0;
+        load_event_n_config <= 1'b1;    
+        load_event_n_data <= 1'b1;    
+        write_regmap <= 1'b0;
+        read_regmap <= 1'b0;
+        regmap_address <= '0;
+        regmap_write_data <= '0;
     end
     else begin
-    symbol_locked <= 1'b0;
+        done <= 1'b0;
+        byte_cnt_en <= 1'b0;
+        load_event_n_config <= 1'b1;    
+        load_event_n_data <= 1'b1;    
         case (Next)
-        RESET: ;
-        CHECK_FOR_DATA: ; 
-        CHECK_SYMBOL: ;
-        UPDATE_START:   if (symbol_start_loc == 4'b1001)
+        WAIT_FOR_COMMA: 
+        GET_NEXT_BYTE:  begin
+                            byte_cnt_en <= 1'b1;
+                            rcvd_packet[byte_cnt*8+7:byte_cnt*8]<=dataword;
+                        end
+        BUILD_LARPIX:   if (symbol_start_loc == 4'b1001)
                             symbol_start_loc <= '0;
                         else if (comma_found)    
                             symbol_start_loc <= symbol_start_loc - 1'b1;
