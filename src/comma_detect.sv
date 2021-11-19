@@ -11,8 +11,8 @@ module comma_detect_fsm
     (output logic symbol_start,         // high for symbol edge bit
     output logic symbol_locked,         // deserializer synchronized
     output logic comma_found,           // high when comma (K28.5) found
-    input logic [9:0] dataword      ,   // 10b symbol under test
-    input logic dataword_ready,         // data ready to sample
+    input logic [9:0] dataword10b      ,   // 10b symbol under test
+    input logic dataword10b_ready,      // data ready to sample
     input logic start_sync,             // start sync (also starts on rst)
     input logic external_sync,          // high for external sync
     input logic clk,                    // MADCAP primary clk
@@ -60,14 +60,15 @@ always_ff @(posedge clk or negedge reset_n) begin
 end // always_ff
 
 always_comb 
-    comma_found = ((dataword == `K_K_DISP_N) || (dataword == `K_K_DISP_P));
+    comma_found = ((dataword10b == `K_K_DISP_N) || 
+                   (dataword10b == `K_K_DISP_P));
 
 always_comb begin
     Next = RESET;
     case (State)
         RESET:      if (external_sync)  Next = RESET;             
                 else                    Next = CHECK_FOR_DATA;
-        CHECK_FOR_DATA: if (dataword_ready) Next = CHECK_SYMBOL;
+        CHECK_FOR_DATA: if (dataword10b_ready) Next = CHECK_SYMBOL;
                 else                    Next = CHECK_FOR_DATA;
         CHECK_SYMBOL:                   Next = UPDATE_START;
         UPDATE_START: if (comma_found)  Next = DONE;    

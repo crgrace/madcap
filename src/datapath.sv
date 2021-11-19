@@ -17,16 +17,22 @@
 //              testmode[2:0] | Description
 //             ------------------------------------
 //              000     Normal operaton
-//              001     Low-Frequency test Patter (K28.7)
-//              010     Mixed-Frequency test pattern (K28.5)
+//              001     Low-Frequency test Patter (K28.7 - K_F)
+//              010     Mixed-Frequency test pattern (K28.5 - K_K)
 //              011     High-Frequency test pattern (D21.5)
-//              100     Alternate comma (K28.3)
-//              101     Alternate comma (K28.0)
+//              100     Alternate comma (K28.3 - K_A)
+//              101     Alternate comma (K28.0 - K_R)
 //              110     Modified RPAT (to stress channel) from IEEE802.3 
 //              111     Test Packet (user must handle CRC generation)
 //
+//              Idle Packet:
 //              Config half-full marker symbol  : K28.3 
 //              Config full marker symbol       : K24.3
+//
+//              Data Packet:
+//              Config half-full marker symbol  : K29.7 (K_T) 
+//              Config full marker symbol       : K28.4 (K_S)
+//
 //
 //    
 ///////////////////////////////////////////////////////////////////

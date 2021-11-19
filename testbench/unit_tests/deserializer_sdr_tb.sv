@@ -115,25 +115,25 @@ serializer_sdr
 deserializer_sdr
     #(.WIDTH(WIDTH))
     deserializer_inst (
-    .dataword       (dataword),
-    .dataword_ready (dataword_ready),
-    .din            (dout),
-    .symbol_start   (symbol_start),
-    .clk            (clk),
-    .reset_n        (reset_n)
+    .dataword10b        (dataword),
+    .dataword10b_ready  (dataword_ready),
+    .din                (dout),
+    .symbol_start       (symbol_start),
+    .clk                (clk),
+    .reset_n            (reset_n)
     );
 
 comma_detect
     comma_detect_inst (
-    .symbol_start   (symbol_start_fsm),
-    .symbol_locked  (symbol_locked),
-    .comma_found    (comma_found),
-    .dataword       (dataword),
-    .dataword_ready (dataword_ready),
-    .start_sync     (start_sync),
-    .external_sync  (external_sync),
-    .clk            (clk),
-    .reset_n        (reset_n)
+    .symbol_start       (symbol_start_fsm),
+    .symbol_locked      (symbol_locked),
+    .comma_found        (comma_found),
+    .dataword10b        (dataword),
+    .dataword10b_ready  (dataword_ready),
+    .start_sync         (start_sync),
+    .external_sync      (external_sync),
+    .clk                (clk),
+    .reset_n            (reset_n)
     );
 
 endmodule

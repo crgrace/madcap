@@ -3,7 +3,8 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 //
 // Description: Array of 16 UART TX modules.
-//         Implements POSI data connections from MADCAP to Tile  
+//         Implements POSI data connections from MADCAP to Tile 
+//          Sends configuration packetes to LArPix (no data packets) 
 //
 //    Packet Definition
 //
@@ -12,14 +13,10 @@
 //     1:0        | packet declaration (00: data, 01: test.
 //                    10: configuration write, 11: configuration read)
 //     9:2        | chip id
-//   15:10        | channel id
-//   47:16        | 32-bit time stamp
-//   55:48        | 8-bit ADC data word
-//   57:56        | trigger type (00: normal, 01: external, 10: cross, 
-//                    11: periodic)
-//   59:58        | local FIFO status (58: fifo half full,59: fifo full)
-//   61:60        | shared FIFO status (60: fifo half full, 61: fifo full)
-//   62           | downstream marker bit (1 if packet is downstream)
+//   17:10        | register map address
+//   25:18        | register map data
+//   61:26        | all zeros
+//   62           | downstream marker bit (always zero here)
 //   63           | odd parity bit
 //
 //  Output format: packet is sent LSB-first, preceded by a start bit = 0
