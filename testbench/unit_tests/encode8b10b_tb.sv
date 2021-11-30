@@ -10,13 +10,13 @@ module encode8b10b_tb ();
 
 localparam NUMTRIALS = 10;
 
-logic [9:0] data_out;
-logic disp_out;// 0 = neg disp; 1 = pos disp; not registered
-logic [7:0] data_in;
-logic disp_in;        // 0 = neg disp; 1 = pos disp
-logic k_in;           // high to denote k character
-logic clk;            // primary clock
-logic reset_n;       // asynchronous reset (active low)
+logic [9:0] data_out;   // 10-bit encoded output
+logic disp_out;         // 0 = neg disp; 1 = pos disp; not registered
+logic [7:0] data_in;    // 8-bit raw input
+logic disp_in;          // 0 = neg disp; 1 = pos disp
+logic k_in;             // high to denote k character
+logic clk;              // primary clock
+logic reset_n;          // asynchronous reset (active low)
 
 logic [8:0] decode_dataout;
 logic decode_dispin;

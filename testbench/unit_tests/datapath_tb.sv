@@ -123,7 +123,7 @@ datapath
     .test_packet        (test_packet),
     .crc_input          (crc_input),
     .chip_id            (chip_id), 
-    .bypass_8b10b       (bypass_8b10),
+    .bypass_8b10b       (bypass_8b10b),
     .serializer_enable  (serializer_enable),
     .clk_core           (clk_core),
     .clk_rx             (clk_rx),
@@ -155,10 +155,10 @@ clk_manager
     .reset_n        (reset_n)
     );
 
-// behavioral deserializer
-deserializer
+// behavioral double datarate deserializer
+deserializer_ddr
     #(.WIDTH(120))
-    deserializer_inst (
+    deserializer_ddr_inst (
     .dataword       (dataword_120b),
     .new_dataword   (new_dataword),
     .din            (dout),
