@@ -13,14 +13,14 @@
 //
 ///////////////////////////////////////////////////////////////////
 
-module encode8b10b_sv (
-        output logic [9:0] data_out,
-        output logic disp_out,// 0 = neg disp; 1 = pos disp; not registered
-        input logic [7:0] data_in,
-        input logic disp_in,        // 0 = neg disp; 1 = pos disp
-        input logic k_in,           // high to denote k character
-        input logic clk,            // primary clock
-        input logic reset_n);       // asynchronous reset (active low)
+module encode8b10b_sv 
+    (output logic [9:0] data_out,
+    output logic disp_out,// 0 = neg disp; 1 = pos disp; not registered
+    input logic [7:0] data_in,
+    input logic disp_in,        // 0 = neg disp; 1 = pos disp
+    input logic k_in,           // high to denote k character
+    input logic clk,            // primary clock
+    input logic reset_n);       // asynchronous reset (active low)
 
 logic   ndl6_n;
 logic   pdl6_n;

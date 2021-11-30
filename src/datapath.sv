@@ -97,6 +97,7 @@ always_comb begin
     else
         serializer_data_120b = output_packet_120b;
 end // always_comb
+
 uart_array_rx
     #(.WIDTH(WIDTH),
     .NUMCHANNELS(NUMCHANNELS)
@@ -191,9 +192,9 @@ encode96b120b
     .data120b           (output_packet_120b)
     );
 
-serializer
+serializer_ddr
     #(.WIDTH(120))
-    serializer_inst     (
+    serializer_ddr_inst     (
     .dout_even          (dout_even),
     .dout_odd           (dout_odd),
     .dout_frame         (dout_frame),

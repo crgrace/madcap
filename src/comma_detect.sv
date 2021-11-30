@@ -7,7 +7,7 @@
 //     
 ///////////////////////////////////////////////////////////////////
 `include "../testbench/tasks/k_codes.sv"
-module comma_detect_fsm
+module comma_detect
     (output logic symbol_start,         // high for symbol edge bit
     output logic symbol_locked,         // deserializer synchronized
     output logic comma_found,           // high when comma (K28.5) found

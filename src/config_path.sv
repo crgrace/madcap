@@ -21,39 +21,40 @@ module config_path
     #(parameter NUMCHANNELS = 16,
     parameter REGNUM = 16,
     parameter FIFO_DEPTH = 32)
-    (output logic posi [NUMCHANNELS-1:0],  // output bits to PHYs
-    output logic [67:0] madcap_packet, // return config data 
+    (output logic posi [NUMCHANNELS-1:0],// output bits to PHYs
+    output logic [67:0] madcap_packet,  // return config data 
     output logic [7:0] config_bits [0:REGNUM-1],// regmap config bits    
-    output logic [4:0] config_fifo_cnt,  // FIFO usage when FIFO read
-    output logic config_fifo_half,       // high if config fifo half full 
-    output logic config_fifo_full,       // high if config fifo full  
-    output logic write_fifo_data_n,   // low to put data into data FIFO
+    output logic [4:0] config_fifo_cnt, // FIFO usage when FIFO read
+    output logic config_fifo_half,      // high if config fifo half full 
+    output logic config_fifo_full,      // high if config fifo full  
+    output logic write_fifo_data_n,     // low to put data into data FIFO
     input logic input_bit,              // serial bits from LVDS RX
-    input logic load_config_defaults, // high for soft reset
-    input logic clk,                        // MADCAP primary clk
-    input logic reset_n);                   // digital reset (active low)
+    input logic [15:0] tx_enable,       // high to enable TX channel
+    input logic external_sync,          // high for external sync    
+    input logic start_sync,             // start sync (also starts on rst) 
+    input logic load_config_defaults,   // high for soft reset
+    input logic clk_tx,                 // 5 MHz tx clk
+    input logic clk,                    // MADCAP primary clk
+    input logic reset_n);               // digital reset (active low)
 
-logic [9:0] dataword10b; // 10b symbol from LVDS RX PHY
-logic [7:0] dataword8b;  // 8b decoded symbol 
-
-logic k_out; // high if k-code detected
-logic dataword10b_ready;      // data ready to sample
-logic symbol_start;     // high for symbol edge bit
-logic symbol_locked;    // deserializer synchronized
-logic start_sync;             // start sync (also starts on rst)
-logic external_sync;          // high for external sync
-logic [63:0] larpix_packet;     // config packet for LArPix
-logic [7:0] regmap_write_data;   // data to write to regmap
-logic [7:0] regmap_address;      // regmap addr to write
-logic write_regmap;      // active high to load register data
-logic read_regmap;       // active high to read register data
-logic [63:0] config_fifo_out;  // output of config fifo
-logic write_fifo_config_n; // low to put data into config FIFO
-logic [7:0] dataword;       // current 8b symbol
-logic [7:0] regmap_read_data;     // data to read from regmap
-logic comma_found;        // high when comma (K28.5) found  
-logic [15:0] ld_tx_data;    // high to transfer data to UART TX
-logic [15:0] tx_busy;        // high when tx uart sending data
+logic [5:0] fifo_counter;               // 6 bit fifo counter
+logic [9:0] dataword10b;                // 10b symbol from LVDS RX PHY
+logic [7:0] dataword8b;                 // 8b decoded symbol 
+logic [63:0] tx_data [NUMCHANNELS-1:0]; // data to be sent 
+logic k_out;                            // high if k-code detected
+logic dataword10b_ready;                // data ready to sample
+logic symbol_locked;                    // deserializer synchronized
+logic [63:0] larpix_packet;             // config packet for LArPix
+logic [7:0] regmap_write_data;          // data to write to regmap
+logic [7:0] regmap_address;             // regmap addr to write
+logic write_regmap;                     // active high to load register data
+logic read_regmap;                      // active high to read register data
+logic [63:0] config_fifo_out;           // output of config fifo
+logic write_fifo_config_n;              // low to put data into config FIFO
+logic [7:0] regmap_read_data;           // data to read from regmap
+logic comma_found;                      // high when comma (K28.5) found  
+logic [15:0] ld_tx_data;                // high to transfer data to UART TX
+logic [15:0] tx_busy;                   // high when tx uart sending data
 
 // internal 8b10 decoder signals
 logic disp_in;
@@ -68,9 +69,11 @@ always @(posedge clk or negedge reset_n)
   else
     disp_in <= disp_out;
  
-// shifter for routing   
-// module declarations
+// convert fifo counter to fifo usage
+always_comb 
+    config_fifo_cnt = fifo_counter - 1'b1;
 
+// module declarations
 deserializer_sdr
     deserializer_inst (
     .dataword10b            (dataword10b),
@@ -86,8 +89,8 @@ comma_detect
     .symbol_start           (symbol_start),
     .symbol_locked          (symbol_locked),
     .comma_found            (comma_found),
-    .dataword               (dataword8b),
-    .dataword_ready         (dataword10b_ready),
+    .dataword10b            (dataword10b),
+    .dataword10b_ready      (dataword10b_ready),
     .start_sync             (start_sync),
     .external_sync          (external_sync),
     .clk                    (clk),
@@ -112,8 +115,8 @@ config_packet_builder
     .regmap_address         (regmap_address),
     .write_regmap           (write_regmap),
     .read_regmap            (read_regmap),
-    .write_fifo_n_config    (write_fifo_n_config),
-    .write_fifo_n_data      (write_fifo_n_data),
+    .write_fifo_config_n    (write_fifo_config_n),
+    .write_fifo_data_n      (write_fifo_data_n),
     .dataword8b             (dataword8b),
     .dataword8b_ready       (dataword10b_ready),
     .regmap_read_data       (regmap_read_data),
@@ -144,11 +147,11 @@ fifo_ff
     )
     fifo_ff_inst        (
     .data_out           (config_fifo_out),
-    .fifo_counter       (config_fifo_cnt),
+    .fifo_counter       (fifo_counter),
     .fifo_full          (config_fifo_full),
     .fifo_half          (config_fifo_half),
     .fifo_empty         (config_fifo_empty),
-    .data_in            (larpix_n),
+    .data_in            (larpix_packet),
     .read_n             (read_fifo_n),
     .write_n            (write_fifo_config_n),
     .reset_n            (reset_n)
@@ -156,6 +159,7 @@ fifo_ff
 
 tx_router            
     tx_router_inst      (
+    .tx_data            (tx_data),
     .read_fifo_n        (read_fifo_n),
     .fifo_out           (config_fifo_out),
     .ld_tx_data         (ld_tx_data),
@@ -172,6 +176,7 @@ uart_array_tx
     .tx_out             (posi),
     .tx_busy            (tx_busy),
     .tx_data            (tx_data),
+    .ld_tx_data         (ld_tx_data),
     .tx_enable          (tx_enable),
     .clk_tx             (clk_tx),   // 5 MHz UART TX clock
     .reset_n            (reset_n)
