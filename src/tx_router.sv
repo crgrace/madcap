@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////
 // File Name: tx_router.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
-// Description:  Finite state machine to control reading of FIFO and 
+// Description: Finite state machine to control reading of FIFO and 
 //              coordinating transfer of data to UART TX.
 //              Routes FIFO data to one of 16 avaiable UART TX blocks.
 //              Also makes sure the TX is ready before it sends it data.
@@ -16,7 +16,7 @@ module tx_router
     output logic [15:0] ld_tx_data,     // high to transfer data to UART TX
     input logic [63:0] fifo_out,        // fifo output to be routed
     input logic [15:0] tx_busy,         // high when tx uart sending data
-    input logic [3:0] target_larpix,    // which LArPix is this going?
+    input logic [3:0] target_larpix,    // which LArPix is this going to?
     input logic fifo_empty,             // high when fifo is in underflow 
     input logic write_fifo_n,           // no simultaneous read and write
     input logic clk,                    // primary clock    

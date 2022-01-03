@@ -28,10 +28,12 @@ module config_packet_builder
 
 // local signals
 logic done;                 // high if new packet received
-logic byte_cnt_en;
+logic byte_cnt_en;          // high to increment byte counter on next clk
+logic byte_cnt_clear;       // high to clear byte counter on next clk
 logic [31:0] rcvd_packet;   // packet received from PACMAN
 logic [2:0] byte_cnt;       // which byte in packet just received
 logic [7:0] rcvd_bytes [3:0]; // 4 bytes make a received packet
+                            // (we strip off the start byte)
 // byte counter
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
@@ -40,8 +42,10 @@ always_ff @(posedge clk or negedge reset_n) begin
     else begin
         if (byte_cnt_en)  
             byte_cnt <= byte_cnt + 1'b1;
-        else
+        else if (byte_cnt_clear)
             byte_cnt <= '0;
+        else 
+            byte_cnt <= byte_cnt;
     end
 end // always_ff
 
@@ -96,6 +100,7 @@ end // always
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         byte_cnt_en <= 1'b0;
+        byte_cnt_clear <= 1'b1;
         write_fifo_config_n <= 1'b1;    
         write_fifo_data_n <= 1'b1;    
         write_regmap <= 1'b0;
@@ -111,6 +116,7 @@ always_ff @(posedge clk or negedge reset_n) begin
     end
     else begin
         byte_cnt_en <= 1'b0;
+        byte_cnt_clear <= 1'b1;
         write_fifo_config_n <= 1'b1;    
         write_fifo_data_n <= 1'b1;    
         write_regmap <= 1'b0;
@@ -126,8 +132,12 @@ always_ff @(posedge clk or negedge reset_n) begin
                             rcvd_bytes[2] <= '0;
                             rcvd_bytes[3] <= '0;
                         end
-        GET_NEXT_BYTE:  begin
+        WAIT_FOR_BYTE:  begin
+                            byte_cnt_clear <= 1'b0;
+                        end
+       GET_NEXT_BYTE:  begin
                             byte_cnt_en <= 1'b1;
+                            byte_cnt_clear <= 1'b0;
                             rcvd_bytes[byte_cnt] <= dataword8b;
                         end
         WRITE_REGMAP:   begin        
@@ -154,10 +164,10 @@ always_ff @(posedge clk or negedge reset_n) begin
                             write_fifo_data_n <= 1'b0;
                         end     
         LOAD_FIFO_CONFIG: begin
-                           write_fifo_config_n <= 1'b0;
+                            write_fifo_config_n <= 1'b0;
                             // calculate parity bit, just in case we use
                             // it in a future LArPix version
-                           larpix_packet[63] = ~^larpix_packet[62:0];
+                            larpix_packet[63] = ~^larpix_packet[62:0];
                         end          
         default:            ;
         endcase

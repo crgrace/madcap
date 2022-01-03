@@ -2,16 +2,19 @@
 // File Name: comma_detect.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 //
-// Description: Correlate data stream to find commas (K28.5) and 
+// Description: Correlate data stream to find idle codes (K28.5) and 
 //              locate 8b10b symbol boundary 
+//              
+//              Also scans for K28.7 comma codes (used to mark first byte
+//              in a packet)
 //     
 ///////////////////////////////////////////////////////////////////
 `include "../testbench/tasks/k_codes.sv"
 module comma_detect
     (output logic symbol_start,         // high for symbol edge bit
     output logic symbol_locked,         // deserializer synchronized
-    output logic comma_found,           // high when comma (K28.5) found
-    input logic [9:0] dataword10b      ,   // 10b symbol under test
+    output logic comma_found,           // high when comma (K28.7) found
+    input logic [9:0] dataword10b,      // 10b symbol under test
     input logic dataword10b_ready,      // data ready to sample
     input logic start_sync,             // start sync (also starts on rst)
     input logic external_sync,          // high for external sync
@@ -21,6 +24,7 @@ module comma_detect
     
 logic [3:0] bit_cnt;            // bit counter
 logic [3:0] symbol_start_loc;   // where is the symbol edge
+logic idle_found;               // high if K28.5 found
 
 // bit counter
 always_ff @(posedge clk or negedge reset_n) begin
@@ -59,9 +63,13 @@ always_ff @(posedge clk or negedge reset_n) begin
         State <= Next;
 end // always_ff
 
-always_comb 
-    comma_found = ((dataword10b == `K_K_DISP_N) || 
+always_comb begin
+    idle_found = ( (dataword10b == `K_K_DISP_N) || 
                    (dataword10b == `K_K_DISP_P));
+    comma_found = ( (dataword10b == `K_F_DISP_N) || 
+                    (dataword10b == `K_F_DISP_P));
+   
+end
 
 always_comb begin
     Next = RESET;
@@ -71,7 +79,7 @@ always_comb begin
         CHECK_FOR_DATA: if (dataword10b_ready) Next = CHECK_SYMBOL;
                 else                    Next = CHECK_FOR_DATA;
         CHECK_SYMBOL:                   Next = UPDATE_START;
-        UPDATE_START: if (comma_found)  Next = DONE;    
+        UPDATE_START: if (idle_found)   Next = DONE;    
                 else                    Next = CHECK_FOR_DATA;
         DONE:                           Next = DONE;
         default:                        Next = RESET;
@@ -94,7 +102,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                             symbol_start_loc <= '0;
                         // we increment before test, so if we find a comma
                         // we need to roll back the setting
-                        else if (comma_found)    
+                        else if (idle_found)    
                             symbol_start_loc <= symbol_start_loc - 1'b1;
                         else
                             symbol_start_loc <= symbol_start_loc + 1'b1;

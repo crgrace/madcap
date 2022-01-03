@@ -36,7 +36,8 @@
 module data_packet_builder 
     #(parameter WIDTH = 64)
     (output logic [95:0] output_packet, // superpacket to send to tx
-    output logic [11:0] k_in,           // high per byte for k-codes 
+    output logic [11:0] k_in,           // high per byte for k-codes
+    output logic enable_8b10b,          // enable 8b10b encoder 
     input logic [WIDTH-1:0] rx_data,    // data from data fifo (w/o parity)
     input logic [3:0] channel_id,       // channel id from rx fifo
     input logic [5:0] chip_id,          // unique id for each MADCAP chip
@@ -65,7 +66,8 @@ enum logic [2:0] // explicit state definitions
             BUILD_TEST  = 3'h1,
             BUILD_DATA  = 3'h2,
             BUILD_K     = 3'h3,
-            IDLE        = 3'h4} State, Next;
+            SEND_PACKET = 3'h4,
+            IDLE        = 3'h5} State, Next;
             
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)
@@ -81,9 +83,10 @@ always_comb begin
                 else if (build_data)            Next = BUILD_DATA; 
                 else if (build_k)               Next = BUILD_K;    
                 else                            Next = READY;
-        BUILD_TEST:                             Next = IDLE;
-        BUILD_DATA:                             Next = IDLE;
-        BUILD_K:                                Next = IDLE;
+        BUILD_TEST:                             Next = SEND_PACKET;
+        BUILD_DATA:                             Next = SEND_PACKET;
+        BUILD_K:                                Next = SEND_PACKET;
+        SEND_PACKET:                            Next = IDLE;
         IDLE:   if (packet_rcvd)                Next = READY;
         default:                                Next = READY;
     endcase
@@ -94,9 +97,11 @@ always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         output_packet <= '0;
         k_in <= '0;  
+        enable_8b10b <= 1'b0;
     end
     else begin
-        case (Next)
+      enable_8b10b <= 1'b0;
+      case (Next)
         READY:       ; 
         BUILD_TEST: begin
                         if (test_mode == 3'b001) begin 
@@ -159,6 +164,9 @@ always_ff @(posedge clk or negedge reset_n) begin
                             enable_fifo_panic[0]) begin
                             output_packet[7:0] <= `K_A;
                         end
+                     end
+        SEND_PACKET: begin
+                        enable_8b10b <= 1'b1;
                      end
         IDLE:       ;
         default:    ;

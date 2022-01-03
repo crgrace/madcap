@@ -126,9 +126,9 @@ config_packet_builder
     );
 
 // register map
-config_regfile
+config_regfile_mc
     #(.REGNUM(REGNUM)
-     ) config_regile_inst (
+     ) config_regfile_mc_inst (
     .config_bits           (config_bits),
     .read_data             (regmap_read_data),
     .write_addr            (regmap_address), 

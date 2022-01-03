@@ -4,16 +4,19 @@
 // Engineer: Carl Grace (crgrace@lbl.gov)
 // Description: 96b120b wide encoder implemented with 12 8b10b encoders.
 //
+//  
+//
 ///////////////////////////////////////////////////////////////////
 
 
 module encode96b120b (
-         input clk,
-         input reset_n,
-         input [95:0] data_in,
-         input [11:0] k_in,
-         output [119:0] data120b
-       ) ;
+    input clk,
+    input reset_n,
+    input enable,
+    input [95:0] data_in,
+    input [11:0] k_in,
+    output [119:0] data120b
+    );
 
 reg       disp_0;
 wire      disp_01;
@@ -68,8 +71,7 @@ always @(posedge clk or negedge reset_n)
   if (!reset_n)
     disp_0 <= 1'b0; // initialize disparity
   else
-    disp_0 <= disp_3;
-
-
+    if (enable)
+        disp_0 <= disp_3;
 
 endmodule

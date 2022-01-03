@@ -56,6 +56,7 @@ module datapath
     input logic [5:0] chip_id,          // id for MADCAP  
     input logic bypass_8b10b,           // high to bypass 8b10 encoder
     input logic serializer_enable,      // high to enable 
+    input logic enable_prbs7,           // high to enable PRBS7 
     input logic clk_core,               // 80 MHz primary clock
     input logic clk_rx,                 // 10 MHz rx uart sampling clock
     input logic reset_n);               // digital reset  (active low)
@@ -70,6 +71,8 @@ logic [WIDTH+3:0] fifo_out;         // data from FIFO (including chan id)
 logic rx_empty [NUMCHANNELS-1:0];   // high if no data waiting
 logic [NUMCHANNELS-1:0] read_rx;    // high to read rx uart 
 logic [7:0] crc_word;               // CRC8 calculated from LArPix data
+logic enable_8b10b;                 // enable 8b10b encoder 
+
 // fifo signals
 logic load_event_n;                 // low to put data in FIFO
 logic rx_fifo_empty;                // high if FIFO empty
@@ -164,6 +167,7 @@ data_packet_builder
     data_packet_builder_inst (
     .output_packet      (output_packet_96b),  
     .k_in               (k_in),
+    .enable_8b10b       (enable_8b10b),
     .rx_data            (fifo_out[67:4]),
     .channel_id         (fifo_out[3:0]),
     .chip_id            (chip_id),
@@ -187,6 +191,7 @@ encode96b120b
     encode96b120b_inst (
     .clk                (clk_core),
     .reset_n            (reset_n),
+    .enable             (enable_8b10b),
     .data_in            (output_packet_96b),
     .k_in               (k_in),
     .data120b           (output_packet_120b)
@@ -200,6 +205,7 @@ serializer_ddr
     .dout_frame         (dout_frame),
     .din                (serializer_data_120b),
     .enable             (serializer_enable),
+    .enable_prbs7       (enable_prbs7),
     .load               (load_serializer),
     .clk                (clk_core),
     .reset_n            (reset_n)
