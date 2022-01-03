@@ -23,8 +23,8 @@ initial begin
     #35 reset_n = 1;
 end // initial
 
-clk_manager
-    clk_manager_inst (
+clk_manager_mc
+    clk_manager_mc_inst (
     .clk_core       (clk_core),
     .clk_rx         (clk_rx),
     .clk_tx         (clk_tx),

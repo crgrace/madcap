@@ -23,7 +23,6 @@ logic dout_odd;
 logic dout; // DDR output
 logic dout_frame;
 logic new_dataword; // high to indicate new dataword available
-logic [11:0] k_in;      // high if 8b pattern is intended as k-code
 logic [NUMCHANNELS-1:0] piso;
 logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic [NUMCHANNELS-1:0] tx_enable;  // not used yet
@@ -31,7 +30,8 @@ logic clk_fast;     // 80 MHz input clock
 logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
-logic serializer_enable;            // high to enable 
+logic serializer_enable;        // high to enable 
+logic enable_prbs7;                 // high for PRBS output
 logic [1:0] enable_fifo_panic;  // high to insert fifo k-codes
 logic config_fifo_half;     // high if config fifo half full 
 logic config_fifo_full;     // high if config fifo full  
@@ -63,6 +63,7 @@ initial begin
     chip_id = 5'b00001;
     ld_tx_data = '0;
     simulation_done = 0;
+    enable_prbs7 = 0;
  
     for (int i = 0; i < NUMCHANNELS; i++) begin
         larpix_packet[i] = {$urandom(),$urandom()};
@@ -85,11 +86,16 @@ initial begin
     #500 ld_tx_data = '0; 
     $display("Test inputs complete");
     #100 $display("Bypass 8b10b test");
-//    bypass_8b10b = 1;
+    bypass_8b10b = 1;
     #40 ld_tx_data = 16'hFFFF;
     #500 ld_tx_data = '0;     
     #10000 bypass_8b10b = 0;
-    #20000 simulation_done = 1;
+    #1000 $display("Bypass 8b10b test complete");
+    $display("PRBS7 test");
+    enable_prbs7 = 1;
+    #20000 $display("PRBS7 test complete");
+    enable_prbs7 = 0;
+    simulation_done = 1;
 end // initial
 
 initial begin
@@ -124,7 +130,8 @@ datapath
     .crc_input          (crc_input),
     .chip_id            (chip_id), 
     .bypass_8b10b       (bypass_8b10b),
-    .serializer_enable  (serializer_enable),
+    .serializer_enable  (serializer_enable),    
+    .enable_prbs7       (enable_prbs7),
     .clk_core           (clk_core),
     .clk_rx             (clk_rx),
     .reset_n            (reset_n)
@@ -146,8 +153,8 @@ uart_array_tx
     );
 
 // clock gen
-clk_manager
-    clk_manager_inst (
+clk_manager_mc
+    clk_manager_mc_inst (
     .clk_core       (clk_core),
     .clk_rx         (clk_rx),
     .clk_tx         (clk_tx),
