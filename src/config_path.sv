@@ -27,19 +27,22 @@ module config_path
     output logic [4:0] config_fifo_cnt, // FIFO usage when FIFO read
     output logic config_fifo_half,      // high if config fifo half full 
     output logic config_fifo_full,      // high if config fifo full  
-    output logic write_fifo_data_n,     // low to put data into data FIFO
+    output logic write_fifo_data_req,   // req to put data into data FIFO
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
     input logic external_sync,          // high for external sync    
     input logic start_sync,             // start sync (also starts on rst) 
     input logic load_config_defaults,   // high for soft reset
+    input logic ack_fifo_data,          // acknowledge from data FIFO
+    input logic bypass_8b10b_dec,       // high to bypass 8b10b decoders
     input logic clk_tx,                 // 5 MHz tx clk
     input logic clk,                    // MADCAP primary clk
     input logic reset_n);               // digital reset (active low)
 
-logic [5:0] fifo_counter;               // 6 bit fifo counter
+logic [5:0] fifo_counter;               // 6b fifo counter
 logic [9:0] dataword10b;                // 10b symbol from LVDS RX PHY
 logic [7:0] dataword8b;                 // 8b decoded symbol 
+logic [7:0] dataword8b_muxed;           // symbol after bypass mux 
 logic [63:0] tx_data [NUMCHANNELS-1:0]; // data to be sent 
 logic k_out;                            // high if k-code detected
 logic dataword10b_ready;                // data ready to sample
@@ -72,6 +75,16 @@ always @(posedge clk or negedge reset_n)
 // convert fifo counter to fifo usage
 always_comb 
     config_fifo_cnt = fifo_counter - 1'b1;
+
+// 8b10b decoder bypass mux
+always_comb begin
+    if (bypass_8b10b_dec) begin  
+        dataword8b_muxed = dataword10b[7:0];
+    end 
+    else begin
+        dataword8b_muxed = dataword8b;
+    end
+end // always_comb
 
 // module declarations
 deserializer_sdr
@@ -117,9 +130,10 @@ config_packet_builder
     .read_regmap            (read_regmap),
     .write_fifo_config_n    (write_fifo_config_n),
     .write_fifo_data_n      (write_fifo_data_n),
-    .dataword8b             (dataword8b),
+    .dataword8b             (dataword8b_muxed),
     .dataword8b_ready       (dataword10b_ready),
     .regmap_read_data       (regmap_read_data),
+    .ack_fifo_data          (ack_fifo_data),
     .comma_found            (comma_found),
     .clk                    (clk),
     .reset_n                (reset_n)
@@ -129,57 +143,57 @@ config_packet_builder
 config_regfile_mc
     #(.REGNUM(REGNUM)
      ) config_regfile_mc_inst (
-    .config_bits           (config_bits),
-    .read_data             (regmap_read_data),
-    .write_addr            (regmap_address), 
-    .write_data            (regmap_write_data),
-    .read_addr             (regmap_address),
-    .write                 (write_regmap),
-    .read                  (read_regmap),
-    .load_config_defaults  (load_config_defaults),
-    .clk                   (clk),
-    .reset_n               (reset_n)
+    .config_bits            (config_bits),
+    .read_data              (regmap_read_data),
+    .write_addr             (regmap_address), 
+    .write_data             (regmap_write_data),
+    .read_addr              (regmap_address),
+    .write                  (write_regmap),
+    .read                   (read_regmap),
+    .load_config_defaults   (load_config_defaults),
+    .clk                    (clk),
+    .reset_n                (reset_n)
     );
 
 fifo_ff
     #(.FIFO_WIDTH(64),
     .FIFO_DEPTH(FIFO_DEPTH)
     )
-    fifo_ff_inst        (
-    .data_out           (config_fifo_out),
-    .fifo_counter       (fifo_counter),
-    .fifo_full          (config_fifo_full),
-    .fifo_half          (config_fifo_half),
-    .fifo_empty         (config_fifo_empty),
-    .data_in            (larpix_packet),
-    .read_n             (read_fifo_n),
-    .write_n            (write_fifo_config_n),
-    .reset_n            (reset_n)
+    fifo_ff_inst (
+    .data_out               (config_fifo_out),
+    .fifo_counter           (fifo_counter),
+    .fifo_full              (config_fifo_full),
+    .fifo_half              (config_fifo_half),
+    .fifo_empty             (config_fifo_empty),
+    .data_in                (larpix_packet),
+    .read_n                 (read_fifo_n),
+    .write_n                (write_fifo_config_n),
+    .reset_n                (reset_n)
     );
 
 tx_router            
-    tx_router_inst      (
-    .tx_data            (tx_data),
-    .read_fifo_n        (read_fifo_n),
-    .fifo_out           (config_fifo_out),
-    .ld_tx_data         (ld_tx_data),
-    .tx_busy            (tx_busy),
-    .target_larpix      (config_fifo_out[29:26]),
-    .fifo_empty         (config_fifo_empty),
-    .write_fifo_n       (write_fifo_config_n),
-    .clk                (clk),
-    .reset_n            (reset_n)
+    tx_router_inst (
+    .tx_data                (tx_data),
+    .read_fifo_n            (read_fifo_n),
+    .fifo_out               (config_fifo_out),
+    .ld_tx_data             (ld_tx_data),
+    .tx_busy                (tx_busy),
+    .target_larpix          (config_fifo_out[29:26]),
+    .fifo_empty             (config_fifo_empty),
+    .write_fifo_n           (write_fifo_config_n),
+    .clk                    (clk),
+    .reset_n                (reset_n)
     );
 
 uart_array_tx
-    uart_array_tx_inst  (
-    .tx_out             (posi),
-    .tx_busy            (tx_busy),
-    .tx_data            (tx_data),
-    .ld_tx_data         (ld_tx_data),
-    .tx_enable          (tx_enable),
-    .clk_tx             (clk_tx),   // 5 MHz UART TX clock
-    .reset_n            (reset_n)
+    uart_array_tx_inst (
+    .tx_out                 (posi),
+    .tx_busy                (tx_busy),
+    .tx_data                (tx_data),
+    .ld_tx_data             (ld_tx_data),
+    .tx_enable              (tx_enable),
+    .clk_tx                 (clk_tx),   // 5 MHz UART TX clock
+    .reset_n                (reset_n)
     );
 
 endmodule

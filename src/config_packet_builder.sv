@@ -17,11 +17,12 @@ module config_packet_builder
     output logic write_regmap,      // active high to load register data
     output logic read_regmap,       // active high to read register data
     output logic write_fifo_config_n, // low to put data into config FIFO
-    output logic write_fifo_data_n,   // low to put data into data FIFO
-    input logic [7:0] dataword8b      ,       // current 8b symbol
+    output logic write_fifo_data_req,   // high to req data into data FIFO
+    input logic [7:0] dataword8b,           // current 8b symbol
     input logic [7:0] regmap_read_data,     // data to read from regmap
-    input logic dataword8b_ready,      // data ready to sample
-    input logic comma_found,        // high when comma (K28.5) found    
+    input logic ack_fifo_data,              // acknowledge from data FIFO
+    input logic dataword8b_ready,           // data ready to sample
+    input logic comma_found,           // high when comma (K28.5) found    
     input logic clk,                        // MADCAP primary clk
     input logic reset_n);                   // digital reset (active low)
 
@@ -90,7 +91,8 @@ always_comb begin
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;
         READ_REGMAP:                        Next = LOAD_FIFO_DATA;
         BUILD_LARPIX:                       Next = LOAD_FIFO_CONFIG;
-        LOAD_FIFO_DATA:                     Next = WAIT_FOR_COMMA;    
+        LOAD_FIFO_DATA: if (ack_fifo_data)  Next = WAIT_FOR_COMMA;
+                else                        Next = LOAD_FIFO_DATA;    
         LOAD_FIFO_CONFIG:                   Next = WAIT_FOR_COMMA;    
         default:                            Next = WAIT_FOR_COMMA;
     endcase
@@ -102,7 +104,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         byte_cnt_en <= 1'b0;
         byte_cnt_clear <= 1'b1;
         write_fifo_config_n <= 1'b1;    
-        write_fifo_data_n <= 1'b1;    
+        write_fifo_data_req <= 1'b0;    
         write_regmap <= 1'b0;
         read_regmap <= 1'b0;
         regmap_address <= '0;
@@ -118,7 +120,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         byte_cnt_en <= 1'b0;
         byte_cnt_clear <= 1'b1;
         write_fifo_config_n <= 1'b1;    
-        write_fifo_data_n <= 1'b1;    
+        write_fifo_data_req <= 1'b0;    
         write_regmap <= 1'b0;
         read_regmap <= 1'b0;
         regmap_address <= '0;
@@ -161,7 +163,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                             larpix_packet[29:26] <= rcvd_packet[31:28];
                         end
         LOAD_FIFO_DATA: begin
-                            write_fifo_data_n <= 1'b0;
+                            write_fifo_data_req <= 1'b1;
                         end     
         LOAD_FIFO_CONFIG: begin
                             write_fifo_config_n <= 1'b0;

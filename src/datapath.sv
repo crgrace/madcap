@@ -26,8 +26,8 @@
 //              111     Test Packet (user must handle CRC generation)
 //
 //              Idle Packet:
-//              Config half-full marker symbol  : K28.3 
-//              Config full marker symbol       : K24.3
+//              Config half-full marker symbol  : K28.3 (K_A) 
+//              Config full marker symbol       : K24.3 
 //
 //              Data Packet:
 //              Config half-full marker symbol  : K29.7 (K_T) 
@@ -44,7 +44,9 @@ module datapath
     (output logic dout_even,            // DDR even bits                 
     output logic dout_odd,              // DDR odd bits                 
     output logic dout_frame,            // high when LSB output
+    output logic ack_fifo_data,         // high to ack config write to FIFO
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
+    input logic write_fifo_data_req,    // req to put data into FIFO
     input logic [4:0] config_fifo_cnt,  // FIFO usage when FIFO read
     input logic config_fifo_half,       // high if config fifo half full 
     input logic config_fifo_full,       // high if config fifo full  
@@ -119,13 +121,15 @@ event_router
     .NUMCHANNELS(NUMCHANNELS)
     )
     event_router_inst   (
-    .channel_event_out  (channel_event_out),
-    .read_rx            (read_rx),
-    .load_event_n       (load_event_n),
-    .input_events       (rx_data),
-    .rx_empty           (rx_empty),
-    .clk                (clk_core),
-    .reset_n            (reset_n)
+    .channel_event_out      (channel_event_out),
+    .read_rx                (read_rx),
+    .load_event_n           (load_event_n),
+    .ack_fifo_data          (ack_fifo_data),
+    .input_events           (rx_data),
+    .write_fifo_data_req    (write_fifo_data_req),
+    .rx_empty               (rx_empty),
+    .clk                    (clk_core),
+    .reset_n                (reset_n)
     );
 
 fifo_ff

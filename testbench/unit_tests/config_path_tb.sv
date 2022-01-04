@@ -50,6 +50,8 @@ logic load_serializer;
 logic ready_to_load;
 logic [15:0] tx_enable;
 logic [3:0] serializer_cnt;
+logic ack_fifo_data;        // high to ack config write to FIFO
+logic write_fifo_data_req;  // req to put data into FIFO
 logic disp_out;             // 0 = neg disp; 1 = pos disp; not registered
 logic disp_in;              // 0 = neg disp; 1 = pos disp
 logic [39:0] upstream_packet; // from FPGA to MADCAP
@@ -63,6 +65,7 @@ logic k_in;                 // high to indicate 8b symbol represents k-code
 logic external_sync;        // high for external sync mode
 logic start_sync;           // high to mark first bit in symbol
 logic enable_8b10b;         // high to enable 8b10b encoder
+logic bypass_8b10b_dec;     // high to bypass 8b10b decoders
 
 // packet building
 logic [1:0] packet_declaration;
@@ -283,12 +286,14 @@ config_path
     .config_fifo_cnt        (config_fifo_cnt),
     .config_fifo_half       (config_fifo_half),
     .config_fifo_full       (config_fifo_full),
-    .write_fifo_data_n      (write_fifo_data_n),
+    .write_fifo_data_req    (write_fifo_data_req),
     .input_bit              (dout),  
     .tx_enable              (tx_enable),  
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .load_config_defaults   (load_config_defaults),
+    .ack_fifo_data          (ack_fifo_data),
+    .bypass_8b10b_dec       (bypass_8b10b_dec),
     .clk_tx                 (clk_tx),
     .clk                    (clk_core),
     .reset_n                (reset_n)

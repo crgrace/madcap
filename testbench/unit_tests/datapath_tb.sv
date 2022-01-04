@@ -18,6 +18,8 @@ logic [95:0] superpacket;   // final packet ready for analysis
 logic [11:0] k_out;
 logic [11:0] code_err;
 logic [11:0] disp_err;
+logic ack_fifo_data;         // high to ack config write to FIFO
+logic write_fifo_data_req;    // req to put data into FIFO
 logic dout_even;
 logic dout_odd;
 logic dout; // DDR output
@@ -116,25 +118,27 @@ end // always_comb
 datapath
     #(.WIDTH(WIDTH))
     datapath_inst (
-    .dout_even          (dout_even),
-    .dout_odd           (dout_odd),
-    .dout_frame         (dout_frame),
-    .piso               (piso),
-    .config_fifo_cnt    (config_fifo_cnt),
-    .config_fifo_half   (config_fifo_half),
-    .config_fifo_full   (config_fifo_full),
-    .which_fifo         (which_fifo),
-    .enable_fifo_panic  (enable_fifo_panic),
-    .test_mode          (test_mode),
-    .test_packet        (test_packet),
-    .crc_input          (crc_input),
-    .chip_id            (chip_id), 
-    .bypass_8b10b       (bypass_8b10b),
-    .serializer_enable  (serializer_enable),    
-    .enable_prbs7       (enable_prbs7),
-    .clk_core           (clk_core),
-    .clk_rx             (clk_rx),
-    .reset_n            (reset_n)
+    .dout_even              (dout_even),
+    .dout_odd               (dout_odd),
+    .dout_frame             (dout_frame),
+    .ack_fifo_data          (ack_fifo_data),
+    .piso                   (piso),
+    .write_fifo_data_req    (write_fifo_data_req),
+    .config_fifo_cnt        (config_fifo_cnt),
+    .config_fifo_half       (config_fifo_half),
+    .config_fifo_full       (config_fifo_full),
+    .which_fifo             (which_fifo),
+    .enable_fifo_panic      (enable_fifo_panic),
+    .test_mode              (test_mode),
+    .test_packet            (test_packet),
+    .crc_input              (crc_input),
+    .chip_id                (chip_id), 
+    .bypass_8b10b           (bypass_8b10b),
+    .serializer_enable      (serializer_enable),    
+    .enable_prbs7           (enable_prbs7),
+    .clk_core               (clk_core),
+    .clk_rx                 (clk_rx),
+    .reset_n                (reset_n)
     );
 
 // tile model

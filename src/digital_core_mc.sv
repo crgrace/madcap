@@ -10,13 +10,13 @@
 //      16 TX UARTS
 //      Event Router
 //      32 deep 68-bit FIFO
-//      CRC8 calculation (uses Maxim 1-wire polynomail x^8 + x^5 + x^4 + 1)
-//      Packet Builder (makes 12-bytes super packets (data or idle) )
+//      CRC8 calculation (uses Maxim 1-wire polynomial x^8 + x^5 + x^4 + 1)
+//      Packet Builder (makes 12-byte superpackets (data or idle) )
 //      8b/10b encoder
 //      Serializer (sends odd and even bit streams for later DDR mux)
 //      8b/10 decoder
 //      Comma detect for auto-sync
-//      32 deep by 64b configuraion (upstream) FIFO
+//      32 deep by 64b configuration (upstream) FIFO
 //
 ///////////////////////////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ module digital_core_mc
     input logic clk_fast,               // externally supplied clk
     input logic reset_n);               // digital reset  (active low)
 
-// digital config
+// digital config & local variables
 logic [7:0] config_bits [0:REGNUM-1];// regmap config bits    
 logic digital_monitor_enable;       // high to enable
 logic [3:0] digital_monitor_select; // see docs
@@ -71,6 +71,8 @@ logic load_config_defaults;         // MADCAP soft reset (set to low after)
 logic bypass_8b10b_enc;             // high to bypass 8b10b encoder
 logic bypass_8b10b_dec;             // high to bypass 8b10b decoder
 logic [2:0] test_mode;              // datapath test modes
+logic write_fifo_data_req;          // req to put data into FIFO
+logic ack_fifo_data;                // high to ack config write to FIFO
 logic which_fifo;                   // selects which fifo diagnositics sent
 logic [1:0] enable_fifo_panic;      // embed FIFO diagnostics in stream
 logic config_fifo_half;             // high if config fifo half full 
@@ -87,6 +89,7 @@ logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
 logic [67:0] madcap_packet;         // return config data via data FIFO
 logic write_fifo_data_n;            // low to put MADCAP packet to FIFO  
+
 
 `include "madcap_constants.sv"
 // need to use generates for large config words
@@ -146,34 +149,35 @@ end // always_comb
 datapath
     #(.WIDTH(WIDTH))
     datapath_inst (
-    .dout_even          (dout_even),
-    .dout_odd           (dout_odd),
-    .dout_frame         (dout_frame),
-    .piso               (piso),
-    .config_fifo_cnt    (config_fifo_cnt),
-    .config_fifo_half   (config_fifo_half),
-    .config_fifo_full   (config_fifo_full),
-    .which_fifo         (which_fifo),
-    .enable_fifo_panic  (enable_fifo_panic),
-    .test_mode          (test_mode),
-    .test_packet        (test_packet),
-    .crc_input          (crc_input),
-    .chip_id            (chip_id), 
-    .bypass_8b10b       (bypass_8b10b),
-    .serializer_enable  (serializer_enable),
-    .clk_core           (clk_core),
-    .clk_rx             (clk_rx),
-    .reset_n            (reset_n)
+    .dout_even              (dout_even),
+    .dout_odd               (dout_odd),
+    .dout_frame             (dout_frame),
+    .piso                   (piso),
+    .write_fifo_data_req    (write_fifo_data_req),
+    .config_fifo_cnt        (config_fifo_cnt),
+    .config_fifo_half       (config_fifo_half),
+    .config_fifo_full       (config_fifo_full),
+    .which_fifo             (which_fifo),
+    .enable_fifo_panic      (enable_fifo_panic),
+    .test_mode              (test_mode),
+    .test_packet            (test_packet),
+    .crc_input              (crc_input),
+    .chip_id                (chip_id), 
+    .bypass_8b10b           (bypass_8b10b_enc),
+    .serializer_enable      (serializer_enable),
+    .clk_core               (clk_core),
+    .clk_rx                 (clk_rx),
+    .reset_n                (reset_n)
     );
 
 // clock gen
 clk_manager_mc
     clk_manager_mc_inst (
-    .clk_core       (clk_core),
-    .clk_rx         (clk_rx),
-    .clk_tx         (clk_tx),
-    .clk_fast       (clk_fast),
-    .reset_n        (reset_n)
+    .clk_core               (clk_core),
+    .clk_rx                 (clk_rx),
+    .clk_tx                 (clk_tx),
+    .clk_fast               (clk_fast),
+    .reset_n                (reset_n)
     );
 
 config_path
@@ -193,6 +197,8 @@ config_path
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .load_config_defaults   (load_config_defaults),
+    .ack_fifo_data          (ack_fifo_data),
+    .bypass_8b10b_dec       (bypass_8b10b_dec),
     .clk_tx                 (clk_tx),
     .clk                    (clk_core),
     .reset_n                (reset_n)

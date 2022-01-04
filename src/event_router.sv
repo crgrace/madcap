@@ -14,7 +14,9 @@ module event_router
     (output logic [WIDTH+3:0] channel_event_out,// routed event 
     output logic [NUMCHANNELS-1:0] read_rx, // high to read rx uart 
     output logic load_event_n,    // low to put data in FIFO
+    output logic ack_fifo_data,   // high to ack config write to FIFO
     input logic [WIDTH-1:0] input_events [NUMCHANNELS-1:0], // data in
+    input logic write_fifo_data_req, // req to put data into FIFO
     input logic [NUMCHANNELS-1:0] rx_empty, // when low, event ready
     input logic clk,           // primary clock
     input logic reset_n);      // asynchronous digital reset (active low)
@@ -25,15 +27,17 @@ logic [NUMCHANNELS-1:0] channel_blacklist; // channel not yet reset
 logic [NUMCHANNELS-1:0] read_rx_fast; // read_rx on fast clk domain
 logic [1:0] wait_counter; // wait state counter
 logic wait_counter_done; // wait state counter (wait for RX reset)
-logic [NUMCHANNELS-1:0] veto_event;       // high if already dealing with it
+logic [NUMCHANNELS-1:0] veto_event;    // high if already dealing with it
 
 // state machine
 enum logic [2:0] // explicit state definitions 
             {READY          = 3'h0,
-            READ_EVENT      = 3'h1,
-            VETO_CHECK      = 3'h2,
-            LATCH_EVENT     = 3'h3,
-            WAIT_STATE      = 3'h4} State, Next;
+            READ_CONFIG     = 3'h1,
+            READ_EVENT      = 3'h2,
+            VETO_CHECK      = 3'h3,
+            LATCH_EVENT     = 3'h4,
+            WAIT_STATE      = 3'h5,
+            READ_HANDSHAKE  = 3'h6} State, Next;
 
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)
@@ -45,14 +49,16 @@ end // always_ff
 
 always_comb begin
     case (State)
-        READY:  if (!(&rx_empty))               Next = READ_EVENT; 
+        READY:  if (!(&rx_empty))               Next = READ_EVENT;  
+                else if (write_fifo_data_req)   Next = READ_CONFIG;
                 else                            Next = READY;
         READ_EVENT:                             Next = VETO_CHECK;
         VETO_CHECK: if (veto_event)             Next = READY;
                     else                        Next = LATCH_EVENT;
         LATCH_EVENT:                            Next = WAIT_STATE;  
-        WAIT_STATE: if (wait_counter_done)      Next = READY;
+        WAIT_STATE: if (wait_counter_done)      Next = READ_HANDSHAKE;
                     else                        Next = WAIT_STATE;
+        READ_HANDSHAKE:                         Next = READY;
         default:                                Next = READY;
     endcase
 end // always_comb
@@ -120,6 +126,11 @@ always_ff @(posedge clk or negedge reset_n) begin
                     wait_counter_done <= 1'b1;
                 end // if
             end // WAIT_STATE
+            READ_HANDSHAKE: begin
+                if (write_fifo_data_req) begin
+                    ack_fifo_data <= 1'b1;
+                end
+            end // READ_HANDSHAKE
             default: ;
         endcase
     end
