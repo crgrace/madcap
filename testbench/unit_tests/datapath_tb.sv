@@ -32,6 +32,7 @@ logic clk_fast;     // 80 MHz input clock
 logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
+logic v3_mode;
 logic serializer_enable;        // high to enable 
 logic enable_prbs7;                 // high for PRBS output
 logic [1:0] enable_fifo_panic;  // high to insert fifo k-codes
@@ -53,6 +54,7 @@ initial begin
     tx_enable = '1;
     bypass_8b10b = 0;
     clk_fast = 0; 
+    v3_mode = 0;
     test_mode = '0; 
     test_packet = '0;
     serializer_enable = 1;
@@ -133,6 +135,7 @@ datapath
     .test_packet            (test_packet),
     .crc_input              (crc_input),
     .chip_id                (chip_id), 
+    .v3_mode                (v3_mode),
     .bypass_8b10b           (bypass_8b10b),
     .serializer_enable      (serializer_enable),    
     .enable_prbs7           (enable_prbs7),
@@ -162,6 +165,7 @@ clk_manager_mc
     .clk_core       (clk_core),
     .clk_rx         (clk_rx),
     .clk_tx         (clk_tx),
+    .v3_mode        (v3_mode),
     .clk_fast       (clk_fast),
     .reset_n        (reset_n)
     );

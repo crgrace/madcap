@@ -56,7 +56,7 @@ module datapath
     input logic [95:0] test_packet,     // test data to send to 8b10b 
     input logic [7:0] crc_input,        // CRC-8 hash of rx_data         
     input logic [5:0] chip_id,          // id for MADCAP
-    input logic v3_mode,    // high for v3 mode (no oversampling)  
+    input logic v3_mode,                // high for v3 mode (no 2X RX clk)  
     input logic bypass_8b10b,           // high to bypass 8b10 encoder
     input logic serializer_enable,      // high to enable 
     input logic enable_prbs7,           // high to enable PRBS7 
