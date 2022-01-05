@@ -3,7 +3,11 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Simple UART receiver
 //              Adapted from orignal design by Deepak Tala
+//
+//              in v2 mode:
 //              RX should use a 2X oversampled clock relative to TX
+//              in v3 mode:
+//              RX should use same clock as TX
 //
 // If rx_empty is low then data is waiting. It should be read and then
 // uld_rx_data should be asserted to enable rx for another reception.
@@ -32,12 +36,13 @@
 module uart_rx
     #(parameter WIDTH = 64)
     (output logic [WIDTH-1:0] rx_data,    // data received by UART
-    output logic rx_empty,                // high if no data in rx
+    output logic rx_empty,          // high if no data in rx
     output logic parity_error,      // high if last word has bad parity
-    input logic rx_in,                    // input bit
-    input logic uld_rx_data,              // transfer data to output (rx_data)
-    input logic clk_rx,                    // oversampling receiving clock
-    input logic reset_n);                 // digital reset (active low) 
+    input logic rx_in,              // input bit
+    input logic uld_rx_data,        // transfer data to output (rx_data)
+    input logic v3_mode,            // high for v3 mode (no oversampling)
+    input logic clk_rx,             // receive clock
+    input logic reset_n);           // digital reset (active low) 
 
 // Internal Variables 
 logic [WIDTH-1:0] rx_reg;
@@ -79,9 +84,9 @@ always_ff @ (negedge clk_rx or negedge reset_n) begin
             rx_sample_cnt <= rx_sample_cnt + 1'b1;
             // Logic to sample at middle of data
             // makes sure we don't start based on runt start bit
-            if (rx_sample_cnt == 1'b1) begin
+            if ( (v3_mode) || (rx_sample_cnt == 1'b1) ) begin
                 if ((rx_d2 == 1'b1) && (rx_cnt == 8'b0)) begin
-                    rx_busy <= 1'b0;
+                    if (!v3_mode) rx_busy <= 1'b0;
                 end 
                 else begin
                     rx_cnt <= rx_cnt + 1'b1; 

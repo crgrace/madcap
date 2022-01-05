@@ -3,7 +3,12 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Simple UART transmitter.
 //              Adapted from orignal design by Deepak Tala
-//              RX should use 2X oversampled clock relative to TX
+//
+//              in v2 mode:
+//              RX should use a 2X oversampled clock relative to TX
+//              in v3 mode:
+//              RX should use same clock as TX
+//
 //              UART word width is 64 bits.
 //
 //    Packet Definition

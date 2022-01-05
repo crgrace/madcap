@@ -55,7 +55,8 @@ module datapath
     input logic [2:0] test_mode,        // specify test modes
     input logic [95:0] test_packet,     // test data to send to 8b10b 
     input logic [7:0] crc_input,        // CRC-8 hash of rx_data         
-    input logic [5:0] chip_id,          // id for MADCAP  
+    input logic [5:0] chip_id,          // id for MADCAP
+    input logic v3_mode,    // high for v3 mode (no oversampling)  
     input logic bypass_8b10b,           // high to bypass 8b10 encoder
     input logic serializer_enable,      // high to enable 
     input logic enable_prbs7,           // high to enable PRBS7 
@@ -112,6 +113,7 @@ uart_array_rx
     .rx_empty       (rx_empty),
     .rx_in          (piso),
     .uld_rx_data    (read_rx),
+    .v3_mode        (v3_mode),
     .clk_rx         (clk_rx),
     .reset_n        (reset_n)
     );

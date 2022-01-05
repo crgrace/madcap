@@ -3,7 +3,7 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 //
 // Description: Array of 16 UART RX modules.
-//         Implements PISO data connections from Tile to MADCAP  
+//         Implements PISO data connections from LArPix to MADCAP  
 //
 //    Packet Definition
 //
@@ -34,8 +34,9 @@ module uart_array_rx
     output logic rx_empty [NUMCHANNELS-1:0], // high if no data waiting
     input logic rx_in [NUMCHANNELS-1:0], // input bits from PHYs
     input logic uld_rx_data[NUMCHANNELS-1:0], // xfer data to output
-    input logic clk_rx,     // 2X oversampling receiving clock
-    input logic reset_n);  // digital reset  (active low)
+    input logic v3_mode,    // high for v3 mode (no oversampling)
+    input logic clk_rx,     // receive clock
+    input logic reset_n);   // digital reset  (active low)
 
 // instantiate RX UART sub-blocks
 genvar i;
@@ -51,6 +52,7 @@ generate
             .parity_error   (),
             .rx_in          (rx_in[i]),
             .uld_rx_data    (uld_rx_data[i]),
+            .v3_mode        (v3_mode),
             .clk_rx         (clk_rx),
             .reset_n        (reset_n)
         );
