@@ -16,7 +16,8 @@ module event_router
     output logic load_event_n,    // low to put data in FIFO
     output logic ack_fifo_data,   // high to ack config write to FIFO
     input logic [WIDTH-1:0] input_events [NUMCHANNELS-1:0], // data in
-    input logic write_fifo_data_req, // req to put data into FIFO
+    input logic [63:0] mc_config_packet,    // config read for MADCAP
+    input logic write_fifo_data_req, // high to put config data into FIFO
     input logic [NUMCHANNELS-1:0] rx_empty, // when low, event ready
     input logic clk,           // primary clock
     input logic reset_n);      // asynchronous digital reset (active low)
@@ -52,6 +53,7 @@ always_comb begin
         READY:  if (!(&rx_empty))               Next = READ_EVENT;  
                 else if (write_fifo_data_req)   Next = READ_CONFIG;
                 else                            Next = READY;
+        READ_CONFIG:                            Next = WAIT_STATE;
         READ_EVENT:                             Next = VETO_CHECK;
         VETO_CHECK: if (veto_event)             Next = READY;
                     else                        Next = LATCH_EVENT;
@@ -92,6 +94,10 @@ always_ff @(posedge clk or negedge reset_n) begin
                 end 
                                     
             end // READY
+            READ_CONFIG: begin
+                channel_event_out[3:0] <= '0;
+                channel_event_out[67:4] <= mc_config_packet;
+            end // READ_CONFIG
             READ_EVENT: begin   
                 wait_counter <= 2'b0;
                 wait_counter_done <= 1'b0;

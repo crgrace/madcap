@@ -6,7 +6,8 @@
 //              locate 8b10b symbol boundary 
 //              
 //              Also scans for K28.7 comma codes (used to mark first byte
-//              in a packet)
+//              in a packet) and K28.0 comma codes (used to request 
+//              trigger for LArPix)
 //     
 ///////////////////////////////////////////////////////////////////
 `include "../testbench/tasks/k_codes.sv"
@@ -14,6 +15,7 @@ module comma_detect
     (output logic symbol_start,         // high for symbol edge bit
     output logic symbol_locked,         // deserializer synchronized
     output logic comma_found,           // high when comma (K28.7) found
+    output logic trigger_found,         // high when K28.0 found
     input logic [9:0] dataword10b,      // 10b symbol under test
     input logic dataword10b_ready,      // data ready to sample
     input logic start_sync,             // start sync (also starts on rst)
@@ -68,7 +70,9 @@ always_comb begin
                    (dataword10b == `K_K_DISP_P));
     comma_found = ( (dataword10b == `K_F_DISP_N) || 
                     (dataword10b == `K_F_DISP_P));
-   
+    trigger_found = ( (dataword10b == `K_R_DISP_N) || 
+                    (dataword10b == `K_R_DISP_P));
+ 
 end
 
 always_comb begin

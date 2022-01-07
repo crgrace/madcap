@@ -25,9 +25,10 @@
         config_bits[TRX3]                   <= 8'h05;
         config_bits[TRX4]                   <= 8'h8C;
         config_bits[TRX5]                   <= 8'h88;
-        config_bits[TRX6]                   <= 8'h00;
+        config_bits[TRX6]                   <= 8'h08;
         config_bits[PD_LVDS]                <= 8'h00;
         config_bits[PD_DRIVER]              <= 8'h00;
+        config_bits[PD_TRIGGER]             <= 8'h00;
         for (int i = 0; i < 2; i++) begin
             config_bits[PD_RX + i]          <= 8'h00;
         end

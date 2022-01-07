@@ -37,8 +37,9 @@ localparam TRX5         = 26;
 localparam TRX6         = 27;
 localparam PD_LVDS      = 28;
 localparam PD_DRIVER    = 29;
-localparam PD_RX        = 30;
-localparam PD_TX        = 32;
+localparam PD_TRIGGER   = 30;
+localparam PD_RX        = 31;
+localparam PD_TX        = 33;
 
 // PRBS7
 localparam PRBS7_ROM = 127'b1000001100001010001111001000101100111010100111110100001110001001001101101011011110110001101001011101110011001010101111111000000;

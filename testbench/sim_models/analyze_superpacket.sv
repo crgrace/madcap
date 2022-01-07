@@ -10,7 +10,7 @@ module analyze_superpacket
     input logic new_superpacket, // high when new superpacket available
     input logic which_fifo,     // 0 = config fifo, 1 = data fifo
     input logic [11:0] k_out,   // high if corresponding byte is K-code
-    input logic bypass_8b10b,    // high to bypass 8b10 encoder 
+    input logic bypass_8b10b_enc,    // high to bypass 8b10 encoder 
     input logic simulation_done // high if simulation finished
     );
 
@@ -49,7 +49,7 @@ end
 // classify superpacket
 always @(posedge new_superpacket) begin
     #10
-    if (bypass_8b10b) rcvd_packet_declare = 0; 
+    if (bypass_8b10b_enc) rcvd_packet_declare = 0; 
     else if (( (superpacket[7:0] == `K_F) ||
                (superpacket[7:0] == `K_S) ||
                (superpacket[7:0] == `K_T) )
@@ -93,9 +93,9 @@ always @(posedge new_superpacket) begin
                     $display("data FIFO usage reported:");
                 else
                     $display("config FIFO usage reported:");
-                $display("FIFO usage = %d",rcvd_fifo_usage);
-                $display("LArPix payload = %h",rcvd_larpix_payload);
-                $display("CRC word = %h",rcvd_crc_word);
+                    $display("FIFO usage = %d",rcvd_fifo_usage);
+                    $display("LArPix payload = %h",rcvd_larpix_payload);
+                    $display("CRC word = %h",rcvd_crc_word);
             end
         2:  begin // Idle
                 total_idle_packets++;
@@ -126,7 +126,8 @@ always @(posedge new_superpacket) begin
                 else if (superpacket[95:0] == `RPAT) begin
                     $display("testmode 110: RPAT");
                 end
-                else $display ("testmode 110: test superpacket");
+                else 
+                    $display ("testmode 110: test superpacket");
             end
     endcase
     else $display("flush data stream. Not real superpacket.");

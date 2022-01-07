@@ -25,8 +25,9 @@ vlog -incr -sv "../src/uart_rx_config.sv"
 vlog -incr -sv "../src/uart_tx.sv" 
 vlog -incr -sv "../src/uart_array_rx.sv" 
 vlog -incr -sv "../src/uart_array_tx.sv" 
-vlog -incr -sv "../src/uart.sv" 
 vlog -incr -sv "../src/pulse_stretcher.sv" 
+vlog -incr -sv "../src/driver_ctrl.sv" 
+vlog -incr -sv "../src/reset_sync.sv" 
 vlog +incdir+../testbench/tasks/ -incr -sv "../src/prbs7.sv" 
 vlog -incr "../src/datapath_fsm.sv" 
 vlog -incr "../src/datapath.sv" 
@@ -77,6 +78,7 @@ vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/unit_tests/config_path_
 vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/unit_tests/encode8b10b_tb.sv" 
 vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/unit_tests/encode24b30b_tb.sv" 
 vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/unit_tests/encode96b120b_tb.sv" 
+vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/unit_tests/digital_core_mc_tb.sv" 
 
 #
 # aux modules for testbenches

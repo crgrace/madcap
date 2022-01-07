@@ -27,11 +27,11 @@
 //
 //              Idle Packet:
 //              Config half-full marker symbol  : K28.3 (K_A) 
-//              Config full marker symbol       : K24.3 
+//              Config full marker symbol       : K28.4 (K_Q)  
 //
 //              Data Packet:
 //              Config half-full marker symbol  : K29.7 (K_T) 
-//              Config full marker symbol       : K28.4 (K_S)
+//              Config full marker symbol       : K27.7 (K_S)
 //
 //
 //    
@@ -46,6 +46,7 @@ module datapath
     output logic dout_frame,            // high when LSB output
     output logic ack_fifo_data,         // high to ack config write to FIFO
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
+    input logic [63:0] mc_config_packet,// config read for MADCAP
     input logic write_fifo_data_req,    // req to put data into FIFO
     input logic [4:0] config_fifo_cnt,  // FIFO usage when FIFO read
     input logic config_fifo_half,       // high if config fifo half full 
@@ -54,7 +55,6 @@ module datapath
     input logic [1:0] enable_fifo_panic,// high to insert fifo k-codes
     input logic [2:0] test_mode,        // specify test modes
     input logic [95:0] test_packet,     // test data to send to 8b10b 
-    input logic [7:0] crc_input,        // CRC-8 hash of rx_data         
     input logic [5:0] chip_id,          // id for MADCAP
     input logic v3_mode,                // high for v3 mode (no 2X RX clk)  
     input logic bypass_8b10b,           // high to bypass 8b10 encoder
@@ -128,6 +128,7 @@ event_router
     .load_event_n           (load_event_n),
     .ack_fifo_data          (ack_fifo_data),
     .input_events           (rx_data),
+    .mc_config_packet       (mc_config_packet),
     .write_fifo_data_req    (write_fifo_data_req),
     .rx_empty               (rx_empty),
     .clk                    (clk_core),

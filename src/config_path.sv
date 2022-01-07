@@ -22,12 +22,13 @@ module config_path
     parameter REGNUM = 16,
     parameter FIFO_DEPTH = 32)
     (output logic posi [NUMCHANNELS-1:0],// output bits to PHYs
-    output logic [67:0] madcap_packet,  // return config data 
+    output logic [63:0] larpix_packet,  // config read for MADCAP 
     output logic [7:0] config_bits [0:REGNUM-1],// regmap config bits    
     output logic [4:0] config_fifo_cnt, // FIFO usage when FIFO read
     output logic config_fifo_half,      // high if config fifo half full 
     output logic config_fifo_full,      // high if config fifo full  
     output logic write_fifo_data_req,   // req to put data into data FIFO
+    output logic trigger_found,         // high when K28.0 detected
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
     input logic external_sync,          // high for external sync    
@@ -47,7 +48,6 @@ logic [63:0] tx_data [NUMCHANNELS-1:0]; // data to be sent
 logic k_out;                            // high if k-code detected
 logic dataword10b_ready;                // data ready to sample
 logic symbol_locked;                    // deserializer synchronized
-logic [63:0] larpix_packet;             // config packet for LArPix
 logic [7:0] regmap_write_data;          // data to write to regmap
 logic [7:0] regmap_address;             // regmap addr to write
 logic write_regmap;                     // active high to load register data
@@ -66,7 +66,7 @@ logic code_err;
 logic disp_err;
 
 // sample disparity for 8b10b decoder
-always @(posedge clk or negedge reset_n)
+always_ff @(posedge clk or negedge reset_n)
   if (!reset_n)
     disp_in <= 1'b0; // initialize disparity
   else
@@ -102,6 +102,7 @@ comma_detect
     .symbol_start           (symbol_start),
     .symbol_locked          (symbol_locked),
     .comma_found            (comma_found),
+    .trigger_found          (trigger_found),
     .dataword10b            (dataword10b),
     .dataword10b_ready      (dataword10b_ready),
     .start_sync             (start_sync),
@@ -123,13 +124,12 @@ decode8b10b
 config_packet_builder   
     config_packet_builder_inst (
     .larpix_packet          (larpix_packet),
-    .madcap_packet          (madcap_packet),
     .regmap_write_data      (regmap_write_data),
     .regmap_address         (regmap_address),
     .write_regmap           (write_regmap),
     .read_regmap            (read_regmap),
     .write_fifo_config_n    (write_fifo_config_n),
-    .write_fifo_data_n      (write_fifo_data_n),
+    .write_fifo_data_req    (write_fifo_data_req),
     .dataword8b             (dataword8b_muxed),
     .dataword8b_ready       (dataword10b_ready),
     .regmap_read_data       (regmap_read_data),

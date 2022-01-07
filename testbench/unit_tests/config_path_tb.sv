@@ -205,20 +205,7 @@ always_ff @(posedge clk_core or negedge reset_n) begin
         end
     end
 end
-/*
-// determine when to send commas (command codes)
-always_ff @(posedge clk_core or negedge reset_n) begin
-    if (!reset_n) begin
-        sending_commas <= 1'b1;
-    end
-    else begin
-        if (make_madcap_packet || make_larpix_packet)
-            sending_commas <= 1'b0;
-        else if (make_comma_packet)
-            sending_commas <= 1;b1;
-    end
-end // always
-  */          
+    
     
 // update input to 8b10b a few clock cycles before the serializer is ready
 always_ff @(posedge clk_core or negedge reset_n) begin
