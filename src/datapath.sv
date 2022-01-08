@@ -68,9 +68,9 @@ module datapath
 logic [95:0] output_packet_96b;     // superpacket before 8b10b encoding
 logic [119:0] output_packet_120b;   // superpacket after 8b10b encoding
 logic [119:0] serializer_data_120b; // data sent to serializer
-logic [WIDTH-1:0] rx_data [NUMCHANNELS-1:0]; // data from UART array
-logic [WIDTH+3:0] channel_event_out;// data from event router
-logic [WIDTH+3:0] fifo_out;         // data from FIFO (including chan id)
+logic [63:0] rx_data [NUMCHANNELS-1:0]; // data from UART array
+logic [67:0] channel_event_out;// data from event router
+logic [67:0] fifo_out;         // data from FIFO (including chan id)
 logic rx_empty [NUMCHANNELS-1:0];   // high if no data waiting
 logic [NUMCHANNELS-1:0] read_rx;    // high to read rx uart 
 logic [7:0] crc_word;               // CRC8 calculated from LArPix data
@@ -136,7 +136,7 @@ event_router
     );
 
 fifo_ff
-    #(.FIFO_WIDTH(WIDTH+4),
+    #(.FIFO_WIDTH(68),
     .FIFO_DEPTH(FIFO_DEPTH)
     )
     fifo_ff_inst        (

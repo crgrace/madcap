@@ -88,7 +88,7 @@ end // always_comb
 
 // module declarations
 deserializer_sdr
-    deserializer_inst (
+    deserializer_sdr_inst (
     .dataword10b            (dataword10b),
     .dataword10b_ready      (dataword10b_ready),
     .din                    (input_bit),

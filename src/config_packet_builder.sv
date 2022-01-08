@@ -10,8 +10,7 @@
 //     
 ///////////////////////////////////////////////////////////////////
 module config_packet_builder 
-    (output logic [63:0] larpix_packet,     // config packet for LArPix
-    output logic [67:0] madcap_packet,      // return MADCAP config data
+    (output logic [63:0] larpix_packet,     // config packet (either chip) 
     output logic [7:0] regmap_write_data,   // data to write to regmap
     output logic [7:0] regmap_address,      // regmap addr to write
     output logic write_regmap,      // active high to load register data
@@ -56,15 +55,17 @@ always_comb begin
 end // always_comb
 
 // state machine
-enum logic [2:0] // explicit state definitions 
-            {WAIT_FOR_COMMA     = 3'h0,
-            WAIT_FOR_BYTE       = 3'h1,
-            GET_NEXT_BYTE       = 3'h2,
-            WRITE_REGMAP        = 3'h3,
-            READ_REGMAP         = 3'h4,
-            BUILD_LARPIX        = 3'h5,
-            LOAD_FIFO_DATA      = 3'h6,
-            LOAD_FIFO_CONFIG    = 3'h7} State, Next;
+enum logic [3:0] // explicit state definitions 
+            {WAIT_FOR_COMMA     = 4'h0,
+            WAIT_FOR_BYTE       = 4'h1,
+            GET_NEXT_BYTE       = 4'h2,
+            WRITE_REGMAP        = 4'h3,
+            READ_REGMAP         = 4'h4,
+            LATCH_DATA          = 4'h5,
+            BUILD_DATA          = 4'h6,
+            BUILD_LARPIX        = 4'h7,
+            LOAD_FIFO_DATA      = 4'h8,
+            LOAD_FIFO_CONFIG    = 4'h9} State, Next;
 
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)
@@ -85,11 +86,14 @@ always_comb begin
                                             Next = BUILD_LARPIX;
                 else if (done && rcvd_packet[1:0] == 2'b10) 
                                             Next = WRITE_REGMAP;
-                else if (done && rcvd_packet[1:0] == 2'b11)
+                else if (done 
+                        && rcvd_packet[1:0] == 2'b11)
                                             Next = READ_REGMAP;
                 else                        Next = WAIT_FOR_BYTE;
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;
-        READ_REGMAP:                        Next = LOAD_FIFO_DATA;
+        READ_REGMAP:                        Next = LATCH_DATA;
+        LATCH_DATA:                         Next = BUILD_DATA;
+        BUILD_DATA:                         Next = LOAD_FIFO_DATA;
         BUILD_LARPIX:                       Next = LOAD_FIFO_CONFIG;
         LOAD_FIFO_DATA: if (ack_fifo_data)  Next = WAIT_FOR_COMMA;
                 else                        Next = LOAD_FIFO_DATA;    
@@ -109,7 +113,6 @@ always_ff @(posedge clk or negedge reset_n) begin
         read_regmap <= 1'b0;
         regmap_address <= '0;
         regmap_write_data <= '0;
-        madcap_packet <= '0;
         larpix_packet <= '0;
         rcvd_bytes[0] <= '0;
         rcvd_bytes[1] <= '0;
@@ -127,7 +130,6 @@ always_ff @(posedge clk or negedge reset_n) begin
         regmap_write_data <= '0;
         case (Next)
         WAIT_FOR_COMMA: begin
-                            madcap_packet <= '0;
                             larpix_packet <= '0;
                             rcvd_bytes[0] <= '0;
                             rcvd_bytes[1] <= '0;
@@ -148,11 +150,17 @@ always_ff @(posedge clk or negedge reset_n) begin
                             write_regmap <= 1'b1;
                         end
         READ_REGMAP:    begin
-                            madcap_packet[31:0] <= rcvd_packet;
-                            madcap_packet[67:0] <= '0;
-                            madcap_packet[22:15] <= regmap_read_data;
+                            regmap_address <= rcvd_packet[14:7];
+                            read_regmap <= 1'b1;
                         end
-
+        LATCH_DATA:    ;
+        BUILD_DATA:     begin
+                            larpix_packet[1:0] <= 2'b11; // config read
+                            larpix_packet[7:2] <= rcvd_packet[7:2];
+                            larpix_packet[15:8] <= regmap_address;
+                            larpix_packet[23:16] <= regmap_read_data;
+                            larpix_packet[26] = 1'b1;
+                        end
         BUILD_LARPIX:   begin
                             // lowest 2 bits of MADCAP packet are MADCAP
                             // specific, so shift two bits because

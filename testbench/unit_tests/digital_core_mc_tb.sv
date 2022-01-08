@@ -9,7 +9,7 @@
 module digital_core_mc_tb();
 
 localparam WIDTH = 10;
-localparam REGNUM = 34;
+localparam REGNUM = 35;
 localparam FIFO_DEPTH = 32;
 localparam NUMTRIALS = 20;
 localparam NUMCHANNELS = 16;
@@ -64,14 +64,15 @@ logic [NUMCHANNELS-1:0] posi;
 logic [NUMCHANNELS-1:0] ld_tx_data; // high to xfer data to UART
 logic simulation_done;          // high when simulation done
 logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
+logic load_tx_data;
+logic clk_tx;
+logic which_fifo;
 
 // PACMAN to MADCAP config path
 logic load_serializer;
 logic ready_to_load;
 logic [15:0] tx_enable;
 logic [3:0] serializer_cnt;
-logic ack_fifo_data;        // high to ack config write to FIFO
-logic write_fifo_data_req;  // req to put data into FIFO
 logic disp_out;             // 0 = neg disp; 1 = pos disp; not registered
 logic disp_in;              // 0 = neg disp; 1 = pos disp
 logic [39:0] upstream_packet; // from FPGA to MADCAP
@@ -100,6 +101,13 @@ logic make_madcap_packet;
 logic make_larpix_packet;
 
 initial begin
+// temp:
+    load_tx_data = '0;
+    simulation_done = 0;
+    bypass_8b10b_dec = 0;
+    clk_tx = 0;
+    which_fifo = 0;
+// end temp
     packet_declaration = '0;
     chip_id = '0;
     regmap_address = '0;
@@ -114,9 +122,9 @@ initial begin
     start_sync = 1'b0;
     bypass_8b10b_enc = 1'b0;
     #10 reset_n = 1'b0;
-    #55 reset_n = 1'b1;
+    #155 reset_n = 1'b1;
     // wait a while and then send a MADCAP regfile packet!'
-   #5000
+    #5000
     $display("Send first MADCAP packet");
     chip_id = 5'b0_0001;
     regmap_address = '0;
@@ -125,12 +133,20 @@ initial begin
     make_madcap_packet = 1;
     @upstream_packet;
     make_madcap_packet = 0;
-    target_larpix = 4'h1;
-    larpix_packet = 26'h3_CE_01_8F;
-    packet_declaration = 2'b00;
-    #1000 make_larpix_packet = 1;
+    #1000
+    $display("Readback first MADCAP config packet");
+    regmap_address = '0;
+    regmap_data = '0;
+    packet_declaration = 2'b11; // MADCAP config read
+    make_madcap_packet = 1;
     @upstream_packet;
-    make_larpix_packet = 0;
+    make_madcap_packet = 0;
+//    target_larpix = 4'h1;
+//    larpix_packet = 26'h3_CE_01_8F;
+//    packet_declaration = 2'b00;
+//    #1000 make_larpix_packet = 1;
+//    @upstream_packet;
+//    make_larpix_packet = 0;
 end // initial
 
 // primary clock
@@ -350,8 +366,7 @@ analyze_superpacket
 
 // DUT connected here   
 digital_core_mc
-    #(.WIDTH(WIDTH),
-    .NUMCHANNELS(NUMCHANNELS),
+    #(.NUMCHANNELS(NUMCHANNELS),
     .REGNUM(REGNUM),
     .FIFO_DEPTH(FIFO_DEPTH))
     digital_core_mc_inst (
@@ -384,7 +399,7 @@ digital_core_mc
     .pd_rx                  (pd_rx),
     .pd_tx                  (pd_tx),
     .piso                   (piso),
-    .lvds_rx_bit            (lvds_rx_bit),
+    .lvds_rx_bit            (dout_pacman),
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .clk_fast               (clk_fast),

@@ -31,9 +31,9 @@ end // always_comb
 always_ff @(posedge clk) begin
     srg_sync <= {srg_sync[3:0],reset_n};
     if (all_0_sync)
-        sync_reg <= 1'b1;
-    else if (all_1_sync)
         sync_reg <= 1'b0;
+    else if (all_1_sync)
+        sync_reg <= 1'b1;
     else
         sync_reg <= sync_reg;
     if (srg_sync [4:1] == 4'b0000) begin

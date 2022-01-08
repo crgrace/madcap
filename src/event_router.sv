@@ -74,12 +74,14 @@ always_ff @(posedge clk or negedge reset_n) begin
         channel_waiting <= '0;
         channel_blacklist <= '0;
         veto_event <= '0;
+        ack_fifo_data <= 1'b0;
         wait_counter <= 2'b0;
         wait_counter_done <= 1'b1;
     end
     else begin
         load_event_n <= 1'b1;
         read_rx_fast <= '0;
+        ack_fifo_data <= 1'b0;
         case(Next)
             READY:  begin
                 channel_waiting <= '0;
@@ -133,6 +135,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                 end // if
             end // WAIT_STATE
             READ_HANDSHAKE: begin
+                wait_counter <= 2'b00;
                 if (write_fifo_data_req) begin
                     ack_fifo_data <= 1'b1;
                 end

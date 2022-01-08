@@ -22,7 +22,7 @@
 
 module digital_core_mc
     #(parameter WIDTH = 64,
-    parameter REGNUM = 34,
+    parameter REGNUM = 35,
     parameter NUMCHANNELS = 16,
     parameter FIFO_DEPTH = 32)
     (output logic dout_even,            // DDR even bits                 
@@ -89,7 +89,7 @@ logic serializer_enable;            // enable serializer (MADCAP to PACMAN)
 logic v3_mode;                      // puts UARTs in v3 mode 
 logic [15:0] tx_enable;             // per-channel TX enable
 logic lvds_loopback;                // high to enable loopback
-logic lvds_prbs;                    // send PRBS7 through TX LVDS
+logic enable_prbs7;                 // send PRBS7 through TX LVDS
 logic reset_n_sync;                 // reset_n synced to clk_core
 logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
@@ -141,7 +141,7 @@ always_comb begin
     i_cml_clk               = config_bits[TRX5][7:4];
     i_cml_trigger           = config_bits[TRX6][3:0];
     lvds_loopback           = config_bits[TRX6][4];
-    lvds_prbs               = config_bits[TRX6][5];
+    enable_prbs7            = config_bits[TRX6][5];
     pd_lvds_tx              = config_bits[PD_LVDS][0];
     pd_reset_n_drivers      = config_bits[PD_DRIVER][3:0];
     pd_clk_drivers          = config_bits[PD_DRIVER][7:4];
@@ -160,6 +160,7 @@ datapath
     .dout_even              (dout_even),
     .dout_odd               (dout_odd),
     .dout_frame             (dout_frame),
+    .ack_fifo_data          (ack_fifo_data),
     .piso                   (piso),
     .mc_config_packet       (larpix_packet),
     .write_fifo_data_req    (write_fifo_data_req),
@@ -174,6 +175,7 @@ datapath
     .v3_mode                (v3_mode), 
     .bypass_8b10b           (bypass_8b10b_enc),
     .serializer_enable      (serializer_enable),
+    .enable_prbs7           (enable_prbs7),
     .clk_core               (clk_core),
     .clk_rx                 (clk_rx),
     .reset_n                (reset_n_sync)
@@ -185,6 +187,7 @@ clk_manager_mc
     .clk_core               (clk_core),
     .clk_rx                 (clk_rx),
     .clk_tx                 (clk_tx),
+    .v3_mode                (v3_mode),
     .clk_fast               (clk_fast),
     .reset_n                (reset_n_sync)
     );
