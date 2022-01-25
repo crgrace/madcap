@@ -10,20 +10,21 @@
 //     
 ///////////////////////////////////////////////////////////////////
 module config_packet_builder 
-    (output logic [63:0] larpix_packet,     // config packet (either chip) 
+    (output logic [63:0] larpix_packet,  // config packet (either chip) 
     output logic [7:0] regmap_write_data,   // data to write to regmap
-    output logic [7:0] regmap_address,      // regmap addr to write
-    output logic write_regmap,      // active high to load register data
-    output logic read_regmap,       // active high to read register data
-    output logic write_fifo_config_n, // low to put data into config FIFO
+    output logic [7:0] regmap_address,  // regmap addr to write
+    output logic write_regmap,          // high to load register data
+    output logic read_regmap,           // high to read register data
+    output logic write_fifo_config_n,   // low to put data into config FIFO
     output logic write_fifo_data_req,   // high to req data into data FIFO
-    input logic [7:0] dataword8b,           // current 8b symbol
-    input logic [7:0] regmap_read_data,     // data to read from regmap
-    input logic ack_fifo_data,              // acknowledge from data FIFO
-    input logic dataword8b_ready,           // data ready to sample
-    input logic comma_found,           // high when comma (K28.5) found    
-    input logic clk,                        // MADCAP primary clk
-    input logic reset_n);                   // digital reset (active low)
+    input logic [7:0] dataword8b,       // current 8b symbol
+    input logic [7:0] regmap_read_data, // data to read from regmap
+    input logic [5:0] chip_id,          // id for current MADCAP 
+    input logic ack_fifo_data,          // acknowledge from data FIFO
+    input logic dataword8b_ready,       // data ready to sample
+    input logic comma_found,            // high when comma (K28.5) found    
+    input logic clk,                    // MADCAP primary clk
+    input logic reset_n);               // digital reset (active low)
 
 
 // local signals
@@ -87,7 +88,8 @@ always_comb begin
                 else if (done && rcvd_packet[1:0] == 2'b10) 
                                             Next = WRITE_REGMAP;
                 else if (done 
-                        && rcvd_packet[1:0] == 2'b11)
+                        && rcvd_packet[1:0] == 2'b11
+                        && chip_id == rcvd_packet[7:2])
                                             Next = READ_REGMAP;
                 else                        Next = WAIT_FOR_BYTE;
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;

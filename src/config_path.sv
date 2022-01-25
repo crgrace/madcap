@@ -31,6 +31,7 @@ module config_path
     output logic trigger_found,         // high when K28.0 detected
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
+    input logic [5:0] chip_id,          // id for current MADCAP 
     input logic external_sync,          // high for external sync    
     input logic start_sync,             // start sync (also starts on rst) 
     input logic load_config_defaults,   // high for soft reset
@@ -133,6 +134,7 @@ config_packet_builder
     .dataword8b             (dataword8b_muxed),
     .dataword8b_ready       (dataword10b_ready),
     .regmap_read_data       (regmap_read_data),
+    .chip_id                (chip_id),
     .ack_fifo_data          (ack_fifo_data),
     .comma_found            (comma_found),
     .clk                    (clk),

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// File Name: deserializer_beh.sv
+// File Name: deserializer_ddr.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description:
 //          Behavioral model of deserializer for MADCAP data serializer
