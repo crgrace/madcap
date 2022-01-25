@@ -89,7 +89,9 @@ always_comb begin
                                             Next = WRITE_REGMAP;
                 else if (done 
                         && rcvd_packet[1:0] == 2'b11
-                        && chip_id == rcvd_packet[7:2])
+                        && ((rcvd_packet[7:2] == chip_id)
+                            || (rcvd_packet[7:2] == 6'b00_0000))
+                        )
                                             Next = READ_REGMAP;
                 else                        Next = WAIT_FOR_BYTE;
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;

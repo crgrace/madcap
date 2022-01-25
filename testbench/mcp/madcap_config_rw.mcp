@@ -4,7 +4,7 @@
 
     #5000
     $display("Send MADCAP packet");
-    chip_id = 5'b0_0001;
+    chip_id = 6'b00_0000;
     regmap_address = 8'h0F;
     regmap_data = 8'hF3;
     packet_declaration = 2'b10; // MADCAP config write

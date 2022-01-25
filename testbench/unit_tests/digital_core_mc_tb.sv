@@ -91,7 +91,7 @@ logic bypass_8b10b_enc;     // high to bypass 8b10b encoders
 
 // packet building
 logic [1:0] packet_declaration;
-logic [4:0] chip_id;
+logic [5:0] chip_id;
 logic [7:0] regmap_address;
 logic [7:0] regmap_data;
 logic [25:0] larpix_packet;
