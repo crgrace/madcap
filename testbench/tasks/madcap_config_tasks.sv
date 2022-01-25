@@ -11,7 +11,7 @@
 //`include "madcap_constants.sv"  // all sim constants defined here
 function [39:0] create_madcap_packet
     (input logic [1:0] packet_declaration,
-    input logic [4:0] chip_id,
+    input logic [5:0] chip_id,
     input logic [7:0] regmap_address,
     input logic [7:0] regmap_data
     );

@@ -1,0 +1,27 @@
+// setup_sim.mcp
+// Configure simulation and testbench components. Reset chip.
+// 
+
+// temp:
+    load_tx_data = '0;
+    simulation_done = 0;
+    bypass_8b10b_dec = 0;
+    clk_tx = 0;
+    which_fifo = 0;
+// end temp
+    packet_declaration = '0;
+    chip_id = '0;
+    regmap_address = '0;
+    regmap_data = '0;
+    larpix_packet = '0;
+    target_larpix = '0;
+    make_madcap_packet = 0;
+    make_larpix_packet = 0;
+    tx_enable = '0;
+    clk_fast = 1'b0;
+    external_sync = 1'b0;
+    start_sync = 1'b0;
+    bypass_8b10b_enc = 1'b0;
+    #10 reset_n = 1'b0;
+    #155 reset_n = 1'b1;
+    $display("MADCAP ready for simulation\n");

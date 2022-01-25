@@ -147,12 +147,12 @@ always_ff @(posedge clk or negedge reset_n) begin
                             rcvd_bytes[byte_cnt] <= dataword8b;
                         end
         WRITE_REGMAP:   begin        
-                            regmap_address <= rcvd_packet[14:7];
-                            regmap_write_data <= rcvd_packet[22:15];
+                            regmap_address <= rcvd_packet[15:8];
+                            regmap_write_data <= rcvd_packet[23:16];
                             write_regmap <= 1'b1;
                         end
         READ_REGMAP:    begin
-                            regmap_address <= rcvd_packet[14:7];
+                            regmap_address <= rcvd_packet[15:8];
                             read_regmap <= 1'b1;
                         end
         LATCH_DATA:    ;

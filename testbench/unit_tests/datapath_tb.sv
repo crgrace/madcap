@@ -18,6 +18,7 @@ logic [95:0] superpacket;   // final packet ready for analysis
 logic [11:0] k_out;
 logic [11:0] code_err;
 logic [11:0] disp_err;
+logic [63:0] mc_config_packet;
 logic ack_fifo_data;         // high to ack config write to FIFO
 logic write_fifo_data_req;    // req to put data into FIFO
 logic dout_even;
@@ -52,6 +53,9 @@ logic simulation_done;          // high when simulation done
 initial begin
     reset_n = 1;
     tx_enable = '1;
+    mc_config_packet = '0;
+    write_fifo_data_req = 0;
+    chip_id = 6'b00_0001; // default chip_id
     bypass_8b10b = 0;
     clk_fast = 0; 
     v3_mode = 0;
@@ -64,7 +68,6 @@ initial begin
     config_fifo_half = 0; 
     config_fifo_full = 0;
     crc_input = '0;
-    chip_id = 5'b00001;
     ld_tx_data = '0;
     simulation_done = 0;
     enable_prbs7 = 0;
@@ -125,6 +128,7 @@ datapath
     .dout_frame             (dout_frame),
     .ack_fifo_data          (ack_fifo_data),
     .piso                   (piso),
+    .mc_config_packet       (mc_config_packet),
     .write_fifo_data_req    (write_fifo_data_req),
     .config_fifo_cnt        (config_fifo_cnt),
     .config_fifo_half       (config_fifo_half),
@@ -133,8 +137,7 @@ datapath
     .enable_fifo_panic      (enable_fifo_panic),
     .test_mode              (test_mode),
     .test_packet            (test_packet),
-    .crc_input              (crc_input),
-    .chip_id                (chip_id), 
+    .chip_id                (chip_id),
     .v3_mode                (v3_mode),
     .bypass_8b10b           (bypass_8b10b),
     .serializer_enable      (serializer_enable),    
@@ -211,7 +214,7 @@ analyze_superpacket
     .new_superpacket    (new_dataword),
     .which_fifo         (which_fifo),
     .k_out              (k_out),
-    .bypass_8b10b       (bypass_8b10b),
+    .bypass_8b10b_enc   (bypass_8b10b),
     .simulation_done    (simulation_done)
     );
 

@@ -1,0 +1,5 @@
+// test.mcp
+// tests whether it is possible to include mcp tests into testbench
+#5000
+$display("THE TEST WORKED!!!!");
+

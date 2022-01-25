@@ -1,0 +1,22 @@
+// madcap_config_rw.mcp
+// Write a config word to MADCAP and read it back
+//
+
+    #5000
+    $display("Send MADCAP packet");
+    chip_id = 5'b0_0001;
+    regmap_address = 8'h0F;
+    regmap_data = 8'hF3;
+    packet_declaration = 2'b10; // MADCAP config write
+    make_madcap_packet = 1;
+    @upstream_packet;
+    make_madcap_packet = 0;
+    #1000
+    $display("Readback MADCAP config packet");
+    regmap_address = 8'h0F;
+    regmap_data = '0;
+    packet_declaration = 2'b11; // MADCAP config read
+    make_madcap_packet = 1;
+    @upstream_packet;
+    make_madcap_packet = 0;
+

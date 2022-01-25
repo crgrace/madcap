@@ -101,6 +101,7 @@ logic make_madcap_packet;
 logic make_larpix_packet;
 
 initial begin
+/*
 // temp:
     load_tx_data = '0;
     simulation_done = 0;
@@ -124,18 +125,19 @@ initial begin
     #10 reset_n = 1'b0;
     #155 reset_n = 1'b1;
     // wait a while and then send a MADCAP regfile packet!'
+`include "../mcp/test.mcp"
     #5000
     $display("Send first MADCAP packet");
     chip_id = 5'b0_0001;
-    regmap_address = '0;
+    regmap_address = 8'h01;
     regmap_data = 8'hF3;
-    packet_declaration = 2'b10;
+    packet_declaration = 2'b10; // MADCAP config write
     make_madcap_packet = 1;
     @upstream_packet;
     make_madcap_packet = 0;
     #1000
     $display("Readback first MADCAP config packet");
-    regmap_address = '0;
+    regmap_address = 8'h01;
     regmap_data = '0;
     packet_declaration = 2'b11; // MADCAP config read
     make_madcap_packet = 1;
@@ -146,7 +148,11 @@ initial begin
 //    packet_declaration = 2'b00;
 //    #1000 make_larpix_packet = 1;
 //    @upstream_packet;
-//    make_larpix_packet = 0;
+//    make_larpix_packet = 0;]*/
+
+`include "../mcp/setup_sim.mcp"
+`include "../mcp/madcap_config_rw.mcp"
+
 end // initial
 
 // primary clock
