@@ -30,17 +30,19 @@ always_ff @(negedge clk)
 // output muxes mux
 always_comb begin
     for (int i = 0; i < 4; i++) begin
+        trigger_larpix[i] = !pd_trigger_drivers[i]
+            & external_trigger_resampled;
+        reset_n_larpix[i] = !pd_reset_n_drivers & reset_n;
+        clk_larpix[i] = !pd_clk_drivers & clk;
+        
         if (embedded_trigger_en) begin
-            trigger_larpix[i] = !pd_trigger_drivers[i] | trigger_found; 
+            trigger_larpix[i] = !pd_trigger_drivers[i] & trigger_found; 
         end
         else begin
-            trigger_larpix[i] = !pd_trigger_drivers[i] 
-                | external_trigger_resampled;
-            reset_n_larpix[i] = !pd_reset_n_drivers | reset_n;
-            clk_larpix[i] = !pd_reset_n_drivers | clk;
-
-        end 
+            trigger_larpix[i] = 1'b0;
+        end
     end // for loop
+
 end // always_comb
 
 endmodule

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////
 // File Name: digital_core_mc_tb.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: SystemVerilog testbench for MADCAP digital core.
@@ -64,8 +64,8 @@ logic [NUMCHANNELS-1:0] posi;
 logic [NUMCHANNELS-1:0] ld_tx_data; // high to xfer data to UART
 logic simulation_done;          // high when simulation done
 logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
-logic load_tx_data;
 logic clk_tx;
+logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
 
 // PACMAN to MADCAP config path
@@ -75,7 +75,7 @@ logic [15:0] tx_enable;
 logic [3:0] serializer_cnt;
 logic disp_out;             // 0 = neg disp; 1 = pos disp; not registered
 logic disp_in;              // 0 = neg disp; 1 = pos disp
-logic [39:0] upstream_packet; // from FPGA to MADCAP
+logic [47:0] upstream_packet; // from FPGA to MADCAP
 logic dout_pacman;                 // serializer output (single bit)
 logic [7:0] data_in8b;      // input to send to 8b10b encoder
 logic [7:0] current_byte;   // byte selected from upstream pacet
@@ -88,10 +88,11 @@ logic start_sync;           // high to mark first bit in symbol
 logic enable_8b10b;         // high to enable 8b10b encoder (for PACMAN)
 logic bypass_8b10b_dec;     // high to bypass 8b10b decoders
 logic bypass_8b10b_enc;     // high to bypass 8b10b encoders
+logic external_trigger;     // high for external trigger
 
 // packet building
 logic [1:0] packet_declaration;
-logic [5:0] chip_id;
+logic [2:0] chip_id;
 logic [7:0] regmap_address;
 logic [7:0] regmap_data;
 logic [25:0] larpix_packet;
@@ -99,59 +100,13 @@ logic [3:0] target_larpix;
 logic sending_commas;
 logic make_madcap_packet;
 logic make_larpix_packet;
+logic [63:0] larpix_payload [NUMCHANNELS-1:0]; // data from LArPix ASICs
 
 initial begin
-/*
-// temp:
-    load_tx_data = '0;
-    simulation_done = 0;
-    bypass_8b10b_dec = 0;
-    clk_tx = 0;
-    which_fifo = 0;
-// end temp
-    packet_declaration = '0;
-    chip_id = '0;
-    regmap_address = '0;
-    regmap_data = '0;
-    larpix_packet = '0;
-    target_larpix = '0;
-    make_madcap_packet = 0;
-    make_larpix_packet = 0;
-    tx_enable = '0;
-    clk_fast = 1'b0;
-    external_sync = 1'b0;
-    start_sync = 1'b0;
-    bypass_8b10b_enc = 1'b0;
-    #10 reset_n = 1'b0;
-    #155 reset_n = 1'b1;
-    // wait a while and then send a MADCAP regfile packet!'
-`include "../mcp/test.mcp"
-    #5000
-    $display("Send first MADCAP packet");
-    chip_id = 5'b0_0001;
-    regmap_address = 8'h01;
-    regmap_data = 8'hF3;
-    packet_declaration = 2'b10; // MADCAP config write
-    make_madcap_packet = 1;
-    @upstream_packet;
-    make_madcap_packet = 0;
-    #1000
-    $display("Readback first MADCAP config packet");
-    regmap_address = 8'h01;
-    regmap_data = '0;
-    packet_declaration = 2'b11; // MADCAP config read
-    make_madcap_packet = 1;
-    @upstream_packet;
-    make_madcap_packet = 0;
-//    target_larpix = 4'h1;
-//    larpix_packet = 26'h3_CE_01_8F;
-//    packet_declaration = 2'b00;
-//    #1000 make_larpix_packet = 1;
-//    @upstream_packet;
-//    make_larpix_packet = 0;]*/
 
 `include "../mcp/setup_sim.mcp"
-`include "../mcp/madcap_config_rw.mcp"
+//`include "../mcp/madcap_config_rw.mcp"
+`include "../mcp/test_datapath.mcp"
 
 end // initial
 
@@ -160,6 +115,11 @@ initial begin
     forever begin   
         #10 clk_fast = ~clk_fast;
     end
+end // initial
+
+// LArPix primary clock
+initial begin
+    clk_larpix_delayed = #1 clk_larpix[0];
 end // initial
 
 //// START CONFIG MODEL
@@ -194,6 +154,7 @@ always_comb begin
         3'b010 : current_byte = upstream_packet[23:16];
         3'b011 : current_byte = upstream_packet[31:24];
         3'b100 : current_byte = upstream_packet[39:32];
+        3'b101 : current_byte = upstream_packet[47:33];
         default: current_byte = '0;
     endcase
 end // always_comb
@@ -219,7 +180,7 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
         enable_8b10b <= 1'b0;
         if (serializer_cnt == 4'b0100) begin // update a few clocks early
                enable_8b10b <= 1'b1;
-            if (which_byte == 3'b100) begin
+            if (which_byte == 3'b101) begin
                 next_packet <= 1'b1;
                 which_byte <= 3'b00;
                 if (make_madcap_packet) begin
@@ -234,6 +195,7 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
                     sending_commas <= 1'b0;
                     upstream_packet <= create_larpix_packet(
                                     packet_declaration,
+                                    chip_id,
                                     larpix_packet,
                                     target_larpix);
                 end
@@ -309,6 +271,19 @@ uart_array_tx
     .clk_tx         (clk_tx),
     .reset_n        (reset_n)
     );
+
+// this module sets the relationship between core, rx, and tx clock
+// simulates clock manager on LArPix
+clk_manager
+    clk_manager_inst (
+    .clk_core       (),
+    .clk_rx         (),
+    .clk_tx         (clk_tx),
+    .clk_ctrl       (2'b00),
+    .clk            (clk_larpix_delayed),
+    .reset_n        (reset_n)
+    );
+
 // END tile mode
 
 // START PACMAN data rx 
@@ -406,9 +381,11 @@ digital_core_mc
     .pd_tx                  (pd_tx),
     .piso                   (piso),
     .lvds_rx_bit            (dout_pacman),
+    .external_trigger       (external_trigger),
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .clk_fast               (clk_fast),
+    .chip_id                (chip_id),
     .reset_n                (reset_n)
     );
 

@@ -61,16 +61,17 @@ module digital_core_mc
 // INPUTS
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
+    input logic external_trigger,       // high for external trigger 
     input logic external_sync,          // high for external sync 
     input logic start_sync,             // start sync (also starts on rst)  
     input logic clk_fast,               // externally supplied clk
+    input logic [2:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
 
 // digital config & local variables
 logic [7:0] config_bits [0:REGNUM-1];// regmap config bits    
 logic digital_monitor_enable;       // high to enable
 logic [3:0] digital_monitor_select; // see docs
-logic [5:0] chip_id;                // unique ID for each chip
 logic load_config_defaults;         // MADCAP soft reset (set to low after)
 logic bypass_8b10b_enc;             // high to bypass 8b10b encoder
 logic bypass_8b10b_dec;             // high to bypass 8b10b decoder
@@ -119,8 +120,7 @@ always_comb begin
     voltage_monitor_refgen  = config_bits[VMONITOR][7:0];
     digital_monitor_enable  = config_bits[DMONITOR][0];
     digital_monitor_select  = config_bits[DMONITOR][4:1];
-    chip_id                 = config_bits[CHIP_ID][5:0];
-    load_config_defaults    = config_bits[CHIP_ID][6];
+    load_config_defaults    = config_bits[CONFIG][0];
     test_mode               = config_bits[TEST_MODE][2:0];
     which_fifo              = config_bits[TEST_MODE][3];
     enable_fifo_panic       = config_bits[TEST_MODE][5:4];
