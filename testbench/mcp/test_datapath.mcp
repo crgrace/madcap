@@ -1,0 +1,25 @@
+// test_datapath
+// run simulated LArPix packets through MADCAP and analyze
+    tx_enable = 16'hFFFF;
+    for (int i = 0; i < NUMCHANNELS; i++) begin
+        larpix_payload[i] = {$urandom(),$urandom()};
+         $display ("larpix_payload[%d] = %h",i,larpix_payload[i]);
+    end // for
+//    larpix_payload = {larpix_payload[63:0],larpix_payload[62:0]}; // parity
+    #40 reset_n = 0;
+    #35 reset_n = 1;
+//    #10 $display ("larpix_payload[2] = %h",larpix_payload[2]);
+    for (int i = 0; i < NUMCHANNELS; i++) begin
+        tx_data[i] = larpix_payload[i];
+    end
+    #650 ld_tx_data = 16'hFFFF;
+    #400 ld_tx_data = '0; 
+    @ (!tx_busy); 
+    #40 ld_tx_data = 16'hFFFF;
+    #400 ld_tx_data = '0; 
+    @ (!tx_busy);     
+    #40 ld_tx_data = 16'hFFFF;
+    #400 ld_tx_data = '0; 
+    $display("Test inputs complete");
+    #10000
+    simulation_done = 1;

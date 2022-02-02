@@ -47,7 +47,7 @@ logic [15:0] pd_rx;          // pd rx from LArPix to MADCAP
 logic [15:0] pd_tx;          // pd rx from MADCAP to LArPix
 
 // LArPix to MADCAP datapath
-logic [WIDTH-1:0] tx_data [NUMCHANNELS-1:0]; // data sent (pre serializer)
+logic [63:0] tx_data [NUMCHANNELS-1:0]; // data sent (pre serializer)
 logic [119:0] dataword_120b; // deserialized data (before 8b10 decoding)
 logic [95:0] dataword_96b;   // deserialized data (after 8b10 decoding)
 logic [95:0] superpacket;   // final packet ready for analysis
@@ -117,10 +117,7 @@ initial begin
     end
 end // initial
 
-// LArPix primary clock
-initial begin
-    clk_larpix_delayed = #1 clk_larpix[0];
-end // initial
+assign #1 clk_larpix_delayed = clk_larpix[0];
 
 //// START CONFIG MODEL
 /////////////// MODEL FOR DOWNSTREAM PACMAN CONTROLLER 
@@ -259,7 +256,7 @@ serializer_sdr
 //// START DATAPATH MODEL
 /// START tile model:
 uart_array_tx
-    #(.WIDTH(WIDTH),
+    #(.WIDTH(64),
     .NUMCHANNELS(NUMCHANNELS)
     )
     uart_array_tx_inst (
@@ -284,7 +281,7 @@ clk_manager
     .reset_n        (reset_n)
     );
 
-// END tile mode
+// END tile model
 
 // START PACMAN data rx 
 // behavioral double datarate deserializer

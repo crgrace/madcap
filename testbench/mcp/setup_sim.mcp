@@ -2,13 +2,11 @@
 // Configure simulation and testbench components. Reset chip.
 // 
 
-// temp:
-    load_tx_data = '0;
+    ld_tx_data = '0;
+    external_trigger = 0;
     simulation_done = 0;
     bypass_8b10b_dec = 0;
-    clk_tx = 0;
     which_fifo = 0;
-// end temp
     packet_declaration = '0;
     chip_id = '0;
     regmap_address = '0;

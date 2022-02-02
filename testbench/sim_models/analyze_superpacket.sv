@@ -19,7 +19,7 @@ logic [63:0] packet_number;     // tagged input signal to scoreboard
 logic [2:0] rcvd_packet_declare; // 0 = bypass 1 = data, 2 = idle, 3 = test
 logic rcvd_which_fifo;          //  0 = config_fifo, 1 = data_fifo
 logic [4:0]rcvd_fifo_usage;          // number of FIFO locations in use
-logic [5:0] rcvd_chip_id;       // which specific MADCAP is this?
+logic [2:0] rcvd_chip_id;       // which specific MADCAP is this?
 logic [3:0] rcvd_channel_id;    // which channel?
 logic [63:0] rcvd_larpix_payload; // 64-bit LArPix message
 logic [7:0] rcvd_crc_word;      // Maxim 1-wire CRC8 word
@@ -60,7 +60,7 @@ always @(posedge new_superpacket) begin
         rcvd_packet_declare = 1; // data
         rcvd_which_fifo     = superpacket[8];
         rcvd_fifo_usage     = superpacket[13:9];
-        rcvd_chip_id        = superpacket[19:14];
+        rcvd_chip_id        = superpacket[16:14];
         rcvd_channel_id     = superpacket[23:20];
         rcvd_larpix_payload = superpacket[87:24];
         rcvd_crc_word       = superpacket[95:88];

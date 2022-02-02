@@ -19,7 +19,7 @@ module config_packet_builder
     output logic write_fifo_data_req,   // high to req data into data FIFO
     input logic [7:0] dataword8b,       // current 8b symbol
     input logic [7:0] regmap_read_data, // data to read from regmap
-    input logic [5:0] chip_id,          // id for current MADCAP 
+    input logic [2:0] chip_id,          // id for current MADCAP 
     input logic ack_fifo_data,          // acknowledge from data FIFO
     input logic dataword8b_ready,       // data ready to sample
     input logic comma_found,            // high when comma (K28.5) found    
@@ -31,9 +31,9 @@ module config_packet_builder
 logic done;                 // high if new packet received
 logic byte_cnt_en;          // high to increment byte counter on next clk
 logic byte_cnt_clear;       // high to clear byte counter on next clk
-logic [31:0] rcvd_packet;   // packet received from PACMAN
+logic [39:0] rcvd_packet;   // packet received from PACMAN
 logic [2:0] byte_cnt;       // which byte in packet just received
-logic [7:0] rcvd_bytes [3:0]; // 4 bytes make a received packet
+logic [7:0] rcvd_bytes [4:0]; // 5 bytes make a received packet
                             // (we strip off the start byte)
 // byte counter
 always_ff @(posedge clk or negedge reset_n) begin
@@ -51,8 +51,11 @@ always_ff @(posedge clk or negedge reset_n) begin
 end // always_ff
 
 always_comb begin 
-    done = (byte_cnt == 3'b100);
-    rcvd_packet = {rcvd_bytes[3],rcvd_bytes[2],rcvd_bytes[1],rcvd_bytes[0]};
+    done = (byte_cnt == 3'b101);
+    rcvd_packet =   {rcvd_bytes[4],rcvd_bytes[3]
+                    ,rcvd_bytes[2],rcvd_bytes[1]
+                    ,rcvd_bytes[0]
+                    };
 end // always_comb
 
 // state machine
@@ -89,8 +92,8 @@ always_comb begin
                                             Next = WRITE_REGMAP;
                 else if (done 
                         && rcvd_packet[1:0] == 2'b11
-                        && ((rcvd_packet[7:2] == chip_id)
-                            || (rcvd_packet[7:2] == 6'b00_0000))
+                        && ((rcvd_packet[4:2] == chip_id)
+                            || (rcvd_packet[4:2] == 3'b111))
                         )
                                             Next = READ_REGMAP;
                 else                        Next = WAIT_FOR_BYTE;
@@ -122,6 +125,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         rcvd_bytes[1] <= '0;
         rcvd_bytes[2] <= '0;
         rcvd_bytes[3] <= '0;   
+        rcvd_bytes[4] <= '0;   
     end
     else begin
         byte_cnt_en <= 1'b0;
@@ -139,6 +143,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                             rcvd_bytes[1] <= '0;
                             rcvd_bytes[2] <= '0;
                             rcvd_bytes[3] <= '0;
+                            rcvd_bytes[4] <= '0;
                         end
         WAIT_FOR_BYTE:  begin
                             byte_cnt_clear <= 1'b0;
@@ -160,7 +165,8 @@ always_ff @(posedge clk or negedge reset_n) begin
         LATCH_DATA:    ;
         BUILD_DATA:     begin
                             larpix_packet[1:0] <= 2'b11; // config read
-                            larpix_packet[7:2] <= rcvd_packet[7:2];
+                            larpix_packet[4:2] <= rcvd_packet[4:2];
+                            larpix_packet[7:5] <= 3'b000;
                             larpix_packet[15:8] <= regmap_address;
                             larpix_packet[23:16] <= regmap_read_data;
                             larpix_packet[26] = 1'b1;

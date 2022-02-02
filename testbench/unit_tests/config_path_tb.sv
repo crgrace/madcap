@@ -190,6 +190,7 @@ always_ff @(posedge clk_core or negedge reset_n) begin
                     sending_commas <= 1'b0;
                     upstream_packet <= create_larpix_packet(
                                     packet_declaration,
+                                    chip_id,
                                     larpix_packet,
                                     target_larpix);
                 end

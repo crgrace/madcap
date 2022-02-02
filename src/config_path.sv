@@ -31,7 +31,7 @@ module config_path
     output logic trigger_found,         // high when K28.0 detected
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
-    input logic [5:0] chip_id,          // id for current MADCAP 
+    input logic [2:0] chip_id,          // id for current MADCAP 
     input logic external_sync,          // high for external sync    
     input logic start_sync,             // start sync (also starts on rst) 
     input logic load_config_defaults,   // high for soft reset

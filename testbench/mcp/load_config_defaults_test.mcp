@@ -4,7 +4,7 @@
 
     #5000
     $display("Send Load Config Defaults command");
-    chip_id = 6'b00_0001;
+    chip_id = 3'001;
     regmap_address = 8'h04;
     regmap_data = 8'hF3;
     packet_declaration = 2'b10; // MADCAP config write

@@ -9,36 +9,41 @@
 `define _madcap_config_tasks_
 
 //`include "madcap_constants.sv"  // all sim constants defined here
-function [39:0] create_madcap_packet
+function [47:0] create_madcap_packet
     (input logic [1:0] packet_declaration,
-    input logic [5:0] chip_id,
+    input logic [2:0] chip_id,
     input logic [7:0] regmap_address,
     input logic [7:0] regmap_data
     );
-    return {    9'h000, 
+    return {    16'h00, 
                 regmap_data, 
-                regmap_address, 
+                regmap_address,
+                3'b000, 
                 chip_id,
                 packet_declaration,
                 `K_F 
             };
 endfunction : create_madcap_packet
 
-function [39:0] create_larpix_packet
+function [47:0] create_larpix_packet
     (input logic [1:0] packet_declaration,
+    input logic [2:0] chip_id,
     input logic [25:0] larpix_packet,
     input logic [2:0] target_larpix
     );
-    return {    target_larpix,
+    return {    5'h00,
+                target_larpix,
                 larpix_packet,
+                chip_id,
                 packet_declaration,
                 `K_F
     };
 endfunction : create_larpix_packet 
 
-function [39:0] create_comma_packet
+function [47:0] create_comma_packet
     (input logic [7:0] comma=`K_K);    
     return {    comma,
+                comma,
                 comma,
                 comma,
                 comma,

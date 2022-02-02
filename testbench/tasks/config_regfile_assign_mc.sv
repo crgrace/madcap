@@ -10,7 +10,7 @@
         config_bits[IMONITOR]               <= 8'h00;
         config_bits[VMONITOR]               <= 8'h00;
         config_bits[DMONITOR]               <= 8'h00;
-        config_bits[CHIP_ID]                <= 8'h01;
+        config_bits[CONFIG]                 <= 8'h00;
         config_bits[TEST_MODE]              <= 8'h30;
         for (int i = 0; i < 12; i++) begin
             config_bits[TEST_PACKETS + i]   <= 8'h00;
