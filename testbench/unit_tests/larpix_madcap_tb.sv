@@ -1,12 +1,12 @@
  ///////////////////////////////////////////////////////////////////
-// File Name: digital_core_mc_tb.sv
+// File Name: larpix_madcap_tb.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
-// Description: SystemVerilog testbench for MADCAP digital core.
+// Description: Combo LArPix / MADCAP simulation
 ///////////////////////////////////////////////////////////////////
 `timescale 1ns/1ps
 `include "../testbench/tasks/k_codes.sv"
 `include "../testbench/tasks/madcap_tasks_top.sv"
-module digital_core_mc_tb();
+module larpix_madcap_tb();
 
 localparam WIDTH = 10;
 localparam REGNUM = 35;
@@ -102,7 +102,18 @@ logic make_madcap_packet;
 logic make_larpix_packet;
 logic [63:0] larpix_payload [NUMCHANNELS-1:0]; // data from LArPix ASICs
 
+//larpix specific
+logic external_trigger_larpix;
+real charge_in_r[63:0];
+real monitor_out_r;
+
 initial begin
+
+    external_trigger_larpix = 0;
+
+    for (int i = 0; i < 64; i++) begin
+        charge_in_r[i] = 0.0;
+    end
 
 `include "../mcp/setup_sim.mcp"
 `include "../mcp/madcap_config_rw.mcp"
@@ -253,36 +264,6 @@ serializer_sdr
     );
 ///// END PACMAN CONFIG MODEL
 
-//// START DATAPATH MODEL
-/// START tile model:
-uart_array_tx
-    #(.WIDTH(64),
-    .NUMCHANNELS(NUMCHANNELS)
-    )
-    uart_array_tx_inst (
-    .tx_out         (piso),
-    .tx_busy        (tx_busy),
-    .tx_data        (tx_data),
-    .ld_tx_data     (ld_tx_data),
-    .tx_enable      (tx_enable),
-    .clk_tx         (clk_tx),
-    .reset_n        (reset_n)
-    );
-
-// this module sets the relationship between core, rx, and tx clock
-// simulates clock manager on LArPix
-clk_manager
-    clk_manager_inst (
-    .clk_core       (),
-    .clk_rx         (),
-    .clk_tx         (clk_tx),
-    .clk_ctrl       (2'b00),
-    .clk            (clk_larpix_delayed),
-    .reset_n        (reset_n)
-    );
-
-// END tile model
-
 // START PACMAN data rx 
 // behavioral double datarate deserializer
 deserializer_ddr
@@ -317,17 +298,6 @@ always_comb begin
 end // always_comb
 // END PACMAN data rx
 
-
-// START output mux
-output_mux  
-    output_mux_inst (
-    .dout       (dout),
-    .dout_even  (dout_even),
-    .dout_odd   (dout_odd),
-    .clk        (clk_fast)
-    );
-// END output mux
-
 // START PACMAN analysis
 // analysis
 analyze_superpacket
@@ -342,40 +312,34 @@ analyze_superpacket
 // END PACMAN analysis
 // END DATAPATH model
 
-// DUT connected here   
-digital_core_mc
+// LARPIX MODEL
+// single LArPix
+// DUT (LArPix full-chip model) LArPix is connected to MADCAP
+larpix_v2b
+    larpix_v2b_inst (
+    .piso               (piso[3:0]),
+    .digital_monitor    (digital_monitor),
+    .monitor_out_r      (monitor_out_r),
+    .charge_in_r        (charge_in_r),
+    .external_trigger   (external_trigger_larpix),
+    .posi               (posi[3:0]),
+    .clk                (clk_tx),
+    .reset_n            (reset_n)   
+    );
+// END LARPIX MODEL
+
+// MADCAP
+madcap
     #(.NUMCHANNELS(NUMCHANNELS),
     .REGNUM(REGNUM),
     .FIFO_DEPTH(FIFO_DEPTH))
-    digital_core_mc_inst (
-    .dout_even              (dout_even),
-    .dout_odd               (dout_odd),
+    madcap_inst (
+    .dout                   (dout),
     .dout_frame             (dout_frame),
     .posi                   (posi),
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
-    .ref_current_trim       (ref_current_trim),
-    .override_ref           (override_ref),
-    .ref_kickstart          (ref_kickstart),
-    .current_monitor        (current_monitor),
-    .voltage_monitor_refgen (voltage_monitor_refgen),
-    .tx_slices              (tx_slices),
-    .i_tx_diff              (i_tx_diff),
-    .i_rx                   (i_rx),
-    .rx_term                (rx_term),
-    .v_cm_tx                (v_cm_tx),
-    .i_tx_lvds_data         (i_tx_lvds_data),
-    .i_lvds_rx              (i_lvds_rx),
-    .i_cml_rst              (i_cml_rst),
-    .i_cml_clk              (i_cml_clk),
-    .i_cml_trigger          (i_cml_trigger),
-    .pd_lvds_tx             (pd_lvds_tx),
-    .pd_reset_n_drivers     (pd_reset_n_drivers),
-    .pd_clk_drivers         (pd_clk_drivers),
-    .pd_trigger_drivers     (pd_trigger_drivers),
-    .pd_rx                  (pd_rx),
-    .pd_tx                  (pd_tx),
     .piso                   (piso),
     .lvds_rx_bit            (dout_pacman),
     .external_trigger       (external_trigger),
@@ -385,5 +349,5 @@ digital_core_mc
     .chip_id                (chip_id),
     .reset_n                (reset_n)
     );
-
+// END MADCAP
 endmodule 

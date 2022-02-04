@@ -40,7 +40,7 @@ genvar i;
 generate
     for (i=0; i<NUMCHANNELS; i=i+1) begin : TX_CHANNELS
 
-        uart_tx
+        uart_tx_mc
             #(.WIDTH(WIDTH)
             )
             uart_tx_inst (

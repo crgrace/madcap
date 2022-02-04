@@ -43,7 +43,7 @@ genvar i;
 generate
     for (i=0; i<NUMCHANNELS; i=i+1) begin : RX_CHANNELS
 
-        uart_rx
+        uart_rx_mc
             #(.WIDTH(WIDTH)
             )
             uart_rx_inst (

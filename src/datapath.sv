@@ -117,7 +117,7 @@ uart_array_rx
     .reset_n        (reset_n)
     );
 
-event_router
+event_router_mc
     #(.WIDTH(WIDTH),
     .NUMCHANNELS(NUMCHANNELS)
     )
@@ -134,7 +134,7 @@ event_router
     .reset_n                (reset_n)
     );
 
-fifo_ff
+fifo_ff_mc
     #(.FIFO_WIDTH(68),
     .FIFO_DEPTH(FIFO_DEPTH)
     )

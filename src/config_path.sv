@@ -157,7 +157,7 @@ config_regfile_mc
     .reset_n                (reset_n)
     );
 
-fifo_ff
+fifo_ff_mc
     #(.FIFO_WIDTH(64),
     .FIFO_DEPTH(FIFO_DEPTH)
     )
