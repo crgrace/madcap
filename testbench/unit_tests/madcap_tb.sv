@@ -102,6 +102,8 @@ logic make_madcap_packet;
 logic make_larpix_packet;
 logic [63:0] larpix_payload [NUMCHANNELS-1:0]; // data from LArPix ASICs
 
+logic reset_n_lp;
+
 initial begin
 
 `include "../mcp/setup_sim.mcp"
@@ -346,6 +348,7 @@ madcap
     .piso                   (piso),
     .lvds_rx_bit            (dout_pacman),
     .external_trigger       (external_trigger),
+    .reset_n_lp             (reset_n_lp),
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .clk_fast               (clk_fast),

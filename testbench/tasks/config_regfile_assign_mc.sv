@@ -35,3 +35,4 @@
         for (int i = 0; i < 2; i++) begin
             config_bits[PD_TX + i]          <= 8'h00;
         end
+        config_bits[SPARE]                  <= 8'h00;

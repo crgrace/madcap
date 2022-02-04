@@ -57,11 +57,12 @@ module digital_core_mc
     output logic [3:0] pd_trigger_drivers,// pd trigger to LArPix tile
     output logic [15:0] pd_rx,          // pd rx from LArPix to MADCAP
     output logic [15:0] pd_tx,          // pd rx from MADCAP to LArPix
-
+    output logic [7:0] spare,           // spare control bits
 // INPUTS
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
     input logic external_trigger,       // high for external trigger 
+    input logic reset_n_lp,             // reset to send to LArPix
     input logic external_sync,          // high for external sync 
     input logic start_sync,             // start sync (also starts on rst)  
     input logic clk_fast,               // externally supplied clk
@@ -137,6 +138,7 @@ always_comb begin
     rx_term                 = config_bits[TRX2][4:0];
     v_cm_tx                 = config_bits[TRX3][2:0];
     i_tx_lvds_data          = config_bits[TRX4][3:0];
+    i_lvds_rx               = config_bits[TRX4][7:4];
     i_cml_rst               = config_bits[TRX5][3:0];
     i_cml_clk               = config_bits[TRX5][7:4];
     i_cml_trigger           = config_bits[TRX6][3:0];
@@ -150,6 +152,7 @@ always_comb begin
     pd_rx[15:8]             = config_bits[PD_RX+1][7:0];
     pd_tx[7:0]              = config_bits[PD_TX][7:0];
     pd_tx[15:8]             = config_bits[PD_TX+1][7:0];
+    spare[7:0]              = config_bits[SPARE][7:0];
 end // always_comb
 
 // instantiate sub-blocks
@@ -229,8 +232,8 @@ driver_ctrl
     .trigger_found          (trigger_found),
     .embedded_trigger_en    (embedded_trigger_en),
     .external_trigger       (external_trigger),
-    .clk                    (clk_rx),
-    .reset_n                (reset_n_sync)
+    .reset_n_lp             (reset_n_lp),
+    .clk                    (clk_rx)
     );
 
 reset_sync_mc

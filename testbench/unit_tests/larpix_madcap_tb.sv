@@ -24,27 +24,6 @@ logic clk_fast;     // 80 MHz input clock
 logic [3:0] clk_larpix;      // clocks to LArPix tiles
 logic [3:0] reset_n_larpix;      // reset to LArPix tiles
 logic [3:0] trigger_larpix;  // triggers to LArPix tiles
-logic [4:0] ref_current_trim;// trims ref current
-logic override_ref;          // high to enable external bandgap
-logic ref_kickstart;         // active high kickstart bit
-logic [3:0] current_monitor; // one hot monitor (see docs)
-logic [7:0] voltage_monitor_refgen;  // one hot monitor 
-logic [3:0] tx_slices;       // # of TX slices for POSI link
-logic [3:0] i_tx_diff;       // TX bias current (diff)
-logic [3:0] i_rx;            // RX bias current 
-logic [4:0] rx_term;         // RX termination resistor
-logic [2:0] v_cm_tx;         // TX CM (MADCAP to tile)
-logic [3:0] i_tx_lvds_data;  // link from MADCAP to PACMAN
-logic [3:0] i_lvds_rx;       // link from PACMAN to MADCAP
-logic [3:0] i_cml_rst;       // bias current for rst drivers
-logic [3:0] i_cml_clk;       // bias current for clk drivers
-logic [3:0] i_cml_trigger;   // bias current for trigger drivers
-logic pd_lvds_tx;            // pd LVDS from MADCAP to PACMAN
-logic [3:0] pd_reset_n_drivers;  // pd rst drivers to LArPix tile
-logic [3:0] pd_clk_drivers;  // pd clk drivers to LArPix tile
-logic [3:0] pd_trigger_drivers;// pd trigger to LArPix tile
-logic [15:0] pd_rx;          // pd rx from LArPix to MADCAP
-logic [15:0] pd_tx;          // pd rx from MADCAP to LArPix
 
 // LArPix to MADCAP datapath
 logic [63:0] tx_data [NUMCHANNELS-1:0]; // data sent (pre serializer)
@@ -76,7 +55,7 @@ logic [3:0] serializer_cnt;
 logic disp_out;             // 0 = neg disp; 1 = pos disp; not registered
 logic disp_in;              // 0 = neg disp; 1 = pos disp
 logic [47:0] upstream_packet; // from FPGA to MADCAP
-logic dout_pacman;                 // serializer output (single bit)
+logic dout_pacman;          // serializer output (single bit)
 logic [7:0] data_in8b;      // input to send to 8b10b encoder
 logic [7:0] current_byte;   // byte selected from upstream pacet
 logic [9:0] data_in10b;     // input to test serializer 
@@ -89,6 +68,7 @@ logic enable_8b10b;         // high to enable 8b10b encoder (for PACMAN)
 logic bypass_8b10b_dec;     // high to bypass 8b10b decoders
 logic bypass_8b10b_enc;     // high to bypass 8b10b encoders
 logic external_trigger;     // high for external trigger
+logic reset_n_lp;           // reset to send to LArPix
 
 // packet building
 logic [1:0] packet_declaration;
@@ -110,11 +90,12 @@ real monitor_out_r;
 initial begin
 
     external_trigger_larpix = 0;
-
     for (int i = 0; i < 64; i++) begin
         charge_in_r[i] = 0.0;
     end
-
+//    for (int i = 4; i < 15; i++) begin
+//        piso[i] = 1;
+//    end
 `include "../mcp/setup_sim.mcp"
 `include "../mcp/madcap_config_rw.mcp"
 //`include "../mcp/test_datapath.mcp"
@@ -323,10 +304,23 @@ larpix_v2b
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger_larpix),
     .posi               (posi[3:0]),
-    .clk                (clk_tx),
-    .reset_n            (reset_n)   
+    .clk                (clk_larpix[0]),
+    .reset_n            (reset_n_larpix[0])   
     );
 // END LARPIX MODEL
+
+// this module sets the relationship between core, rx, and tx clock
+// simulates clock manager on LArPix
+clk_manager
+    clk_manager_inst (
+    .clk_core       (),
+    .clk_rx         (),
+    .clk_tx         (clk_tx),
+    .clk_ctrl       (2'b00),
+    .clk            (clk_larpix_delayed),
+    .reset_n        (reset_n)
+    );
+
 
 // MADCAP
 madcap
@@ -340,9 +334,10 @@ madcap
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
-    .piso                   (piso),
+    .piso                   ({1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1, piso[3],piso[2],piso[1],piso[0]}),
     .lvds_rx_bit            (dout_pacman),
     .external_trigger       (external_trigger),
+    .reset_n_lp             (reset_n_lp),
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .clk_fast               (clk_fast),

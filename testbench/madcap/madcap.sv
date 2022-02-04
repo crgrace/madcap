@@ -20,6 +20,7 @@ module madcap
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
     input logic external_trigger,       // high for external trigger 
+    input logic reset_n_lp,             // reset to send to LArPix
     input logic external_sync,          // high for external sync 
     input logic start_sync,             // start sync (also starts on rst)  
     input logic clk_fast,               // externally supplied clk
@@ -52,6 +53,7 @@ logic [3:0] pd_clk_drivers;     // pd clk drivers to LArPix tile
 logic [3:0] pd_trigger_drivers; // pd trigger to LArPix tile
 logic [15:0] pd_rx;             // pd rx from LArPix to MADCAP
 logic [15:0] pd_tx;             // pd rx from MADCAP to LArPix
+logic [7:0] spare;              // spare control bits
 
 
 // START output mux
@@ -98,9 +100,11 @@ digital_core_mc
     .pd_trigger_drivers     (pd_trigger_drivers),
     .pd_rx                  (pd_rx),
     .pd_tx                  (pd_tx),
+    .spare                  (spare),
     .piso                   (piso),
     .lvds_rx_bit            (lvds_rx_bit),
     .external_trigger       (external_trigger),
+    .reset_n_lp             (reset_n_lp),
     .external_sync          (external_sync),
     .start_sync             (start_sync),
     .clk_fast               (clk_fast),

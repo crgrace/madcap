@@ -121,7 +121,7 @@ event_router_mc
     #(.WIDTH(WIDTH),
     .NUMCHANNELS(NUMCHANNELS)
     )
-    event_router_inst   (
+    event_router_mc_inst   (
     .channel_event_out      (channel_event_out),
     .read_rx                (read_rx),
     .load_event_n           (load_event_n),
@@ -138,7 +138,7 @@ fifo_ff_mc
     #(.FIFO_WIDTH(68),
     .FIFO_DEPTH(FIFO_DEPTH)
     )
-    fifo_ff_inst        (
+    fifo_ff_mc_inst        (
     .data_out           (fifo_out),
     .fifo_counter       (rx_fifo_cnt),
     .fifo_full          (rx_fifo_full),
