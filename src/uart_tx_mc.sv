@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// File Name: uart_tx.sv
+// File Name: uart_tx_mc.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Simple UART transmitter.
 //              Adapted from orignal design by Deepak Tala
@@ -33,7 +33,7 @@
 //  and ended by a stop bit = 1          
 ///////////////////////////////////////////////////////////////////
 
-module uart_tx
+module uart_tx_mc
     #(parameter WIDTH = 64)
     (output logic tx_out,           // tx bit
     output logic tx_busy,           // high when transmitter sending data

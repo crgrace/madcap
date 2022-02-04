@@ -88,13 +88,15 @@ always_comb begin
                 else                        Next = WAIT_FOR_BYTE;
         GET_NEXT_BYTE: if (done && rcvd_packet[1] == 1'b0) 
                                             Next = BUILD_LARPIX;
-                else if (done && rcvd_packet[1:0] == 2'b10) 
+                else if (done 
+                            && (rcvd_packet[1:0] == 2'b10)
+                            && ((rcvd_packet[4:2] == chip_id)
+                            || (rcvd_packet[4:2] == 3'b111)))     
                                             Next = WRITE_REGMAP;
                 else if (done 
-                        && rcvd_packet[1:0] == 2'b11
-                        && ((rcvd_packet[4:2] == chip_id)
-                            || (rcvd_packet[4:2] == 3'b111))
-                        )
+                            && (rcvd_packet[1:0] == 2'b11)
+                            && ((rcvd_packet[4:2] == chip_id)
+                            || (rcvd_packet[4:2] == 3'b111)))
                                             Next = READ_REGMAP;
                 else                        Next = WAIT_FOR_BYTE;
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// File Name: fifo_ff.sv
+// File Name: fifo_ff_mc.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Asynchronous FIFO (controlled by read and write pulses). 
 //              Temporarily stores data until it can be 
@@ -10,7 +10,7 @@
 //              Sue me.
 ///////////////////////////////////////////////////////////////////
 
-module fifo_ff
+module fifo_ff_mc
     #(parameter FIFO_WIDTH = 68, // width of each FIFO word
     parameter integer unsigned FIFO_DEPTH = 32)   // FIFO memory locations
     (output logic [FIFO_WIDTH-1:0] data_out, // FIFO output data 

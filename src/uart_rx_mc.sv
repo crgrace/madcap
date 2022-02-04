@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// File Name: uart_rx.sv
+// File Name: uart_rx_mc.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Simple UART receiver
 //              Adapted from orignal design by Deepak Tala
@@ -33,7 +33,7 @@
 //  and ended by a stop bit = 1       
 ///////////////////////////////////////////////////////////////////
 
-module uart_rx
+module uart_rx_mc
     #(parameter WIDTH = 64)
     (output logic [WIDTH-1:0] rx_data,    // data received by UART
     output logic rx_empty,          // high if no data in rx
