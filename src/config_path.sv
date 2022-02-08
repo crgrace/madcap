@@ -181,6 +181,7 @@ tx_router
     .ld_tx_data             (ld_tx_data),
     .tx_busy                (tx_busy),
     .target_larpix          (config_fifo_out[29:26]),
+    .broadcast              (config_fifo_out[30]),
     .fifo_empty             (config_fifo_empty),
     .write_fifo_n           (write_fifo_config_n),
     .clk                    (clk),

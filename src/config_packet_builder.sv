@@ -174,13 +174,15 @@ always_ff @(posedge clk or negedge reset_n) begin
                             larpix_packet[26] = 1'b1;
                         end
         BUILD_LARPIX:   begin
-                            // lowest 2 bits of MADCAP packet are MADCAP
+                            // lowest 5 bits of MADCAP packet are MADCAP
                             // specific, so shift two bits because
-                            // rcvd_packet[2] corresponds to 
+                            // rcvd_packet[5] corresponds to 
                             // larpix_packet[0] in the larpix_v2b datasheet
-                            larpix_packet[25:0] <= rcvd_packet[27:2];
+                            larpix_packet[25:0] <= rcvd_packet[31:5];
                             // record target LArPix
-                            larpix_packet[29:26] <= rcvd_packet[31:28];
+                            larpix_packet[29:26] <= rcvd_packet[35:32];
+                            if (rcvd_packet[1:0] == 2'b01) // broadcast 
+                                larpix_packet[30] <= 1'b1;
                         end
         LOAD_FIFO_DATA: begin
                             write_fifo_data_req <= 1'b1;

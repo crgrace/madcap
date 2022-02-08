@@ -17,6 +17,7 @@ module tx_router
     input logic [63:0] fifo_out,        // fifo output to be routed
     input logic [15:0] tx_busy,         // high when tx uart sending data
     input logic [3:0] target_larpix,    // which LArPix is this going to?
+    input logic broadcast,              // high if we want to send to all
     input logic fifo_empty,             // high when fifo is in underflow 
     input logic write_fifo_n,           // no simultaneous read and write
     input logic clk,                    // primary clock    
@@ -35,26 +36,23 @@ enum logic [2:0] // explicit state definitions
 
 // internal registers
 logic [6:0] timeout; // keeps state machine from hanging if all TX off
-logic [15:0] which_larpix; // current TX to access
-logic broadcast;
+//logic [15:0] which_larpix; // current TX to access
 logic [5:0] broadcast_timer;
-logic broadcast_delay;
 
 // decode target LArPix
 always_comb begin
-    broadcast = (fifo_out == 2'b11);
-    which_larpix = (1'b1 << target_larpix);
+//    which_larpix = (1'b1 << target_larpix);
     if (broadcast) begin
+        for (int i = 0; i < 16; i++) begin
+            tx_data[i] = fifo_out;
+        end
+    end
+    else begin
         for (int i = 0; i < 16; i++) begin
             if (i == target_larpix) 
                 tx_data[i] = fifo_out;
             else
                 tx_data[i] = '0;
-        end
-    end
-    else begin
-        for (int i = 0; i < 16; i++) begin
-            tx_data[i] = fifo_out;
         end
     end
 end // always_comb
@@ -75,14 +73,15 @@ always_comb begin
         GET_FIFO_DATA:              Next = WAIT_STATE;
         WAIT_STATE:                 Next = CHECK_BROADCAST;
         CHECK_BROADCAST: if (broadcast) Next = TRANSFER_BROADCAST;
+                   else if (tx_busy[target_larpix]) Next = CHECK_BROADCAST;
                    else             Next = TRANSFER;
         BROADCAST_WAIT:  if (broadcast_timer == 6'h3F) 
                                     Next = TRANSFER_BROADCAST;
                             else    Next = BROADCAST_WAIT;
-        TRANSFER_BROADCAST: if ( (&tx_busy) | (timeout == 6'h3F))
+        TRANSFER_BROADCAST: if (timeout == 6'h3F)
                                     Next = IDLE;
                             else    Next = TRANSFER_BROADCAST;
-        TRANSFER: if (tx_busy[which_larpix] | (timeout == 6'h3F))      
+        TRANSFER: if (timeout == 6'h3F)      
                                     Next = IDLE;
                   else              Next = TRANSFER;
     endcase
@@ -117,7 +116,7 @@ always_ff @(posedge clk  or negedge reset_n)
                                     timeout <= timeout + 1'b1;
                                 end                                
             TRANSFER:       begin
-                                ld_tx_data[which_larpix] <= 1'b1; 
+                                ld_tx_data[target_larpix] <= 1'b1; 
 //                                ld_tx_data <= 1'b1;
                                 timeout <= timeout + 1'b1;
                             end
