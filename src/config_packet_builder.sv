@@ -166,7 +166,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                         end
         LATCH_DATA:    ;
         BUILD_DATA:     begin
-                            larpix_packet[1:0] <= 2'b11; // config read
+                            larpix_packet[1:0] <= 2'b01; // config read
                             larpix_packet[4:2] <= rcvd_packet[4:2];
                             larpix_packet[7:5] <= 3'b000;
                             larpix_packet[15:8] <= regmap_address;
