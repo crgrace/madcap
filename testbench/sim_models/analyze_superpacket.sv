@@ -32,6 +32,8 @@ logic [15:0] total_errors;       // total number of packets errors
 
 logic [7:0] madcap_reg_addr;    // address of MADCAP regmap location
 logic [7:0] madcap_reg_data;    // data in MADCAP regmap location
+logic [7:0] larpix_reg_addr;    // address of LArPix regmap location
+logic [7:0] larpix_reg_data;    // data in LArPix regmap location
 initial begin
     packet_number = '0;
     rcvd_packet_declare = 0; // data
@@ -99,7 +101,7 @@ always @(posedge new_superpacket) begin
                 $display("FIFO usage = %d",rcvd_fifo_usage);
                 $display("LArPix payload = %h",rcvd_larpix_payload);
                 $display("CRC word = %h",rcvd_crc_word);
-                if ( (rcvd_larpix_payload[1:0] == 2'b11)
+                if ( (rcvd_larpix_payload[1:0] == 2'b01)
                     && (rcvd_larpix_payload[26] == 1'b1) ) begin
                     $display("MADCAP Config Read:");
                     madcap_reg_addr = rcvd_larpix_payload[15:8];
@@ -107,6 +109,14 @@ always @(posedge new_superpacket) begin
                     $display("MADCAP Regmap Address = %d",madcap_reg_addr);
                     $display("MADCAP Regmap Data = 0x%h",madcap_reg_data);
                 end
+                if  (rcvd_larpix_payload[1:0] == 2'b11) begin
+                    $display("LArPix Config Read:");
+                    larpix_reg_addr = rcvd_larpix_payload[17:10];
+                    larpix_reg_data = rcvd_larpix_payload[25:18];
+                    $display("LArPix Regmap Address = %d",larpix_reg_addr);
+                    $display("LArPix Regmap Data = 0x%h",larpix_reg_data);
+                end
+
             end
         2:  begin // Idle
                 total_idle_packets++;
