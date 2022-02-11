@@ -174,10 +174,10 @@ digital_core_mc
     .piso                   (piso),
     .lvds_rx_bit            (dout_pacman),
     .external_trigger       (external_trigger),
-    .external_sync          (external_sync),
-    .start_sync             (start_sync),
+    .reset_n_lp             (reset_n_lp),
+    .sync_in                (symbol_start),
     .clk_fast               (clk_fast),
-    .chip_id                (chip_id),
+    .chip_id                (mc_chip_id),
     .reset_n                (reset_n)
     );
 
