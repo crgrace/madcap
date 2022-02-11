@@ -1,0 +1,8 @@
+// sync_start.mcp
+// Force re-synchronization of 8b10b decoder
+// Do not do general reset
+// 
+
+    #1000 reset_n = 1'b0;
+    #60 reset_n = 1'b1;
+

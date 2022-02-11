@@ -84,6 +84,7 @@ initial begin
 `include "../mcp/setup_sim.mcp"
 `include "../mcp/madcap_config_rw.mcp"
 `include "../mcp/larpix_config_rw.mcp"
+`include "../mcp/sync_start.mcp"
 //`include "../mcp/test_datapath.mcp"
 end // initial
 // END SIMULATION SCRIPTS

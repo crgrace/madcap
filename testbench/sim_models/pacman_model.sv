@@ -23,8 +23,8 @@ logic [9:0] data_in10b;     // input to test serializer
 logic next_packet;          // high when ready for new packet
 logic [2:0] which_byte;     // byte of packet being serialized
 logic k_in;                 // high to indicate 8b symbol represents k-code
-logic external_sync;        // high for external sync mode
-logic start_sync;           // high to mark first bit in symbol
+logic external_sync;        // high for external sync
+logic symbol_start;         // high to mark first bit in symbol
 logic enable_8b10b;         // high to enable 8b10b encoder (for PACMAN)
 logic bypass_8b10b_dec;     // high to bypass 8b10b decoders
 logic bypass_8b10b_enc;     // high to bypass 8b10b encoders
@@ -212,12 +212,13 @@ encode8b10b
 // behavioral serializer
 serializer_sdr
     #(.WIDTH(WIDTH))
-    serializer_inst (
+    serializer_sdr_inst (
     .dout           (dout_pacman),
     .dout_symbol    (symbol_start),
     .din            (data_in10b),
     .enable         (1'b1),
     .load           (load_serializer),
+    .external_sync  (external_sync),
     .clk            (clk_fast),
     .reset_n        (reset_n)
     );
