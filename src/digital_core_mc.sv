@@ -63,8 +63,7 @@ module digital_core_mc
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
     input logic external_trigger,       // high for external trigger 
     input logic reset_n_lp,             // reset to send to LArPix
-    input logic external_sync,          // high for external sync 
-    input logic start_sync,             // start sync (also starts on rst)  
+    input logic sync_in,                // sync_pulse (high on first bit)
     input logic clk_fast,               // externally supplied clk
     input logic [2:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
@@ -93,6 +92,8 @@ logic [15:0] tx_enable;             // per-channel TX enable
 logic lvds_loopback;                // high to enable loopback
 logic enable_prbs7;                 // send PRBS7 through TX LVDS
 logic reset_n_sync;                 // reset_n synced to clk_core
+logic reset_n_config_sync;          // reset_n to restore config to default
+logic start_sync;                   // force restart of 8b10b decoder
 logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
@@ -210,14 +211,15 @@ config_path
     .trigger_found          (trigger_found),
     .input_bit              (lvds_rx_bit),  
     .tx_enable              (tx_enable), 
-    .chip_id                (chip_id), 
-    .external_sync          (external_sync),
-    .start_sync             (start_sync),
+    .chip_id                (chip_id),
+    .start_sync             (start_sync), 
+    .sync_in                (sync_in),
     .load_config_defaults   (load_config_defaults),
     .ack_fifo_data          (ack_fifo_data),
     .bypass_8b10b_dec       (bypass_8b10b_dec),
     .clk_tx                 (clk_tx),
     .clk                    (clk_core),
+    .reset_n_config         (reset_n_config_sync),
     .reset_n                (reset_n_sync)
     );
 
@@ -239,6 +241,8 @@ driver_ctrl
 reset_sync_mc
     reset_sync_mc_inst (
     .reset_n_sync           (reset_n_sync),
+    .start_sync             (start_sync),
+    .reset_n_config_sync    (reset_n_config_sync),
     .clk                    (clk_core),
     .reset_n                (reset_n)
     );

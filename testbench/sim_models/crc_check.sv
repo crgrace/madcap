@@ -21,14 +21,11 @@ always_ff @(negedge reset_n)
     if (!reset_n) 
         $readmemh("../testbench/sim_models/crc_lut.txt",crc_lut);
 
-
-
-
 crc 
     crc_inst (
-    .crcIn          (8'h00),
-    .dataIn         (rcvd_packet),
-    .crcOut         (crc_new)
+    .crc_in         (8'h00),
+    .data_in        (rcvd_packet),
+    .crc_out        (crc_new)
     );
 
 // check CRC

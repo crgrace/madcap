@@ -14,6 +14,7 @@ module serializer_sdr
     input logic [WIDTH-1:0] din,    // input bits
     input logic enable,             // high to enable shift register
     input logic load,               // high to load shift register
+    input logic external_sync,      // high to enable sync pulses
     input logic clk,                // primary clock
     input logic reset_n);           // asynchronous reset (active low)
 
@@ -27,7 +28,7 @@ always_ff @(posedge clk or negedge reset_n) begin
     end
     else if (load) begin    
         shift_reg <= din;
-        dout_symbol <= 1'b1;
+        if (external_sync) dout_symbol <= 1'b1;
     end
     else if (enable) begin 
         shift_reg <= {1'b0,shift_reg[WIDTH-1:1]};

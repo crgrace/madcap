@@ -17,7 +17,8 @@ analyze_superpacket
     .which_fifo             (which_fifo),
     .k_out                  (k_out),
     .bypass_8b10b_enc       (bypass_8b10b_enc),
-    .simulation_done        (simulation_done)
+    .simulation_done        (simulation_done),
+    .reset_n                (reset_n)
     );
 // END PACMAN analysis
 

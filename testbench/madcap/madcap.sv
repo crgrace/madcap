@@ -21,8 +21,7 @@ module madcap
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
     input logic external_trigger,       // high for external trigger 
     input logic reset_n_lp,             // reset to send to LArPix
-    input logic external_sync,          // high for external sync 
-    input logic start_sync,             // start sync (also starts on rst)  
+    input logic sync_in,                // sync_pulse (high on first bit)
     input logic clk_fast,               // externally supplied clk
     input logic [2:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
@@ -105,8 +104,7 @@ digital_core_mc
     .lvds_rx_bit            (lvds_rx_bit),
     .external_trigger       (external_trigger),
     .reset_n_lp             (reset_n_lp),
-    .external_sync          (external_sync),
-    .start_sync             (start_sync),
+    .sync_in                (sync_in),
     .clk_fast               (clk_fast),
     .chip_id                (chip_id),
     .reset_n                (reset_n)

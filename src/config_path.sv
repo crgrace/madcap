@@ -12,8 +12,6 @@
 //      Register File
 //      Config FIFO (32 words deep, 64b wide)
 //      16 POSI TX UARTs
-//      Event Router
-//      32 deep 68-bit FIFO
 //    
 ///////////////////////////////////////////////////////////////////
 
@@ -32,13 +30,14 @@ module config_path
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
     input logic [2:0] chip_id,          // id for current MADCAP 
-    input logic external_sync,          // high for external sync    
-    input logic start_sync,             // start sync (also starts on rst) 
+    input logic start_sync,             // start sync (also starts on rst)
+    input logic sync_in,                // sync_pulse (high on first bit)
     input logic load_config_defaults,   // high for soft reset
     input logic ack_fifo_data,          // acknowledge from data FIFO
     input logic bypass_8b10b_dec,       // high to bypass 8b10b decoders
     input logic clk_tx,                 // 5 MHz tx clk
     input logic clk,                    // MADCAP primary clk
+    input logic reset_n_config,         // restore config map to default
     input logic reset_n);               // digital reset (active low)
 
 logic [5:0] fifo_counter;               // 6b fifo counter
@@ -107,7 +106,7 @@ comma_detect
     .dataword10b            (dataword10b),
     .dataword10b_ready      (dataword10b_ready),
     .start_sync             (start_sync),
-    .external_sync          (external_sync),
+    .sync_in                (sync_in),
     .clk                    (clk),
     .reset_n                (reset_n)
     );
@@ -154,7 +153,7 @@ config_regfile_mc
     .read                   (read_regmap),
     .load_config_defaults   (load_config_defaults),
     .clk                    (clk),
-    .reset_n                (reset_n)
+    .reset_n                (reset_n_config)
     );
 
 fifo_ff_mc

@@ -24,12 +24,11 @@
     tx_enable = '0;
     clk_fast = 1'b0;
     external_sync = 1'b0;
-    start_sync = 1'b0;
     bypass_8b10b_enc = 1'b0;
     #10 reset_n = 1'b0;
     reset_n_lp = 0;
-    #155 reset_n = 1'b1;
-    #50000 reset_n_lp = 1;
+    #1000 reset_n = 1'b1;
+    #50000 reset_n_lp = 1'b1;
     #10 reset_n = 1'b0;
-    #155 reset_n = 1'b1;
+    #1000 reset_n = 1'b1;
     $display("MADCAP ready for simulation\n");

@@ -11,7 +11,8 @@ module analyze_superpacket
     input logic which_fifo,     // 0 = config fifo, 1 = data fifo
     input logic [11:0] k_out,   // high if corresponding byte is K-code
     input logic bypass_8b10b_enc,    // high to bypass 8b10 encoder 
-    input logic simulation_done // high if simulation finished
+    input logic simulation_done, // high if simulation finished
+    input logic reset_n         // active low reset
     );
 
 // internal signals
@@ -30,11 +31,16 @@ logic [15:0] total_bypass_packets; // total number of bypass packets
 logic [15:0] total_packets;      // total number of packets
 logic [15:0] total_errors;       // total number of packets errors
 
+logic [7:0] expected_crc_word;      // Maxim 1-wire CRC8 word
+logic check_crc;            // high to check LArPix CRC
+logic crc_error;            // high when error in crc
+
 logic [7:0] madcap_reg_addr;    // address of MADCAP regmap location
 logic [7:0] madcap_reg_data;    // data in MADCAP regmap location
 logic [7:0] larpix_reg_addr;    // address of LArPix regmap location
 logic [7:0] larpix_reg_data;    // data in LArPix regmap location
 initial begin
+    check_crc = 1;
     packet_number = '0;
     rcvd_packet_declare = 0; // data
     rcvd_which_fifo     = 0;
@@ -49,6 +55,10 @@ initial begin
     total_bypass_packets  = '0;
     total_packets       = '0;
     total_errors        = '0;
+    madcap_reg_addr     = '0;
+    madcap_reg_data     = '0;
+    larpix_reg_addr     = '0;
+    larpix_reg_data     = '0;
 end
 
 // classify superpacket
@@ -154,6 +164,19 @@ always @(posedge new_superpacket) begin
     else $display("flush data stream. Not real superpacket.");
 end // always
 
+// CRC check
+always @(expected_crc_word) begin
+    if (check_crc == 1) begin
+        $display("CRC check:");
+        $display("Expected CRC: %h",expected_crc_word);
+        $display("Received CRC: %h",rcvd_crc_word);
+        end
+        
+        if (rcvd_crc_word != expected_crc_word) begin
+            $display("CRC ERROR");
+        end
+end // always
+
 always @(posedge simulation_done) begin
     total_packets = total_idle_packets + total_data_packets + 
                     total_test_packets + total_bypass_packets;
@@ -165,6 +188,16 @@ always @(posedge simulation_done) begin
     $display("Total Packets         = %d",total_packets);
     $display("Total Errors          = %d",total_errors);
 end // always
+
+crc_check 
+    crc_check_inst (
+    .crc_error      (crc_error),
+    .crc_new        (expected_crc_word),
+    .rcvd_packet    (rcvd_larpix_payload),
+    .rcvd_crc       (rcvd_crc_word),
+    .check_crc      (check_crc),
+    .reset_n        (reset_n)
+    );
              
 endmodule 
                  
