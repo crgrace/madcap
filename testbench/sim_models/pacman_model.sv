@@ -83,6 +83,39 @@ begin
 end
 endtask
 
+task madcapTransaction;
+input [1:0] op;
+input [2:0] chip_id;
+input [7:0] addr;
+input [7:0] data;
+logic debug;
+begin
+    debug = 0;
+    if (debug) $display("in task: sending word to MADCAP");
+    mc_packet_declaration = 0;
+    if (op == READ)
+        mc_packet_declaration = 2'b11;
+    else if (op == WRITE)
+        mc_packet_declaration = 2'b10;
+    else
+        $display("madcapTransaction: ERROR IN OP DECLARATION");
+    mc_chip_id = chip_id;
+    mc_regmap_address = addr;
+    mc_regmap_data = data;
+    make_madcap_packet = 1;
+    @upstream_packet;
+    make_madcap_packet = 0;
+    #1000 
+    if (op == WRITE) begin
+        $display("Send MADCAP packet (write to MADCAP)");
+    end
+    else if (op == READ) begin
+        $display("Send MADCAP packet (write from MADCAP)");
+    end
+    else $display("ERROR in MC OP");
+end
+endtask
+
 
 
 //// START CONFIG MODEL

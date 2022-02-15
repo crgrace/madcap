@@ -10,7 +10,7 @@ switch $SIM_LEVEL {
 # compile source
     do {compile_src.do}
 #        vsim serializer_tb
-    vsim -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 digital_core_mc_tb -vopt -voptargs="+acc -xprop,mode=resolve" -sv_seed random 
+    vsim -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 encode96b120b_tb -vopt -voptargs="+acc -xprop,mode=resolve" -sv_seed random 
   }
 
   post_par {

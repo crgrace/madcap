@@ -100,8 +100,9 @@ always_ff @(posedge clk or negedge reset_n) begin
         enable_8b10b <= 1'b0;
     end
     else begin
-      enable_8b10b <= 1'b0;
-      case (Next)
+        k_in <= '0;
+        enable_8b10b <= 1'b0;
+        case (Next)
         READY:       ; 
         BUILD_TEST: begin
                         if (test_mode == 3'b001) begin 

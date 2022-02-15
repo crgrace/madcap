@@ -87,8 +87,8 @@ assign #1 clk_larpix_delayed = clk_larpix[0];
 
 // RUN SIMULATION SCRIPTS
 initial begin
-`include "../mcp/setup_sim.mcp"
-`include "../mcp/madcap_config_rw.mcp"
+//`include "../mcp/setup_sim.mcp"
+//`include "../mcp/madcap_config_rw.mcp"
 //`include "../mcp/test_datapath.mcp"
 end // initial
 

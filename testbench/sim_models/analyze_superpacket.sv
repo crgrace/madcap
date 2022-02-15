@@ -39,6 +39,9 @@ logic [7:0] madcap_reg_addr;    // address of MADCAP regmap location
 logic [7:0] madcap_reg_data;    // data in MADCAP regmap location
 logic [7:0] larpix_reg_addr;    // address of LArPix regmap location
 logic [7:0] larpix_reg_data;    // data in LArPix regmap location
+
+logic verbose;
+
 initial begin
     check_crc = 1;
     packet_number = '0;
@@ -59,6 +62,7 @@ initial begin
     madcap_reg_data     = '0;
     larpix_reg_addr     = '0;
     larpix_reg_data     = '0;
+    verbose             = 0;
 end
 
 // classify superpacket
@@ -89,9 +93,11 @@ end // always
 // analyze superpacket
 always @(posedge new_superpacket) begin
     #10
-    $display("\n--------------------");
-//    $display("\nData Received: %h",superpacket);
-    $display("Superpacket Number: %0d",packet_number++);
+    if (verbose) begin
+        $display("\n--------------------");
+        $display("Superpacket Number: %0d",packet_number);
+    end
+    packet_number++;
     if (packet_number > 1) // allow channel to flush
     case(rcvd_packet_declare)
         0:  begin // BYPASS
@@ -130,7 +136,7 @@ always @(posedge new_superpacket) begin
             end
         2:  begin // Idle
                 total_idle_packets++;
-                $display("Idle superpacket");
+                if (verbose) $display("Idle superpacket");
                 if (superpacket[7:0] == `K_Q) begin
                     $display("Config FIFO Full symbol detected");
                 end
@@ -146,7 +152,6 @@ always @(posedge new_superpacket) begin
                 end
                 else if (superpacket[7:0] == `K_K) begin
                     $display("testmode 010: K_K");
-                    $display("in here! 7:0] = %b ",superpacket[7:0]);
                 end
                 else if (superpacket[7:0] == `D_21_5) begin
                     $display("testmode 011: D21.5");

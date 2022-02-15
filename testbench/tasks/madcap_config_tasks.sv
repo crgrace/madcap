@@ -57,7 +57,4 @@ function [47:0] create_comma_packet
     };
 endfunction : create_comma_packet
 
-
-     
-
 `endif // _madcap_config_tasks_

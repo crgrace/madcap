@@ -17,29 +17,4 @@
     $display("Read Back test GLOBAL_THRESH: 10d/0x0A expected");
     larpixTransaction(READ,1,64,8'h01,0);
 
-/*    
-    mc_chip_id = 3'b111;
-    lp_chip_id = 8'h01;
-    lp_regmap_address = 8'h0F;
-    lp_regmap_data = 8'hF3;
-    mc_packet_declaration = 2'b00; // LArPix packet
-    lp_packet_declaration = 2'b10; // LArPix config write
-    target_larpix = 0;
-    make_larpix_packet = 1;
-    @upstream_packet;
-    make_larpix_packet = 0;
-    #1000 
-    $display("Send MADCAP packet (write to LArPix 0)");
 
-    $display("Readback LARPIX CONFIG packet (read from LArPix 0");
-    #5000
-    mc_chip_id = 3'b111;
-    lp_chip_id = '0;
-    lp_regmap_address = 8'h0F;
-    lp_regmap_data = 8'h00;
-    mc_packet_declaration = 2'b00; // LArPix packet
-    lp_packet_declaration = 2'b10; // LArPix config read (FIX ME)
-    make_larpix_packet = 1;
-    @upstream_packet;
-    make_larpix_packet = 0;
-*/

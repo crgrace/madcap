@@ -6,6 +6,7 @@
 `timescale 1ns/1ps
 `include "../testbench/tasks/k_codes.sv"
 `include "../testbench/tasks/madcap_tasks_top.sv"
+//`include "../testbench/tasks/madcap_tests.sv"
 
 module larpix_madcap_tb();
 
@@ -82,11 +83,14 @@ assign #1 clk_larpix_delayed = clk_larpix[0];
 // RUN SIMULATION SCRIPTS
 initial begin
 `include "../mcp/setup_sim.mcp"
-`include "../mcp/madcap_config_rw.mcp"
-`include "../mcp/larpix_config_rw.mcp"
-`include "../mcp/sync_start.mcp"
+//`include "../mcp/madcap_config_rw.mcp"
+//`include "../mcp/larpix_config_rw.mcp"
+//`include "../mcp/sync_start.mcp"
 //`include "../mcp/test_datapath.mcp"
-end // initial
+`include "../mcp/madcap_testmodes.mcp"
+
+end // include
+
 // END SIMULATION SCRIPTS
 
 // LARPIX MODEL

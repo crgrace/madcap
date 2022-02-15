@@ -5,10 +5,12 @@
 // Description: SystemVerilog testbench for 96b120b encoder.
 //
 ///////////////////////////////////////////////////////////////////
+`timescale 1ns/1ps
+`include "../testbench/tasks/k_codes.sv"
 
 module encode96b120b_tb ();
 
-localparam NUMTRIALS = 10;
+localparam NUMTRIALS =10;
 
 logic [119:0] data_out;
 logic [95:0] data_in;
@@ -16,7 +18,7 @@ logic [11:0] k_in;           // high to denote k character
 logic [11:0] k_out;           // high to denote k character
 logic clk;            // primary clock
 logic reset_n;       // asynchronous reset (active low)
-
+logic enable;
 logic [95:0] decode_dataout;
 logic [11:0] decode_k_out;
 logic [11:0] decode_code_err;
@@ -26,6 +28,7 @@ logic running;
 
 initial begin
     reset_n = 1;
+    enable = 1;
     clk = 0;
     running = 0;
     data_in = '0;
@@ -38,7 +41,9 @@ initial begin
         #100 assert(std::randomize(data_in));
         $display("Original 96b data = %h", data_in);
     end
-    #100 $display("test k-code");
+    #100 $display("test D21.5");
+    data_in = {12{`D_21_5}};
+    #1000 $display("test k-code");
     data_in = {12{8'b10111100}};
     k_in = 12'hfff;
     #40 k_in = 0;
@@ -59,6 +64,7 @@ encode96b120b
     .data_in    (data_in),
     .k_in       (k_in),
     .clk        (clk),
+    .enable     (enable),
     .reset_n    (reset_n)
     );
 
