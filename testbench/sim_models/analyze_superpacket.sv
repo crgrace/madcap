@@ -62,7 +62,7 @@ initial begin
     madcap_reg_data     = '0;
     larpix_reg_addr     = '0;
     larpix_reg_data     = '0;
-    verbose             = 0;
+    verbose             = 1;
 end
 
 // classify superpacket
@@ -142,6 +142,12 @@ always @(posedge new_superpacket) begin
                 end
                 if (superpacket[7:0] == `K_A) begin
                     $display("Config FIFO half symbol detected");
+                end
+                 if (superpacket[7:0] == `K_T) begin
+                    $display("Data FIFO half symbol detected");
+                end           
+                if (superpacket[7:0] == `K_S) begin
+                    $display("Data FIFO half symbol detected");
                 end
             end
         3:  begin // TEST

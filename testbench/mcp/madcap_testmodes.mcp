@@ -28,10 +28,16 @@
 //    madcapTransaction(WRITE,3'b111,8'h05,8'h05);
 //    #25000
 
-    $display("Configure MADCAP to send RPAT");
-    madcapTransaction(WRITE,3'b111,8'h05,8'h06);
+//    $display("Configure MADCAP to send RPAT");
+//    madcapTransaction(WRITE,3'b111,8'h05,8'h06);
 //    #25000
   
-/*    $display("Configure MADCAP to send User-Defined Test");
+    $display("Configure MADCAP User-Defined Test work byte 0");
+    madcapTransaction(WRITE,3'b111,8'h06,8'hFF);
+    $display("Configure MADCAP User-Defined Test work byte 1");
+    madcapTransaction(WRITE,3'b111,8'h07,8'hA5);
+    $display("Configure MADCAP User-Defined Test work byte 12");
+    madcapTransaction(WRITE,3'b111,8'h11,8'hBB);
+    $display("Configure MADCAP to send User-Defined Test");
     madcapTransaction(WRITE,3'b111,8'h05,8'h07);
-*/  
+  

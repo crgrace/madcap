@@ -87,7 +87,8 @@ initial begin
 //`include "../mcp/larpix_config_rw.mcp"
 //`include "../mcp/sync_start.mcp"
 //`include "../mcp/test_datapath.mcp"
-`include "../mcp/madcap_testmodes.mcp"
+//`include "../mcp/madcap_testmodes.mcp"
+`include "../mcp/chipid_test.mcp"
 
 end // include
 

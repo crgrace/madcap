@@ -2,6 +2,9 @@
 // File Name: digital_core_mc_tb.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: SystemVerilog testbench for MADCAP digital core.
+//
+// Note: many signals defined in pacman_model.sv (instantiated in tb)
+//
 ///////////////////////////////////////////////////////////////////
 `timescale 1ns/1ps
 `include "../testbench/tasks/k_codes.sv"

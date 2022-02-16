@@ -100,7 +100,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         enable_8b10b <= 1'b0;
     end
     else begin
-        k_in <= '0;
+      //  k_in <= '0;
         enable_8b10b <= 1'b0;
         case (Next)
         READY:       ; 
@@ -113,8 +113,10 @@ always_ff @(posedge clk or negedge reset_n) begin
                             output_packet = {12{`K_K}}; // send K28.5
                             k_in <= 12'hFFF;
                         end
-                        else if (test_mode == 3'b011)
+                        else if (test_mode == 3'b011) begin
                             output_packet = {12{`D_21_5}}; // send D21.5
+                            k_in <= '0;
+                        end
                         else if (test_mode == 3'b100) begin
                             output_packet = {12{`K_A}}; // send K28.3
                             k_in <= 12'hFFF;
@@ -152,7 +154,6 @@ always_ff @(posedge clk or negedge reset_n) begin
                                     enable_fifo_panic[1]) begin
                                 output_packet[7:0] <= `K_T;
                             end
-
                             k_in <= 12'h001;
                     end
         BUILD_K: begin
