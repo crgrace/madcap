@@ -125,6 +125,7 @@ reset_ctrl
     reset_ctrl_inst (
     .lp_rst_out             (lp_rst_out),
     .mc_rst_out             (mc_rst_out),
+    .lp_trigger_out         (lp_trigger_out),
     .lp_trigger_found       (lp_trigger_found),
     .lp_soft_rst_found      (lp_soft_rst_found),
     .lp_hard_rst_found      (lp_hard_rst_found),

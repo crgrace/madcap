@@ -91,7 +91,9 @@ initial begin
 //`include "../mcp/sync_start.mcp"
 //`include "../mcp/test_datapath.mcp"
 //`include "../mcp/madcap_testmodes.mcp"
-`include "../mcp/chipid_test.mcp"
+//`include "../mcp/chipid_test.mcp"
+//`include "../mcp/test_config_panic.mcp"
+`include "../mcp/larpix_hit.mcp"
 
 end // include
 

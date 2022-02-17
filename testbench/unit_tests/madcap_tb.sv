@@ -67,7 +67,7 @@ logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
-
+logic v3_mode;          // 0 = v2 mode, 1 = v3 mode
 
 // primary clock
 initial begin
@@ -78,6 +78,9 @@ end // initial
 
 assign #1 clk_larpix_delayed = clk_larpix[0];
 
+initial begin
+    v3_mode = 0;
+end
 
 // INCLUDE PACMAN MODEL
 `include "../testbench/sim_models/pacman_model.sv"
@@ -89,9 +92,10 @@ assign #1 clk_larpix_delayed = clk_larpix[0];
 initial begin
 `include "../mcp/setup_sim.mcp"
 //`include "../mcp/madcap_config_rw.mcp"
+`include "../mcp/test_datapath.mcp"
 //`include "../mcp/test_datapath.mcp"
-//`include "../mcp/test_datapath.mcp"
-`include "../mcp/fifo_panic_datapath.mcp"
+//`include "../mcp/fifo_panic_datapath.mcp"
+//`include "../mcp/v3_test.mcp"
 
 end // initial
 // END SIMULATION SCRIPTS
@@ -109,17 +113,21 @@ uart_array_tx
     .tx_data        (tx_data),
     .ld_tx_data     (ld_tx_data),
     .tx_enable      (tx_enable),
-    .clk_tx         (clk_tx),
+    .clk_tx         (clk_tx),  // v2 mode
+//    .clk_tx         (clk_larpix_delay), // v3 mode
     .reset_n        (reset_n)
     );
 
 // this module sets the relationship between core, rx, and tx clock
 // simulates clock manager on LArPix
+// to emulate LArPix clk manager, set v3_mode to 0;
+
 clk_manager
     clk_manager_inst (
     .clk_core       (),
     .clk_rx         (),
     .clk_tx         (clk_tx),
+//    .v3_mode        (v3_mode),
     .clk_ctrl       (2'b00),
     .clk            (clk_larpix_delayed),
     .reset_n        (reset_n)

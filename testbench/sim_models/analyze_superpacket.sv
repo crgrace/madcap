@@ -107,15 +107,24 @@ always @(posedge new_superpacket) begin
             end
         1:  begin  // DATA
                 total_data_packets++;
-                $display("Data superpacket");
-                $display("Chip ID = %d",rcvd_chip_id);
-                $display("Channel ID = %d",rcvd_channel_id);  
-                if (which_fifo == 1)
-                    $display("data FIFO usage reported:");
+                $display("Data superpacket #%d",total_data_packets);
+                $display("MC Chip ID = %d",rcvd_chip_id);
+                $display("MC Channel ID = %d",rcvd_channel_id);  
+                if (rcvd_which_fifo == 1)
+                    $display("Data FIFO usage reported:");
                 else
-                    $display("config FIFO usage reported:");
+                    $display("Config FIFO usage reported:");
                 $display("FIFO usage = %d",rcvd_fifo_usage);
                 $display("LArPix payload = %h",rcvd_larpix_payload);
+                $display("LP: packet dec = %d",rcvd_larpix_payload[1:0]);
+                $display("LP: chip id = %d",rcvd_larpix_payload[9:2]);
+                $display("LP: chan id = %d",rcvd_larpix_payload[15:10]);
+                $display("LP: timestamp = %h",rcvd_larpix_payload[47:16]);
+                $display("LP: data word = %d",rcvd_larpix_payload[55:48]);
+                $display("LP: trig type = %d",rcvd_larpix_payload[57:56]);
+                $display("LP: local fifo = %b",rcvd_larpix_payload[59:58]);
+                $display("LP: shared fifo = %b",rcvd_larpix_payload[61:60]);
+                $display("LP: downstream = %b",rcvd_larpix_payload[62]);
                 $display("CRC word = %h",rcvd_crc_word);
                 if ( (rcvd_larpix_payload[1:0] == 2'b01)
                     && (rcvd_larpix_payload[26] == 1'b1) ) begin
@@ -136,7 +145,8 @@ always @(posedge new_superpacket) begin
             end
         2:  begin // Idle
                 total_idle_packets++;
-                if (verbose) $display("Idle superpacket");
+                if (verbose) 
+                    $display("Idle superpacket #%d",total_idle_packets);
                 if (superpacket[7:0] == `K_Q) begin
                     $display("Config FIFO Full symbol detected");
                 end

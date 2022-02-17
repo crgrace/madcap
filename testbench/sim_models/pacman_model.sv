@@ -72,7 +72,7 @@ begin
     make_larpix_packet = 1;
     @upstream_packet;
     make_larpix_packet = 0;
-    #1000 
+    #2000 
     if (op == WRITE) begin
         $display("Send MADCAP packet (write to LArPix %d)",target);
     end
