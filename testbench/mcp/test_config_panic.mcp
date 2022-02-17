@@ -1,0 +1,182 @@
+// test_config_panic.mcp
+// Confirm we can generate a config panic and it works as expected
+//
+    $display("TEST_CONFIG_PANIC.MCP running");
+    #5000
+
+// USAGE:  larpixTransaction(WRITE,lp_chip_id,lp_regmap_address,
+//        lp_regmap_data,target_larpix);
+//
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+    $display("write 10d to GLOBAL_THRESH (REG 64)");
+    larpixTransaction(WRITE,1,64,8'h0a,0);
+
+#100000
+    $display("Read Back test GLOBAL_THRESH: 10d/0x0A expected");
+    larpixTransaction(READ,1,64,8'h01,0);
+
+

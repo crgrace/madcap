@@ -1,0 +1,24 @@
+// chipid_test.mcp
+
+// Write a config word to with correct chip_ id and read it back
+// Then try with an incorrect chip_id and read it back
+//
+    $display("CHIPID_TEST.MCP running");
+    #5000
+
+// USAGE:  madcapTransaction(WRITE,mc_chip_id,mc_regmap_address,
+//        mc_regmap_data);
+//
+//
+    $display("Send MADCAP packet (broadcast chip id)");
+    madcapTransaction(WRITE,3'b111,8'h0F,8'hF3);
+#10000
+
+    $display("Send MADCAP packet (wrong chip id)");
+    madcapTransaction(WRITE,3'b000,8'h0F,8'hAA);
+
+    $display("Readback MADCAP config packet (correct chip id)");
+    madcapTransaction(READ,3'b001,8'h0F,8'h00);
+
+
+    
