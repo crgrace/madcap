@@ -26,7 +26,9 @@ module config_path
     output logic config_fifo_half,      // high if config fifo half full 
     output logic config_fifo_full,      // high if config fifo full  
     output logic write_fifo_data_req,   // req to put data into data FIFO
-    output logic trigger_found,         // high when K28.0 detected
+    output logic lp_trigger_out,        // generate LArPix trigger
+    output logic lp_rst_out,            // alternative LArPix reset
+    output logic mc_rst_out,            // alternative MADCAP reset
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
     input logic [2:0] chip_id,          // id for current MADCAP 
@@ -58,6 +60,10 @@ logic [7:0] regmap_read_data;           // data to read from regmap
 logic comma_found;                      // high when comma (K28.5) found  
 logic [15:0] ld_tx_data;                // high to transfer data to UART TX
 logic [15:0] tx_busy;                   // high when tx uart sending data
+logic lp_soft_rst_found;                // high if K28.4 (K_Q) found
+logic lp_hard_rst_found;                // high if K27.7 (K_S) found
+logic lp_timestamp_rst_found;           // high if K28.3 (K_A) found
+logic mc_rst_found;                     // high if K28.7 (K_T) found
 
 // internal 8b10 decoder signals
 logic disp_in;
@@ -102,11 +108,28 @@ comma_detect
     .symbol_start           (symbol_start),
     .symbol_locked          (symbol_locked),
     .comma_found            (comma_found),
-    .trigger_found          (trigger_found),
+    .lp_trigger_found       (lp_trigger_found),
+    .lp_soft_rst_found      (lp_soft_rst_found),
+    .lp_hard_rst_found      (lp_hard_rst_found),
+    .lp_timestamp_rst_found (lp_timestamp_rst_found),
+    .mc_rst_found           (mc_rst_found),
     .dataword10b            (dataword10b),
     .dataword10b_ready      (dataword10b_ready),
     .start_sync             (start_sync),
     .sync_in                (sync_in),
+    .clk                    (clk),
+    .reset_n                (reset_n)
+    );
+
+reset_ctrl
+    reset_ctrl_inst (
+    .lp_rst_out             (lp_rst_out),
+    .mc_rst_out             (mc_rst_out),
+    .lp_trigger_found       (lp_trigger_found),
+    .lp_soft_rst_found      (lp_soft_rst_found),
+    .lp_hard_rst_found      (lp_hard_rst_found),
+    .lp_timestamp_rst_found (lp_timestamp_rst_found),
+    .mc_rst_found           (mc_rst_found),
     .clk                    (clk),
     .reset_n                (reset_n)
     );

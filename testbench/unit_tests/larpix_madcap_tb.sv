@@ -46,6 +46,8 @@ logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
+logic [2:0] physical_chip_id;
+
 //larpix specific
 logic external_trigger_larpix;
 real charge_in_r[63:0];
@@ -53,6 +55,7 @@ real monitor_out_r;
 
 initial begin
 
+    physical_chip_id = 3'b001;
     external_trigger_larpix = 0;
     for (int i = 0; i < 64; i++) begin
         charge_in_r[i] = 0.0;
@@ -140,7 +143,7 @@ madcap
     .reset_n_lp             (reset_n_lp),
     .sync_in                (symbol_start),
     .clk_fast               (clk_fast),
-    .chip_id                (mc_chip_id),
+    .chip_id                (physical_chip_id),
     .reset_n                (reset_n)
     );
 // END MADCAP

@@ -76,6 +76,7 @@ logic load_config_defaults;         // MADCAP soft reset (set to low after)
 logic bypass_8b10b_enc;             // high to bypass 8b10b encoder
 logic bypass_8b10b_dec;             // high to bypass 8b10b decoder
 logic embedded_trigger_en;          // high to issue trigger on K28.0
+logic embedded_reset_en;            // high to issue LArPix rst on k-code 
 logic [2:0] test_mode;              // datapath test modes
 logic write_fifo_data_req;          // req to put data into FIFO
 logic trigger_found;                // high when K28.0 detected
@@ -98,6 +99,9 @@ logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
 logic [63:0] larpix_packet;         // config packet for LArPix
+logic lp_trigger_out;               // generate LArPix trigger
+logic lp_rst_out;                   // alternative LArPix reset
+logic mc_rst_out;                   // alternative MADCAP reset
 
 `include "madcap_constants.sv"
 // need to use generates for large config words
@@ -123,6 +127,7 @@ always_comb begin
     digital_monitor_enable  = config_bits[DMONITOR][0];
     digital_monitor_select  = config_bits[DMONITOR][4:1];
     load_config_defaults    = config_bits[CONFIG][0];
+    embedded_reset_en       = config_bits[CONFIG][1];
     test_mode               = config_bits[TEST_MODE][2:0];
     which_fifo              = config_bits[TEST_MODE][3];
     enable_fifo_panic       = config_bits[TEST_MODE][5:4];
@@ -208,7 +213,9 @@ config_path
     .config_fifo_half       (config_fifo_half),
     .config_fifo_full       (config_fifo_full),
     .write_fifo_data_req    (write_fifo_data_req),
-    .trigger_found          (trigger_found),
+    .lp_trigger_out         (lp_trigger_out),
+    .lp_rst_out             (lp_rst_out),
+    .mc_rst_out             (mc_rst_out),
     .input_bit              (lvds_rx_bit),  
     .tx_enable              (tx_enable), 
     .chip_id                (chip_id),
@@ -233,6 +240,8 @@ driver_ctrl
     .pd_clk_drivers         (pd_clk_drivers),
     .trigger_found          (trigger_found),
     .embedded_trigger_en    (embedded_trigger_en),
+    .embedded_reset_en      (embedded_reset_en),
+    .lp_embedded_rst        (lp_embedded_rst),
     .external_trigger       (external_trigger),
     .reset_n_lp             (reset_n_lp),
     .clk                    (clk_rx)
@@ -244,7 +253,7 @@ reset_sync_mc
     .start_sync             (start_sync),
     .reset_n_config_sync    (reset_n_config_sync),
     .clk                    (clk_core),
-    .reset_n                (reset_n)
+    .reset_n                (reset_n & mc_rst_out)
     );
 
 endmodule

@@ -16,8 +16,10 @@ module driver_ctrl
     input logic [3:0] pd_clk_drivers,   // pd clk drivers to LArPix tile
     input logic trigger_found,          // high when K28.0 detected
     input logic embedded_trigger_en,    // high to issue trigger on K28.0
-    input logic reset_n_lp,             // reset to send to LArPix
+    input logic embedded_reset_en,      // high to issue reset on k-code 
+    input logic lp_embedded_rst,        // interal reset to send to LArPix
     input logic external_trigger,       // trigger from off_chip
+    input logic reset_n_lp,             // external reset to send to LArPix
     input logic clk);                    // primary clk
 
 // internal signals
@@ -36,13 +38,12 @@ always_comb begin
         trigger_larpix[i] = !pd_trigger_drivers[i]
             & external_trigger_resampled;
         reset_n_larpix[i] = pd_reset_n_drivers | reset_n_larpix_resampled;
-        clk_larpix[i] = !pd_clk_drivers & clk;
-        
+        clk_larpix[i] = !pd_clk_drivers & clk;        
         if (embedded_trigger_en) begin
             trigger_larpix[i] = !pd_trigger_drivers[i] & trigger_found; 
         end
-        else begin
-            trigger_larpix[i] = 1'b0;
+        if (embedded_reset_en) begin
+            reset_n_larpix[i] = pd_trigger_drivers[i] | lp_embedded_rst; 
         end
     end // for loop
 

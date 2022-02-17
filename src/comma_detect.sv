@@ -5,9 +5,12 @@
 // Description: Correlate data stream to find idle codes (K28.5) and 
 //              locate 8b10b symbol boundary 
 //              
-//              Also scans for K28.7 comma codes (used to mark first byte
-//              in a packet) and K28.0 comma codes (used to request 
-//              trigger for LArPix)
+//              Also scans for: 
+//              K28.7 comma codes (used to mark first byte in a packet)
+//              K28.0 comma codes (used to request a trigger for LArPix)
+//              K28.4 comma codes (used to request LArPix soft reset
+//              K27.7 comma codes (used to request LArPix hard reset
+//              K28.7 comma codes (used to request MADCAP hard reset
 //     
 ///////////////////////////////////////////////////////////////////
 `include "../testbench/tasks/k_codes.sv"
@@ -15,7 +18,11 @@ module comma_detect
     (output logic symbol_start,         // high for symbol edge bit
     output logic symbol_locked,         // deserializer synchronized
     output logic comma_found,           // high when comma (K28.7) found
-    output logic trigger_found,         // high when K28.0 found
+    output logic lp_trigger_found,         // high when K28.0 found
+    output logic lp_soft_rst_found,     // high if K28.4 (K_Q) found
+    output logic lp_hard_rst_found,     // high if K27.7 (K_S) found
+    output logic lp_timestamp_rst_found, // high if K28.3 (K_A) found
+    output logic mc_rst_found,          // high if K28.7 (K_T) found
     input logic [9:0] dataword10b,      // 10b symbol under test
     input logic dataword10b_ready,      // data ready to sample
     input logic start_sync,             // start sync (also starts on rst)
@@ -25,8 +32,8 @@ module comma_detect
 
 logic [3:0] bit_cnt;            // bit counter
 logic [3:0] symbol_start_loc;   // where is the symbol edge
-logic idle_found;               // high if K28.5 found
-logic [4:0] sync_cnt;         // clocks since sync_in received  
+logic idle_found;               // high if K28.5 (K_K) found
+logic [4:0] sync_cnt;           // clocks since sync_in received  
 logic en_sync_cnt;              // high if counting  
 
 always_ff @(posedge clk or negedge reset_n) begin
@@ -96,16 +103,24 @@ always_ff @(posedge clk or negedge reset_n) begin
         State <= Next;
 end // always_ff
 
+// identify k-codes
 always_comb begin
     idle_found = ( (dataword10b == `K_K_DISP_N) || 
                    (dataword10b == `K_K_DISP_P));
     comma_found = ( (dataword10b == `K_F_DISP_N) || 
                     (dataword10b == `K_F_DISP_P));
-    trigger_found = ( (dataword10b == `K_R_DISP_N) || 
+    lp_trigger_found = ( (dataword10b == `K_R_DISP_N) || 
                     (dataword10b == `K_R_DISP_P));
- 
+    lp_timestamp_rst_found = ( (dataword10b == `K_A_DISP_N) || 
+                    (dataword10b == `K_A_DISP_P));
+    lp_soft_rst_found = ( (dataword10b == `K_Q_DISP_N) || 
+                    (dataword10b == `K_Q_DISP_P));
+    lp_hard_rst_found = ( (dataword10b == `K_S_DISP_N) || 
+                    (dataword10b == `K_S_DISP_P));
+    mc_rst_found = ( (dataword10b == `K_T_DISP_N) || 
+                    (dataword10b == `K_T_DISP_P));
 end
-
+         
 always_comb begin
     Next = RESET;
     case (State)

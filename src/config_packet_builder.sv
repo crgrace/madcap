@@ -98,6 +98,7 @@ always_comb begin
                             && ((rcvd_packet[4:2] == chip_id)
                             || (rcvd_packet[4:2] == 3'b111)))
                                             Next = READ_REGMAP;
+                else if (done)              Next = WAIT_FOR_COMMA;
                 else                        Next = WAIT_FOR_BYTE;
         WRITE_REGMAP:                       Next = WAIT_FOR_COMMA;
         READ_REGMAP:                        Next = LATCH_DATA;
