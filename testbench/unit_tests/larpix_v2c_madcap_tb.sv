@@ -96,6 +96,7 @@ initial begin
 //`include "../mcp/chipid_test.mcp"
 //`include "../mcp/test_config_panic.mcp"
 //`include "../mcp/larpix_hit.mcp"
+//`include "../mcp/lp_mc_v3.mcp"
 
 end // include
 

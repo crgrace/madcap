@@ -77,7 +77,8 @@ always_ff @ (negedge clk_rx or negedge reset_n) begin
         if (!rx_busy && !rx_d2) begin
             rx_busy <= 1'b1;
             rx_sample_cnt <= 1'b1;
-            rx_cnt <= 8'b0;
+            rx_cnt <= (v3_mode) ? 8'h01 : 8'b0;
+            //rx_cnt <= 8'b0;
         end
         // Start of frame detected, Proceed with rest of data
         if (rx_busy) begin

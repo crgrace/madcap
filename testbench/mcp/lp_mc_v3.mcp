@@ -8,11 +8,17 @@
 //        mc_regmap_data);
 //
 //
-    $display("Send MADCAP packet (enable MADCAP v3 mode)");
-    madcapTransaction(WRITE,3'b111,18,8'h03);
 
     $display("Put LArPix_v2c into v3 mode");
     larpixTransaction(WRITE,1,126,8'h1F,0);
+#20000
+    $display("Send MADCAP packet (enable MADCAP v3 mode)");
+    madcapTransaction(WRITE,3'b111,18,8'h03);
+
+
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
 
     $display("write 10d to GLOBAL_THRESH (REG 64)");
     larpixTransaction(WRITE,1,64,8'h0a,0);

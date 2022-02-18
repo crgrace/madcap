@@ -105,7 +105,7 @@ begin
     make_madcap_packet = 1;
     @upstream_packet;
     make_madcap_packet = 0;
-    #1000 
+    #2000 
     if (op == WRITE) begin
         $display("Send MADCAP packet (write to MADCAP)");
     end
