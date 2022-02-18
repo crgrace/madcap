@@ -17,6 +17,7 @@ module madcap
     output logic [3:0] clk_larpix,      // clocks to LArPix tiles
     output logic [3:0] reset_n_larpix,  // reset_n to LArPix tiles
     output logic [3:0] trigger_larpix,  // triggers to LArPix tiles
+    output logic [1:0] kill_your_neighbor, // disable neighboring chips
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
     input logic external_trigger,       // high for external trigger 
@@ -99,6 +100,7 @@ digital_core_mc
     .pd_trigger_drivers     (pd_trigger_drivers),
     .pd_rx                  (pd_rx),
     .pd_tx                  (pd_tx),
+    .kill_your_neighbor     (kill_your_neighbor),
     .spare                  (spare),
     .piso                   (piso),
     .lvds_rx_bit            (lvds_rx_bit),

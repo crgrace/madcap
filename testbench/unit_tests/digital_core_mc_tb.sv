@@ -48,6 +48,7 @@ logic [3:0] pd_clk_drivers;  // pd clk drivers to LArPix tile
 logic [3:0] pd_trigger_drivers;// pd trigger to LArPix tile
 logic [15:0] pd_rx;          // pd rx from LArPix to MADCAP
 logic [15:0] pd_tx;          // pd rx from MADCAP to LArPix
+logic [1:0] kill_your_neighbor; // disable neighboring chips
 logic [7:0] spare;           // spare control bits
 
 // LArPix to MADCAP datapath
@@ -173,6 +174,7 @@ digital_core_mc
     .pd_trigger_drivers     (pd_trigger_drivers),
     .pd_rx                  (pd_rx),
     .pd_tx                  (pd_tx),
+    .kill_your_neighbor     (kill_your_neighbor),
     .spare                  (spare),
     .piso                   (piso),
     .lvds_rx_bit            (dout_pacman),

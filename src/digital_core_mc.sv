@@ -57,6 +57,7 @@ module digital_core_mc
     output logic [3:0] pd_trigger_drivers,// pd trigger to LArPix tile
     output logic [15:0] pd_rx,          // pd rx from LArPix to MADCAP
     output logic [15:0] pd_tx,          // pd rx from MADCAP to LArPix
+    output logic [1:0] kill_your_neighbor, // disable neighboring chips
     output logic [7:0] spare,           // spare control bits
 // INPUTS
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
@@ -128,6 +129,7 @@ always_comb begin
     digital_monitor_select  = config_bits[DMONITOR][4:1];
     load_config_defaults    = config_bits[CONFIG][0];
     embedded_reset_en       = config_bits[CONFIG][1];
+    kill_your_neighbor[1:0] = config_bits[CONFIG][3:2];
     test_mode               = config_bits[TEST_MODE][2:0];
     which_fifo              = config_bits[TEST_MODE][3];
     enable_fifo_panic       = config_bits[TEST_MODE][5:4];
