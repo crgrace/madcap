@@ -24,7 +24,7 @@ module madcap
     input logic reset_n_lp,             // reset to send to LArPix
     input logic sync_in,                // sync_pulse (high on first bit)
     input logic clk_fast,               // externally supplied clk
-    input logic [2:0] chip_id,          // id for MADCAP
+    input logic [1:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
 
 // fast digital internal signals

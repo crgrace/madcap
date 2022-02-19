@@ -11,14 +11,14 @@
 //
 //
     $display("Send MADCAP packet (broadcast chip id)");
-    madcapTransaction(WRITE,3'b111,8'h0F,8'hF3);
+    madcapTransaction(WRITE,2'b11,8'h0F,8'hF3);
 #10000
 
     $display("Send MADCAP packet (wrong chip id)");
-    madcapTransaction(WRITE,3'b000,8'h0F,8'hAA);
+    madcapTransaction(WRITE,2'b00,8'h0F,8'hAA);
 
     $display("Readback MADCAP config packet (correct chip id)");
-    madcapTransaction(READ,3'b001,8'h0F,8'h00);
+    madcapTransaction(READ,2'b01,8'h0F,8'h00);
 
 
     

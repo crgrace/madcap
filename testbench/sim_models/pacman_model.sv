@@ -33,7 +33,7 @@ logic reset_n_lp;           // reset to send to LArPix
 
 // packet building
 logic [1:0] mc_packet_declaration;
-logic [2:0] mc_chip_id;
+logic [1:0] mc_chip_id;
 logic [7:0] mc_regmap_address;
 logic [7:0] mc_regmap_data;
 logic [1:0] lp_packet_declaration;
@@ -85,7 +85,7 @@ endtask
 
 task madcapTransaction;
 input [1:0] op;
-input [2:0] chip_id;
+input [1:0] chip_id;
 input [7:0] addr;
 input [7:0] data;
 logic debug;

@@ -31,7 +31,7 @@ module config_path
     output logic mc_rst_out,            // alternative MADCAP reset
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
-    input logic [2:0] chip_id,          // id for current MADCAP 
+    input logic [1:0] chip_id,          // id for current MADCAP 
     input logic start_sync,             // start sync (also starts on rst)
     input logic sync_in,                // sync_pulse (high on first bit)
     input logic load_config_defaults,   // high for soft reset

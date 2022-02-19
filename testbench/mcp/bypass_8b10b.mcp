@@ -9,8 +9,8 @@
 //
 //
     $display("Send MADCAP packet");
-    madcapTransaction(WRITE,2'b11,8'h0F,8'hF3);
+    madcapTransaction(WRITE,3'b111,8'h0F,8'hF3);
 
     $display("Readback MADCAP config packet");
-    madcapTransaction(READ,2'b11,8'h0F,8'h00);
+    madcapTransaction(READ,3'b111,8'h0F,8'h00);
     

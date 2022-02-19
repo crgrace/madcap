@@ -55,7 +55,7 @@ module datapath
     input logic [1:0] enable_fifo_panic,// high to insert fifo k-codes
     input logic [2:0] test_mode,        // specify test modes
     input logic [95:0] test_packet,     // test data to send to 8b10b 
-    input logic [2:0] chip_id,          // id for MADCAP
+    input logic [1:0] chip_id,          // id for MADCAP
     input logic v3_mode,                // high for v3 mode (no 2X RX clk)  
     input logic bypass_8b10b,           // high to bypass 8b10 encoder
     input logic serializer_enable,      // high to enable 

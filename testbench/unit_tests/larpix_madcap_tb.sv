@@ -47,7 +47,7 @@ logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
-logic [2:0] physical_chip_id;
+logic [1:0] physical_chip_id;
 
 //larpix specific
 logic external_trigger_larpix;
@@ -56,7 +56,7 @@ real monitor_out_r;
 
 initial begin
 
-    physical_chip_id = 3'b001;
+    physical_chip_id = 2'b01;
     external_trigger_larpix = 0;
     for (int i = 0; i < 64; i++) begin
         charge_in_r[i] = 0.0;

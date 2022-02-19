@@ -19,7 +19,7 @@ module config_packet_builder
     output logic write_fifo_data_req,   // high to req data into data FIFO
     input logic [7:0] dataword8b,       // current 8b symbol
     input logic [7:0] regmap_read_data, // data to read from regmap
-    input logic [2:0] chip_id,          // id for current MADCAP 
+    input logic [1:0] chip_id,          // id for current MADCAP 
     input logic ack_fifo_data,          // acknowledge from data FIFO
     input logic dataword8b_ready,       // data ready to sample
     input logic comma_found,            // high when comma (K28.5) found    
@@ -90,13 +90,13 @@ always_comb begin
                                             Next = BUILD_LARPIX;
                 else if (done 
                             && (rcvd_packet[1:0] == 2'b10)
-                            && ((rcvd_packet[4:2] == chip_id)
-                            || (rcvd_packet[4:2] == 3'b111)))     
+                            && ((rcvd_packet[3:2] == chip_id)
+                            || (rcvd_packet[3:2] == 2'b11)))     
                                             Next = WRITE_REGMAP;
                 else if (done 
                             && (rcvd_packet[1:0] == 2'b11)
-                            && ((rcvd_packet[4:2] == chip_id)
-                            || (rcvd_packet[4:2] == 3'b111)))
+                            && ((rcvd_packet[3:2] == chip_id)
+                            || (rcvd_packet[3:2] == 2'b11)))
                                             Next = READ_REGMAP;
                 else if (done)              Next = WAIT_FOR_COMMA;
                 else                        Next = WAIT_FOR_BYTE;

@@ -9,7 +9,7 @@
 //
 
     $display("Send MADCAP packet to add data FIFO info in superpacket");
-    madcapTransaction(WRITE,3'b111,5,8'h38);
+    madcapTransaction(WRITE,2'b11,5,8'h38);
 
 // USAGE:  larpixTransaction(WRITE,lp_chip_id,lp_regmap_address,
 //        lp_regmap_data,target_larpix);

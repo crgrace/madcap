@@ -9,35 +9,35 @@
 //
 //
 //    $display("Configure MADCAP to send K_F");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h01);
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h01);
 //    #25000
 
 //    $display("Configure MADCAP to send K_K");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h02);  
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h02);  
 //    #25000
 
 //    $display("Configure MADCAP to send D21.5");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h03);   
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h03);   
 //    #25000
 
 //    $display("Configure MADCAP to send K_A");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h04);
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h04);
 //    #25000
 
 //   $display("Configure MADCAP to send K_R");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h05);
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h05);
 //    #25000
 
 //    $display("Configure MADCAP to send RPAT");
-//    madcapTransaction(WRITE,3'b111,8'h05,8'h06);
+//    madcapTransaction(WRITE,2'b11,8'h05,8'h06);
 //    #25000
   
     $display("Configure MADCAP User-Defined Test work byte 0");
-    madcapTransaction(WRITE,3'b111,8'h06,8'hFF);
+    madcapTransaction(WRITE,2'b11,8'h06,8'hFF);
     $display("Configure MADCAP User-Defined Test work byte 1");
-    madcapTransaction(WRITE,3'b111,8'h07,8'hA5);
+    madcapTransaction(WRITE,2'b11,8'h07,8'hA5);
     $display("Configure MADCAP User-Defined Test work byte 12");
-    madcapTransaction(WRITE,3'b111,8'h11,8'hBB);
+    madcapTransaction(WRITE,2'b11,8'h11,8'hBB);
     $display("Configure MADCAP to send User-Defined Test");
-    madcapTransaction(WRITE,3'b111,8'h05,8'h07);
+    madcapTransaction(WRITE,2'b11,8'h05,8'h07);
   

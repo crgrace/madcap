@@ -40,7 +40,7 @@ module data_packet_builder
     output logic enable_8b10b,          // enable 8b10b encoder 
     input logic [WIDTH-1:0] rx_data,    // data from data fifo (w/o parity)
     input logic [3:0] channel_id,       // channel id from rx fifo
-    input logic [2:0] chip_id,          // unique id for each MADCAP chip
+    input logic [1:0] chip_id,          // unique id for each MADCAP chip
     input logic packet_rcvd,            // high to acknowledge packet rcvd 
     input logic [4:0] rx_fifo_cnt,      // FIFO usage when FIFO read
     input logic [4:0] config_fifo_cnt,  // FIFO usage when FIFO read
@@ -138,8 +138,8 @@ always_ff @(posedge clk or negedge reset_n) begin
                             output_packet[95:88]    <= crc_word;
                             output_packet[87:24]    <= rx_data;
                             output_packet[23:20]    <= channel_id;
-                            output_packet[19:17]    <= 3'b000;
-                            output_packet[16:14]    <= chip_id;
+                            output_packet[19:17]    <= 4'b0000;
+                            output_packet[15:14]    <= chip_id;
                             if (which_fifo)
                                 output_packet[13:9]     <= rx_fifo_cnt;
                             else
