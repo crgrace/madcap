@@ -68,7 +68,28 @@ end
 // classify superpacket
 always @(posedge new_superpacket) begin
     #10
-    if (bypass_8b10b_enc) rcvd_packet_declare = 0; 
+    if (bypass_8b10b_enc) begin
+        if ( (superpacket[7:0] == `K_F) ||
+               (superpacket[7:0] == `K_S) ||
+               (superpacket[7:0] == `K_T) )
+        begin
+            rcvd_packet_declare = 1; // data
+            rcvd_which_fifo     = superpacket[8];
+            rcvd_fifo_usage     = superpacket[13:9];
+            rcvd_chip_id        = superpacket[16:14];
+            rcvd_channel_id     = superpacket[23:20];
+            rcvd_larpix_payload = superpacket[87:24];
+            rcvd_crc_word       = superpacket[95:88];
+        end 
+        else if (superpacket[7:0] == {`K_K})  
+            rcvd_packet_declare = 2; // idle   
+        else if (superpacket[7:0] == {`K_A})
+            rcvd_packet_declare = 2; // idle
+        else if (superpacket[7:0] == {`K_Q})
+            rcvd_packet_declare = 2; // idle 
+        else rcvd_packet_declare = 3; // test
+    end
+
     else if (( (superpacket[7:0] == `K_F) ||
                (superpacket[7:0] == `K_S) ||
                (superpacket[7:0] == `K_T) )

@@ -24,6 +24,7 @@ module madcap
     input logic reset_n_lp,             // reset to send to LArPix
     input logic sync_in,                // sync_pulse (high on first bit)
     input logic clk_fast,               // externally supplied clk
+    input logic bypass_8b10b_extern,    // bypass 8b10b decoder (input)
     input logic [1:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
 
@@ -107,6 +108,7 @@ digital_core_mc
     .external_trigger       (external_trigger),
     .reset_n_lp             (reset_n_lp),
     .sync_in                (sync_in),
+    .bypass_8b10b_extern    (bypass_8b10b_extern),
     .clk_fast               (clk_fast),
     .chip_id                (chip_id),
     .reset_n                (reset_n)

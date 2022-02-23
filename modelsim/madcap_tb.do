@@ -9,7 +9,7 @@ switch $SIM_LEVEL {
   rtl      {
 # compile source
     do {compile_src.do}
-#    do {compile_larpixv2c.do}
+    do {compile_larpixv2c.do}
 #        vsim serializer_tb
     vsim -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 madcap_tb -vopt -voptargs="+acc -xprop,mode=resolve" -sv_seed random 
   }

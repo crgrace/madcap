@@ -66,6 +66,7 @@ module digital_core_mc
     input logic reset_n_lp,             // reset to send to LArPix
     input logic sync_in,                // sync_pulse (high on first bit)
     input logic clk_fast,               // externally supplied clk
+    input logic bypass_8b10b_extern,    // bypass 8b10b decoder (input)
     input logic [1:0] chip_id,          // id for MADCAP
     input logic reset_n);               // digital reset  (active low)
 
@@ -103,7 +104,7 @@ logic [63:0] larpix_packet;         // config packet for LArPix
 logic lp_trigger_out;               // generate LArPix trigger
 logic lp_rst_out;                   // alternative LArPix reset
 logic mc_rst_out;                   // alternative MADCAP reset
-
+logic bypass_8b10b_muxed;           // can bypass via pin or config bit
 `include "madcap_constants.sv"
 // need to use generates for large config words
 // Cadence can't handle two dimensional ports
@@ -163,6 +164,10 @@ always_comb begin
     spare[7:0]              = config_bits[SPARE][7:0];
 end // always_comb
 
+
+always_comb begin
+    bypass_8b10b_muxed = bypass_8b10b_enc | bypass_8b10b_extern;
+end
 // instantiate sub-blocks
 
 datapath
@@ -225,7 +230,7 @@ config_path
     .sync_in                (sync_in),
     .load_config_defaults   (load_config_defaults),
     .ack_fifo_data          (ack_fifo_data),
-    .bypass_8b10b_dec       (bypass_8b10b_dec),
+    .bypass_8b10b_dec       (bypass_8b10b_muxed),
     .clk_tx                 (clk_tx),
     .clk                    (clk_core),
     .reset_n_config         (reset_n_config_sync),

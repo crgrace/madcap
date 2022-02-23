@@ -72,6 +72,7 @@ logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
+logic bypass_8b10b_extern; // high for bypass
 logic [1:0] chip_id;
 
 // primary clock

@@ -1,0 +1,10 @@
+// bypass_8b10b_enc.mcp
+// Configure chip to bypass 8b10b encoders
+// 
+
+    bypass_8b10b_enc = 1'b1;
+    #5000
+    $display("Send MADCAP packet");
+    madcapTransaction(WRITE,2'b11,8'h12,8'h05);
+    $display("MADCAP 8b10b encoders bypassed\n");
+

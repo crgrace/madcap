@@ -1,13 +1,16 @@
 // setup_sim.mcp
 // Configure simulation and testbench components. Reset chip.
 // 
+    $display("RUNNING SETUP_SIM.MCP");
 
     ld_tx_data = '0;
     external_trigger = 0;
     reset_n = 1;
     reset_n_lp = 1;
     simulation_done = 0;
+    bypass_8b10b_extern = 0;
     bypass_8b10b_dec = 0;
+    bypass_8b10b_enc = 0;
     which_fifo = 0;
     mc_packet_declaration = '0;
     mc_chip_id = '0;
@@ -24,11 +27,10 @@
     tx_enable = '0;
     clk_fast = 1'b0;
     external_sync = 1'b0;
-    bypass_8b10b_enc = 1'b0;
     #10 reset_n = 1'b0;
     reset_n_lp = 0;
     #1000 reset_n = 1'b1;
     #50000 reset_n_lp = 1'b1;
     #10 reset_n = 1'b0;
     #1000 reset_n = 1'b1;
-    $display("MADCAP ready for simulation\n");
+    #5000 $display("MADCAP ready for simulation\n");

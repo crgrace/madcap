@@ -48,6 +48,7 @@ logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
 logic [1:0] physical_chip_id;
+logic bypass_8b10b_extern; // high for bypass
 
 //larpix specific
 logic external_trigger_larpix;
@@ -147,6 +148,7 @@ madcap
     .reset_n_lp             (reset_n_lp),
     .sync_in                (symbol_start),
     .clk_fast               (clk_fast),
+    .bypass_8b10b_extern    (bypass_8b10b_extern),
     .chip_id                (physical_chip_id),
     .reset_n                (reset_n)
     );

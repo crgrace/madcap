@@ -1,0 +1,6 @@
+// bypass_8b10b_dec_extern.mcp
+// Configure chip to bypass 8b10b decoders
+// 
+
+    bypass_8b10b_extern = 1'b1;
+

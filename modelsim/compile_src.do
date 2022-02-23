@@ -75,8 +75,8 @@ vlog -incr "../testbench/sim_models/decode8b10b.v"
 vlog -incr "../testbench/sim_models/decode24b30b.v" 
 vlog -incr "../testbench/sim_models/decode96b120b.v" 
 vlog -incr "../testbench/sim_models/crc_check.sv" 
-vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/sim_models/analyze_superpacket.sv" 
-
+vlog -incr "../testbench/sim_models/clk_manager_lp.sv" 
+vlog +incdir+../testbench/tasks/ -incr -sv "../testbench/sim_models/analyze_superpacket.sv"
 #
 # tests
 #

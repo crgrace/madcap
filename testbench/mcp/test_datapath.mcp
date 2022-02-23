@@ -1,5 +1,9 @@
 // test_datapath
 // run simulated LArPix packets through MADCAP and analyze
+
+    for (int i = 0; i < NUMCHANNELS; i++) begin
+        tx_data[i] = '0;
+    end
     tx_enable = 16'hFFFF;
     for (int i = 0; i < NUMCHANNELS; i++) begin
         larpix_payload[i] = {$urandom(),$urandom()};

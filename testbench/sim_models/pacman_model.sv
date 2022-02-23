@@ -20,6 +20,7 @@ logic dout_pacman;          // serializer output (single bit)
 logic [7:0] data_in8b;      // input to send to 8b10b encoder
 logic [7:0] current_byte;   // byte selected from upstream pacet
 logic [9:0] data_in10b;     // input to test serializer 
+logic [9:0] data_in10b_muxed; // input to test serializer after mux 
 logic next_packet;          // high when ready for new packet
 logic [2:0] which_byte;     // byte of packet being serialized
 logic k_in;                 // high to indicate 8b symbol represents k-code
@@ -42,11 +43,12 @@ logic [7:0] lp_regmap_address;
 logic [7:0] lp_regmap_data;
 logic [25:0] larpix_packet;
 logic [3:0] target_larpix;
-logic sending_commas;
+logic sending_idles;
 logic make_madcap_packet;
 logic make_larpix_packet;
+logic make_lp_trigger_packet;
 logic [63:0] larpix_payload [NUMCHANNELS-1:0]; // data from LArPix ASICs
-
+logic in_idle;
 
 task larpixTransaction;
 input [1:0] op;
@@ -54,7 +56,7 @@ input [7:0] chip_id;
 input [7:0] addr;
 input [7:0] data;
 input [3:0] target;
-logic debug;
+logic debug; 
 begin
     debug = 0;
     if (debug) $display("in task: sending word to LArPix");
@@ -127,6 +129,35 @@ always_comb
     else
         ready_to_load = 1'b0;
 
+// 8b10b bypass mux
+always_comb begin
+    if (bypass_8b10b_extern) begin
+        if (which_byte == 3'b000) begin
+            case (current_byte)
+                `K_F : data_in10b_muxed = `K_F_DISP_P;
+                `K_K : data_in10b_muxed = `K_K_DISP_P;  
+                `K_R : data_in10b_muxed = `K_R_DISP_P;  
+                `K_A : data_in10b_muxed = `K_A_DISP_P;
+                `K_Q : data_in10b_muxed = `K_Q_DISP_P;
+                `K_S : data_in10b_muxed = `K_S_DISP_P;
+                `K_T : data_in10b_muxed = `K_T_DISP_P;
+                default : data_in10b_muxed = `K_K_DISP_P;  
+            endcase
+            if (current_byte == `K_K) in_idle = 1'b1;
+            else in_idle = 1'b0;
+        end
+        else begin
+            if (in_idle)
+                data_in10b_muxed = `K_K_DISP_P;                         
+            else
+                data_in10b_muxed = {2'b00,current_byte};
+        end
+    end
+    else begin
+        data_in10b_muxed = data_in10b;
+    end
+end // always_comb
+
 // load serializer counter
 always_ff @(posedge clk_fast or negedge reset_n) begin
     if (!reset_n) begin
@@ -156,7 +187,7 @@ always_comb begin
 end // always_comb
 
 always_comb begin
-    if ( (sending_commas) || (which_byte == 3'b000) ) begin 
+    if ( (sending_idles) || (which_byte == 3'b000) ) begin 
         k_in = 1'b1;
     end
     else begin
@@ -171,7 +202,7 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
         which_byte <= 3'b000;
         upstream_packet <= '0;
         enable_8b10b <= 1'b0;
-        sending_commas <= 1'b0;
+        sending_idles <= 1'b0;
     end
     else begin
         enable_8b10b <= 1'b0;
@@ -181,7 +212,7 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
                 next_packet <= 1'b1;
                 which_byte <= 3'b00;
                 if (make_madcap_packet) begin
-                    sending_commas <= 1'b0;
+                    sending_idles <= 1'b0;
                     upstream_packet <= create_madcap_packet(
                                     mc_packet_declaration,
                                     mc_chip_id,
@@ -189,7 +220,7 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
                                     mc_regmap_data);
                 end
                 else if (make_larpix_packet) begin
-                    sending_commas <= 1'b0;
+                    sending_idles <= 1'b0;
                     upstream_packet <= create_larpix_packet(
                                     mc_packet_declaration,
                                     mc_chip_id,
@@ -200,8 +231,8 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
                                     target_larpix);
                 end
                 else begin
-                    upstream_packet <= create_comma_packet(); 
-                    sending_commas <= 1'b1;
+                    upstream_packet <= create_idle_packet(); 
+                    sending_idles <= 1'b1;
                 end
             end
             else begin
@@ -248,7 +279,7 @@ serializer_sdr
     serializer_sdr_inst (
     .dout           (dout_pacman),
     .dout_symbol    (symbol_start),
-    .din            (data_in10b),
+    .din            (data_in10b_muxed),
     .enable         (1'b1),
     .load           (load_serializer),
     .external_sync  (external_sync),
@@ -284,7 +315,7 @@ decode96b120b
 
 // mux to bypass 8b10b decoder
 always_comb begin
-    if (bypass_8b10b_enc) 
+    if (bypass_8b10b_dec) 
         superpacket = dataword_120b[95:0];
     else
         superpacket = dataword_96b;

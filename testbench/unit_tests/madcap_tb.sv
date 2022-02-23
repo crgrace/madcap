@@ -55,8 +55,6 @@ logic [95:0] superpacket;   // final packet ready for analysis
 logic [11:0] k_out;
 logic [11:0] code_err;
 logic [11:0] disp_err;
-logic dout_even;
-logic dout_odd;
 logic dout; // DDR output
 logic dout_frame;
 logic new_dataword; // high to indicate new dataword available
@@ -68,6 +66,7 @@ logic [NUMCHANNELS-1:0] tx_busy;  // not used yet
 logic clk_tx;
 logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
+logic bypass_8b10b_extern; // high for bypass
 logic v3_mode;          // 0 = v2 mode, 1 = v3 mode
 
 // primary clock
@@ -92,8 +91,9 @@ end
 // RUN SIMULATION SCRIPTS
 initial begin
 `include "../mcp/setup_sim.mcp"
+//`include "../mcp/bypass_8b10b_enc.mcp"
+//`include "../mcp/bypass_8b10b_dec_extern.mcp"
 //`include "../mcp/madcap_config_rw.mcp"
-`include "../mcp/test_datapath.mcp"
 //`include "../mcp/test_datapath.mcp"
 //`include "../mcp/fifo_panic_datapath.mcp"
 //`include "../mcp/v3_test.mcp"
@@ -123,12 +123,12 @@ uart_array_tx
 // simulates clock manager on LArPix
 // to emulate LArPix clk manager, set v3_mode to 0;
 
-clk_manager
-    clk_manager_inst (
+clk_manager_lp
+    clk_manager_lp_inst (
     .clk_core       (),
     .clk_rx         (),
     .clk_tx         (clk_tx),
-//    .v3_mode        (v3_mode),
+    .v3_mode        (v3_mode),
     .clk_ctrl       (2'b00),
     .clk            (clk_larpix_delayed),
     .reset_n        (reset_n)
@@ -157,6 +157,7 @@ madcap
     .reset_n_lp             (reset_n_lp),
     .sync_in                (symbol_start),
     .clk_fast               (clk_fast),
+    .bypass_8b10b_extern    (bypass_8b10b_extern),
     .chip_id                (mc_chip_id),
     .reset_n                (reset_n)
     );
