@@ -24,6 +24,12 @@
     target_larpix = '0;
     make_madcap_packet = 0;
     make_larpix_packet = 0;
+    make_lp_trigger_packet = 0;
+    make_lp_timestamp_packet = 0;
+    make_lp_soft_reset_packet = 0;
+    make_lp_hard_reset_packet = 0;
+    make_mc_soft_reset_packet = 0;
+   
     tx_enable = '0;
     clk_fast = 1'b0;
     external_sync = 1'b0;

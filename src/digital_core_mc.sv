@@ -101,14 +101,20 @@ logic clk_core;     // MADCAP core clock (80 MHz nomimal)
 logic clk_rx;       // 2x oversampling rx clock (10 MHz nominal)
 logic clk_tx;       // slow tx clock (5 MHz nominal)
 logic [63:0] larpix_packet;         // config packet for LArPix
+logic embedded_lp_reset_en;         // enable magic commas
+logic embedded_mc_reset_en;         // enable magic commas
+logic embedded_lp_trigger_en;       // enable magic commas
 logic lp_trigger_out;               // generate LArPix trigger
-logic lp_rst_out;                   // alternative LArPix reset
-logic mc_rst_out;                   // alternative MADCAP reset
+logic lp_rst_out;                 // alternative LArPix reset
+logic mc_rst_out;                 // alternative MADCAP reset
+logic lp_trigger_out_gated;         // generate LArPix trigger
+logic lp_rst_out_gated;           // alternative LArPix reset
+logic mc_rst_out_gated;           // alternative MADCAP reset
 logic bypass_8b10b_muxed;           // can bypass via pin or config bit
 `include "madcap_constants.sv"
+
 // need to use generates for large config words
 // Cadence can't handle two dimensional ports
-
 genvar g_i;
 generate 
     for (g_i = 0; g_i < 12; g_i++) begin
@@ -129,8 +135,10 @@ always_comb begin
     digital_monitor_enable  = config_bits[DMONITOR][0];
     digital_monitor_select  = config_bits[DMONITOR][4:1];
     load_config_defaults    = config_bits[CONFIG][0];
-    embedded_reset_en       = config_bits[CONFIG][1];
-    kill_your_neighbor[1:0] = config_bits[CONFIG][3:2];
+    kill_your_neighbor[1:0] = config_bits[CONFIG][2:1];
+    embedded_lp_reset_en    = config_bits[CONFIG][4];
+    embedded_mc_reset_en    = config_bits[CONFIG][5];
+    embedded_lp_trigger_en  = config_bits[CONFIG][6];
     test_mode               = config_bits[TEST_MODE][2:0];
     which_fifo              = config_bits[TEST_MODE][3];
     enable_fifo_panic       = config_bits[TEST_MODE][5:4];
@@ -165,9 +173,21 @@ always_comb begin
 end // always_comb
 
 
+// random gating logic
 always_comb begin
     bypass_8b10b_muxed = bypass_8b10b_enc | bypass_8b10b_extern;
-end
+    lp_trigger_out_gated = lp_trigger_out & embedded_lp_trigger_en; 
+    if (embedded_lp_reset_en)
+        lp_rst_out_gated = lp_rst_out;
+    else
+        lp_rst_out_gated = 1'b1; 
+
+    if (embedded_mc_reset_en)
+        mc_rst_out_gated = mc_rst_out;
+    else
+        mc_rst_out_gated = 1'b1; 
+end // always_comb
+
 // instantiate sub-blocks
 
 datapath
@@ -245,12 +265,8 @@ driver_ctrl
     .pd_trigger_drivers     (pd_trigger_drivers),
     .pd_reset_n_drivers     (pd_reset_n_drivers),
     .pd_clk_drivers         (pd_clk_drivers),
-    .trigger_found          (trigger_found),
-    .embedded_trigger_en    (embedded_trigger_en),
-    .embedded_reset_en      (embedded_reset_en),
-    .lp_embedded_rst        (lp_embedded_rst),
-    .external_trigger       (external_trigger),
-    .reset_n_lp             (reset_n_lp),
+    .external_trigger       (external_trigger | lp_trigger_out_gated),
+    .reset_n_lp             (reset_n_lp & lp_rst_out_gated),
     .clk                    (clk_rx)
     );
 
@@ -260,7 +276,7 @@ reset_sync_mc
     .start_sync             (start_sync),
     .reset_n_config_sync    (reset_n_config_sync),
     .clk                    (clk_core),
-    .reset_n                (reset_n & mc_rst_out)
+    .reset_n                (reset_n & mc_rst_out_gated)
     );
 
 endmodule

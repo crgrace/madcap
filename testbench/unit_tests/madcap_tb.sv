@@ -25,27 +25,6 @@ logic [1:0] kill_your_neighbor; // disable neighboring chips
 logic [3:0] clk_larpix;      // clocks to LArPix tiles
 logic [3:0] reset_n_larpix;      // reset to LArPix tiles
 logic [3:0] trigger_larpix;  // triggers to LArPix tiles
-logic [4:0] ref_current_trim;// trims ref current
-logic override_ref;          // high to enable external bandgap
-logic ref_kickstart;         // active high kickstart bit
-logic [3:0] current_monitor; // one hot monitor (see docs)
-logic [7:0] voltage_monitor_refgen;  // one hot monitor 
-logic [3:0] tx_slices;       // # of TX slices for POSI link
-logic [3:0] i_tx_diff;       // TX bias current (diff)
-logic [3:0] i_rx;            // RX bias current 
-logic [4:0] rx_term;         // RX termination resistor
-logic [2:0] v_cm_tx;         // TX CM (MADCAP to tile)
-logic [3:0] i_tx_lvds_data;  // link from MADCAP to PACMAN
-logic [3:0] i_lvds_rx;       // link from PACMAN to MADCAP
-logic [3:0] i_cml_rst;       // bias current for rst drivers
-logic [3:0] i_cml_clk;       // bias current for clk drivers
-logic [3:0] i_cml_trigger;   // bias current for trigger drivers
-logic pd_lvds_tx;            // pd LVDS from MADCAP to PACMAN
-logic [3:0] pd_reset_n_drivers;  // pd rst drivers to LArPix tile
-logic [3:0] pd_clk_drivers;  // pd clk drivers to LArPix tile
-logic [3:0] pd_trigger_drivers;// pd trigger to LArPix tile
-logic [15:0] pd_rx;          // pd rx from LArPix to MADCAP
-logic [15:0] pd_tx;          // pd rx from MADCAP to LArPix
 
 // LArPix to MADCAP datapath
 logic [63:0] tx_data [NUMCHANNELS-1:0]; // data sent (pre serializer)
@@ -93,10 +72,11 @@ initial begin
 `include "../mcp/setup_sim.mcp"
 //`include "../mcp/bypass_8b10b_enc.mcp"
 //`include "../mcp/bypass_8b10b_dec_extern.mcp"
-//`include "../mcp/madcap_config_rw.mcp"
+`include "../mcp/madcap_config_rw.mcp"
 //`include "../mcp/test_datapath.mcp"
 //`include "../mcp/fifo_panic_datapath.mcp"
 //`include "../mcp/v3_test.mcp"
+`include "../mcp/magic_comma_test.mcp"
 
 end // initial
 // END SIMULATION SCRIPTS

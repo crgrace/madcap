@@ -1,0 +1,35 @@
+// magic_comma_test.mcp
+// Do the magic commas work?
+//
+    $display("MAGIC_COMMA_TEST.MCP running");
+    #5000
+
+// USAGE:  madcapTransaction(WRITE,mc_chip_id,mc_regmap_address,
+//        mc_regmap_data);
+//
+
+    $display("Send MADCAP packet");
+    madcapTransaction(WRITE,2'b11,8'h0F,8'hF3);
+
+    $display("Test Trigger Request magic comma (K_R)");
+    make_lp_trigger_packet = 1;
+    #500
+    make_lp_trigger_packet = 0;
+    #1000
+    $display("Test Soft Reset Request magic comma (K_R)");
+    make_lp_soft_reset_packet = 1;
+    #500
+    make_lp_soft_reset_packet = 0;
+    #1000
+
+    $display("Readback MADCAP config packet before reset (expect 0xF3)");
+    madcapTransaction(READ,2'b11,8'h0F,8'h00);
+
+    $display("Test MC Hard Reset Request magic comma (K_R)");
+    make_mc_soft_reset_packet = 1;
+    #500
+    make_mc_soft_reset_packet = 0;
+
+    $display("Readback MADCAP config packet after reset (expect 0x00)");
+    madcapTransaction(READ,2'b11,8'h0F,8'h00);
+

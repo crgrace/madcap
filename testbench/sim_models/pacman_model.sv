@@ -47,6 +47,10 @@ logic sending_idles;
 logic make_madcap_packet;
 logic make_larpix_packet;
 logic make_lp_trigger_packet;
+logic make_lp_timestamp_packet;
+logic make_lp_soft_reset_packet;
+logic make_lp_hard_reset_packet;
+logic make_mc_soft_reset_packet;
 logic [63:0] larpix_payload [NUMCHANNELS-1:0]; // data from LArPix ASICs
 logic in_idle;
 
@@ -143,7 +147,7 @@ always_comb begin
                 `K_T : data_in10b_muxed = `K_T_DISP_P;
                 default : data_in10b_muxed = `K_K_DISP_P;  
             endcase
-            if (current_byte == `K_K) in_idle = 1'b1;
+        if (current_byte == `K_K) in_idle = 1'b1;
             else in_idle = 1'b0;
         end
         else begin
@@ -154,6 +158,7 @@ always_comb begin
         end
     end
     else begin
+        in_idle = 1'b0;
         data_in10b_muxed = data_in10b;
     end
 end // always_comb
@@ -230,7 +235,27 @@ always_ff @(posedge clk_fast or negedge reset_n) begin
                                     lp_regmap_data,
                                     target_larpix);
                 end
-                else begin
+                else if (make_lp_trigger_packet) begin
+                    upstream_packet <= create_lp_trigger_packet(); 
+                    sending_idles <= 1'b0;
+                end                    
+                else if (make_lp_timestamp_packet) begin
+                    upstream_packet <= create_lp_timestamp_packet(); 
+                    sending_idles <= 1'b0;
+                end     
+                else if (make_lp_soft_reset_packet) begin
+                    upstream_packet <= create_lp_soft_reset_packet(); 
+                    sending_idles <= 1'b0;
+                end     
+                else if (make_lp_hard_reset_packet) begin
+                    upstream_packet <= create_lp_hard_reset_packet(); 
+                    sending_idles <= 1'b0;
+                end     
+                else if (make_mc_soft_reset_packet) begin
+                    upstream_packet <= create_mc_soft_reset_packet(); 
+                    sending_idles <= 1'b0;
+                end     
+               else begin
                     upstream_packet <= create_idle_packet(); 
                     sending_idles <= 1'b1;
                 end
