@@ -95,7 +95,10 @@ initial begin
 //`include "../mcp/madcap_testmodes.mcp"
 //`include "../mcp/chipid_test.mcp"
 //`include "../mcp/test_config_panic.mcp"
-`include "../mcp/larpix_hit.mcp"
+//`include "../mcp/larpix_hit.mcp"
+//`include "../mcp/magic_comma_test.mcp"
+//`include "../mcp/magic_comma_test_lp.mcp"
+`include "../mcp/magic_comma_test_trigger.mcp"
 
 end // include
 
@@ -110,7 +113,7 @@ larpix_v2b
     .digital_monitor    (digital_monitor),
     .monitor_out_r      (monitor_out_r),
     .charge_in_r        (charge_in_r),
-    .external_trigger   (external_trigger_larpix),
+    .external_trigger   (trigger_larpix[0]),
     .posi               (posi[3:0]),
     .clk                (clk_larpix[0]),
     .reset_n            (reset_n_larpix[0])   

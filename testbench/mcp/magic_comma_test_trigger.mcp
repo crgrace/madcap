@@ -1,0 +1,75 @@
+// magic_comma_test_trigger.mcp
+// Do the magic commas work for controlling LArPix?
+//
+    $display("MAGIC_COMMA_TEST_TRIGGER.MCP running");
+    #5000
+
+// USAGE:  madcapTransaction(WRITE,mc_chip_id,mc_regmap_address,
+//        mc_regmap_data);
+//
+
+//    $display("Send MADCAP packet");
+//    madcapTransaction(WRITE,2'b11,8'h0F,8'hF3);
+
+//    $display("Test Trigger Request magic comma (K_R)");
+//    make_lp_trigger_packet = 1;
+//    #500
+//    make_lp_trigger_packet = 0;
+//    #1000
+//
+
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
+
+    #500 
+    $display("enable channels 0 - 7 (enable CSA)");
+    larpixTransaction(WRITE,1,66,8'hFF,0);
+
+    #500 
+    $display("enable channels 0-7 (turn off channel mask)");
+    larpixTransaction(WRITE,1,131,0,0);
+
+    #500 
+    $display("enable channels 0 - 7  (turn off extern trigger mask)");
+    larpixTransaction(WRITE,1,139,0,0);
+
+    #500 
+    $display("disable hit veto");
+    larpixTransaction(WRITE,1,128,0,0);
+
+    #10000 $display("HERE COMES THE BOOM!");
+    $display("Test Trigger Request magic comma (K_R)");
+    make_lp_trigger_packet = 1;
+    #1500
+    make_lp_trigger_packet = 0;
+//    #1000
+
+/*
+    #200000
+    $display("Test Soft Reset Request magic comma (K_R)");
+    make_lp_soft_reset_packet = 1;
+    #1500
+    make_lp_soft_reset_packet = 0;
+    #100000
+    $display("Soft Reset request complete");
+    $display("Read Back test GLOBAL_THRESH again: 10d/0x0A expected");
+    larpixTransaction(READ,1,64,8'h01,0);
+
+    #200000
+    $display("Test Hard Reset Request magic comma (K_S)");
+    make_lp_hard_reset_packet = 1;
+    #1500
+    make_lp_hard_reset_packet = 0;
+    #100000
+
+    $display("Enable Downstream PISO0 (REG 125)");
+    $display("(for returning data to MADCAP)");
+    larpixTransaction(WRITE,1,125,8'h01,0);    
+
+    $display("Read Back GLOBAL_THRESH after hard reset: 255/0xFF expected");
+    larpixTransaction(READ,1,64,8'h01,0);
+*/
+
+
+ 

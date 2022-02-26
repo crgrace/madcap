@@ -21,7 +21,7 @@ module reset_ctrl
     input logic reset_n                 // asynchronous reset (active low)
     );
 
-logic [8:0] cnt; // 9-bit internal counter
+logic [9:0] cnt; // 10-bit internal counter
 logic cnt_en;   // enable bit
 // define states 
 
@@ -53,9 +53,9 @@ always_comb begin
                         else                        Next = LP_TIMESTAMP;
         LP_SOFT_RST:  if (cnt == 9'd192)            Next = READY;
                         else                        Next = LP_SOFT_RST;
-        LP_HARD_RST:  if (cnt == 9'd384)            Next = READY;
+        LP_HARD_RST:  if (cnt == 9'd650)            Next = READY;
                         else                        Next = LP_HARD_RST;
-        LP_TRIGGER:   if (cnt == 9'd24)             Next = READY;
+        LP_TRIGGER:   if (cnt == 9'd128)             Next = READY;
                         else                        Next = LP_TRIGGER;
         MC_RST:       if (cnt == 9'd384)            Next = READY;
                         else                        Next = MC_RST;
