@@ -29,6 +29,15 @@ module config_path
     output logic lp_trigger_out,        // generate LArPix trigger
     output logic lp_rst_out,            // alternative LArPix reset
     output logic mc_rst_out,            // alternative MADCAP reset
+// DEBUG OUTPUTS
+    output logic symbol_locked,         // deserializer synchronized
+    output logic comma_found,           // high when comma (K28.5) found
+    output logic lp_trigger_found,      // LP trigger comma detected
+    output logic lp_soft_rst_found,     // high if K28.4 (K_Q) found
+    output logic lp_hard_rst_found,     // high if K27.7 (K_S) found
+    output logic lp_timestamp_rst_found,// high if K28.3 (K_A) found
+    output logic mc_rst_found,          // high if K28.7 (K_T) found    
+// INPUTS
     input logic input_bit,              // serial bits from LVDS RX
     input logic [15:0] tx_enable,       // high to enable TX channel
     input logic [1:0] chip_id,          // id for current MADCAP 
@@ -49,7 +58,6 @@ logic [7:0] dataword8b_muxed;           // symbol after bypass mux
 logic [63:0] tx_data [NUMCHANNELS-1:0]; // data to be sent 
 logic k_out;                            // high if k-code detected
 logic dataword10b_ready;                // data ready to sample
-logic symbol_locked;                    // deserializer synchronized
 logic [7:0] regmap_write_data;          // data to write to regmap
 logic [7:0] regmap_address;             // regmap addr to write
 logic write_regmap;                     // active high to load register data
@@ -57,13 +65,8 @@ logic read_regmap;                      // active high to read register data
 logic [63:0] config_fifo_out;           // output of config fifo
 logic write_fifo_config_n;              // low to put data into config FIFO
 logic [7:0] regmap_read_data;           // data to read from regmap
-logic comma_found;                      // high when comma (K28.5) found  
 logic [15:0] ld_tx_data;                // high to transfer data to UART TX
 logic [15:0] tx_busy;                   // high when tx uart sending data
-logic lp_soft_rst_found;                // high if K28.4 (K_Q) found
-logic lp_hard_rst_found;                // high if K27.7 (K_S) found
-logic lp_timestamp_rst_found;           // high if K28.3 (K_A) found
-logic mc_rst_found;                     // high if K28.7 (K_T) found
 
 // internal 8b10 decoder signals
 logic disp_in;

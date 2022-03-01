@@ -17,6 +17,7 @@ module madcap
     output logic [3:0] clk_larpix,      // clocks to LArPix tiles
     output logic [3:0] reset_n_larpix,  // reset_n to LArPix tiles
     output logic [3:0] trigger_larpix,  // triggers to LArPix tiles
+    output logic digital_monitor,       // debugging output
     output logic [1:0] kill_your_neighbor, // disable neighboring chips
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic lvds_rx_bit,            // serial bits from RX (PACMAN)
@@ -80,6 +81,7 @@ digital_core_mc
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
+    .digital_monitor        (digital_monitor),
     .ref_current_trim       (ref_current_trim),
     .override_ref           (override_ref),
     .ref_kickstart          (ref_kickstart),

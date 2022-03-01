@@ -50,6 +50,7 @@ logic [15:0] pd_rx;          // pd rx from LArPix to MADCAP
 logic [15:0] pd_tx;          // pd rx from MADCAP to LArPix
 logic [1:0] kill_your_neighbor; // disable neighboring chips
 logic [7:0] spare;           // spare control bits
+logic digital_monitor;       // debugging output
 
 // LArPix to MADCAP datapath
 logic [63:0] tx_data [NUMCHANNELS-1:0]; // data sent (pre serializer)
@@ -154,6 +155,7 @@ digital_core_mc
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
+    .digital_monitor        (digital_monitor),
     .ref_current_trim       (ref_current_trim),
     .override_ref           (override_ref),
     .ref_kickstart          (ref_kickstart),

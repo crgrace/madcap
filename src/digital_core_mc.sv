@@ -30,8 +30,9 @@ module digital_core_mc
     output logic dout_frame,            // high when LSB output
     output logic [15:0] posi,           // config data to LArPix tiles
     output logic [3:0] clk_larpix,      // clocks to LArPix tiles
-    output logic [3:0] reset_n_larpix,      // reset_n to LArPix tiles
+    output logic [3:0] reset_n_larpix,  // reset_n to LArPix tiles
     output logic [3:0] trigger_larpix,  // triggers to LArPix tiles
+    output logic digital_monitor,       // debugging output
 
 // ANALOG CORE CONFIGURATION SIGNALS
 // these are in the same order as the MADCAP config bits google sheet
@@ -73,7 +74,7 @@ module digital_core_mc
 // digital config & local variables
 logic [7:0] config_bits [0:REGNUM-1];// regmap config bits    
 logic digital_monitor_enable;       // high to enable
-logic [3:0] digital_monitor_select; // see docs
+logic [4:0] digital_monitor_select; // see docs
 logic load_config_defaults;         // MADCAP soft reset (set to low after)
 logic bypass_8b10b_enc;             // high to bypass 8b10b encoder
 logic bypass_8b10b_dec;             // high to bypass 8b10b decoder
@@ -111,6 +112,20 @@ logic lp_trigger_out_gated;         // generate LArPix trigger
 logic lp_rst_out_gated;           // alternative LArPix reset
 logic mc_rst_out_gated;           // alternative MADCAP reset
 logic bypass_8b10b_muxed;           // can bypass via pin or config bit
+
+// digital test signals for monitor use
+logic symbol_locked;         // deserializer synchronized
+logic comma_found;           // high when comma (K28.5) found
+logic lp_trigger_found;      // LP trigger comma detected
+logic lp_soft_rst_found;     // high if K28.4 (K_Q) found
+logic lp_hard_rst_found;     // high if K27.7 (K_S) found
+logic lp_timestamp_rst_found;// high if K28.3 (K_A) found
+logic mc_rst_found;          // high if K28.7 (K_T) found 
+logic packet_rcvd;           // high to acknowledge packet rcvd  
+logic load_serializer;       // high to load serializer
+logic rx_fifo_empty;         // high if FIFO empty
+logic load_event_n;          // low to put data in FIFO
+logic enable_8b10b;          // enable 8b10b encoder 
 `include "madcap_constants.sv"
 
 // need to use generates for large config words
@@ -133,7 +148,7 @@ always_comb begin
     current_monitor         = config_bits[IMONITOR][3:0];
     voltage_monitor_refgen  = config_bits[VMONITOR][7:0];
     digital_monitor_enable  = config_bits[DMONITOR][0];
-    digital_monitor_select  = config_bits[DMONITOR][4:1];
+    digital_monitor_select  = config_bits[DMONITOR][5:1];
     load_config_defaults    = config_bits[CONFIG][0];
     kill_your_neighbor[1:0] = config_bits[CONFIG][2:1];
     embedded_lp_reset_en    = config_bits[CONFIG][4];
@@ -197,6 +212,10 @@ datapath
     .dout_odd               (dout_odd),
     .dout_frame             (dout_frame),
     .ack_fifo_data          (ack_fifo_data),
+    .packet_rcvd            (packet_rcvd),
+    .load_serializer        (load_serializer),
+    .rx_fifo_empty          (rx_fifo_empty),
+    .load_event_n           (enable_8b10b),
     .piso                   (piso),
     .mc_config_packet       (larpix_packet),
     .write_fifo_data_req    (write_fifo_data_req),
@@ -243,6 +262,13 @@ config_path
     .lp_trigger_out         (lp_trigger_out),
     .lp_rst_out             (lp_rst_out),
     .mc_rst_out             (mc_rst_out),
+    .symbol_locked          (symbol_locked),
+    .comma_found            (comma_found),
+    .lp_trigger_found       (lp_trigger_found),
+    .lp_soft_rst_found      (lp_soft_rst_found),
+    .lp_hard_rst_found      (lp_hard_rst_found),
+    .lp_timestamp_rst_found (lp_timestamp_rst_found),
+    .mc_rst_found           (mc_rst_found),
     .input_bit              (lvds_rx_bit),  
     .tx_enable              (tx_enable), 
     .chip_id                (chip_id),
@@ -256,6 +282,35 @@ config_path
     .reset_n_config         (reset_n_config_sync),
     .reset_n                (reset_n_sync)
     );
+
+digital_monitor_mc
+    digital_monitor_mc_inst (
+    .digital_monitor        (digital_monitor),
+    .digital_monitor_enable (digital_monitor_enable),
+    .digital_monitor_select (digital_monitor_select),
+    .symbol_locked          (symbol_locked),
+    .comma_found            (comma_found),
+    .lp_trigger_found       (lp_trigger_found),
+    .lp_soft_rst_found      (lp_soft_rst_found),
+    .lp_hard_rst_found      (lp_hard_rst_found),
+    .lp_timestamp_rst_found (lp_timestamp_rst_found),
+    .mc_rst_found           (mc_rst_found),
+    .lp_rst_out             (lp_rst_out),
+    .lp_trigger_out         (lp_trigger_out),
+    .reset_n_config_sync    (reset_n_config_sync),
+    .clk_fast               (clk_fast),
+    .clk_rx                 (clk_rx),
+    .clk_tx                 (clk_tx),
+    .clk_core               (clk_core),
+    .write_fifo_data_req    (write_fifo_data_req),
+    .ack_fifo_data          (ack_fifo_data),
+    .packet_rcvd            (packet_rcvd),
+    .load_serializer        (load_serializer),
+    .rx_fifo_empty          (rx_fifo_empty),
+    .load_event_n           (enable_8b10b),
+    .enable_8b10b           (enable_8b10b)
+    );
+
 
 driver_ctrl
     driver_ctrl_inst (

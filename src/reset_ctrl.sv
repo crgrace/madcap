@@ -55,7 +55,7 @@ always_comb begin
                         else                        Next = LP_SOFT_RST;
         LP_HARD_RST:  if (cnt == 9'd650)            Next = READY;
                         else                        Next = LP_HARD_RST;
-        LP_TRIGGER:   if (cnt == 9'd128)             Next = READY;
+        LP_TRIGGER:   if (cnt == 9'd128)            Next = READY;
                         else                        Next = LP_TRIGGER;
         MC_RST:       if (cnt == 9'd384)            Next = READY;
                         else                        Next = MC_RST;

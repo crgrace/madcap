@@ -38,7 +38,7 @@
     $display("disable hit veto");
     larpixTransaction(WRITE,1,128,0,0);
 
-    #10000 $display("HERE COMES THE BOOM!");
+    #100000 $display("HERE COMES THE BOOM!");
     $display("Test Trigger Request magic comma (K_R)");
     make_lp_trigger_packet = 1;
     #1500

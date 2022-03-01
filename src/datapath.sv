@@ -44,7 +44,14 @@ module datapath
     (output logic dout_even,            // DDR even bits                 
     output logic dout_odd,              // DDR odd bits                 
     output logic dout_frame,            // high when LSB output
+// DEBUG OUTPUTS
     output logic ack_fifo_data,         // high to ack config write to FIFO
+    output logic packet_rcvd,           // high to acknowledge packet rcvd  
+    output logic load_serializer,       // high to load serializer
+    output logic rx_fifo_empty,         // high if FIFO empty
+    output logic load_event_n,          // low to put data in FIFO
+    output logic enable_8b10b,          // enable 8b10b encoder 
+// INPUTS
     input logic piso [NUMCHANNELS-1:0], // input bits from PHYs
     input logic [63:0] mc_config_packet,// config read for MADCAP
     input logic write_fifo_data_req,    // req to put data into FIFO
@@ -74,18 +81,13 @@ logic [67:0] fifo_out;         // data from FIFO (including chan id)
 logic rx_empty [NUMCHANNELS-1:0];   // high if no data waiting
 logic [NUMCHANNELS-1:0] read_rx;    // high to read rx uart 
 logic [7:0] crc_word;               // CRC8 calculated from LArPix data
-logic enable_8b10b;                 // enable 8b10b encoder 
 
 // fifo signals
-logic load_event_n;                 // low to put data in FIFO
-logic rx_fifo_empty;                // high if FIFO empty
 logic [5:0] rx_fifo_cnt;            // number of FIFO locations in use
 logic [4:0] rx_fifo_cnt_minus_one;  // rebase fifo counter to start at 0
 logic rx_fifo_full;                 // high if FIFO full
 logic rx_fifo_half;                 // high if FIFO half full
 logic get_fifo_data_n;              // low to read FIFO
-logic packet_rcvd;                  // high to acknowledge packet rcvd  
-logic load_serializer;              // high to load serializer
 logic [11:0] k_in;                  // high if byte is intended as k-code
 
 // submodule instantiation

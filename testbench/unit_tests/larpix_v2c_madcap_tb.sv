@@ -24,6 +24,7 @@ localparam NUMCOMMAS = 20;
 logic reset_n;
 logic clk_fast;     // 80 MHz input clock
 logic [1:0] kill_your_neighbor; // disable neighboring chips
+logic digital_monitor;       // debugging output
 
 // signals to analog core
 logic [3:0] clk_larpix;      // clocks to LArPix tiles
@@ -143,6 +144,7 @@ madcap
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
+    .digital_monitor        (digital_monitor),
     .kill_your_neighbor     (kill_your_neighbor),
     .piso                   ({1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1, piso[3],piso[2],piso[1],piso[0]}),
     .lvds_rx_bit            (dout_pacman),

@@ -1,0 +1,16 @@
+// digital_monitor_test.mcp
+// Test digital monitor
+//
+    $display("DIGITAL_MONITOR_TEST.MCP running");
+    #5000
+
+// USAGE:  madcapTransaction(WRITE,mc_chip_id,mc_regmap_address,
+//        mc_regmap_data);
+//
+//
+
+    $display("Set monitor select to COMMA_FOUND");
+    madcapTransaction(WRITE,2'b11,3,8'h03);
+
+    $display("Send MADCAP packet");
+    madcapTransaction(WRITE,2'b11,8'h0F,8'hF3);

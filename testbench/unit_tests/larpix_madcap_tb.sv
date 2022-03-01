@@ -49,6 +49,8 @@ logic clk_larpix_delayed;   // models LArPix primary clock
 logic which_fifo;
 logic [1:0] physical_chip_id;
 logic bypass_8b10b_extern; // high for bypass
+logic digital_monitor_lp;       // LArPix debugging output
+logic digital_monitor_mc;    // MADCAP debugging output
 
 //larpix specific
 logic external_trigger_larpix;
@@ -98,7 +100,8 @@ initial begin
 //`include "../mcp/larpix_hit.mcp"
 //`include "../mcp/magic_comma_test.mcp"
 //`include "../mcp/magic_comma_test_lp.mcp"
-`include "../mcp/magic_comma_test_trigger.mcp"
+//`include "../mcp/magic_comma_test_trigger.mcp"
+`include "../mcp/digital_monitor_test.mcp"
 
 end // include
 
@@ -110,7 +113,7 @@ end // include
 larpix_v2b
     larpix_v2b_inst (
     .piso               (piso[3:0]),
-    .digital_monitor    (digital_monitor),
+    .digital_monitor    (digital_monitor_lp),
     .monitor_out_r      (monitor_out_r),
     .charge_in_r        (charge_in_r),
     .external_trigger   (trigger_larpix[0]),
@@ -144,6 +147,7 @@ madcap
     .clk_larpix             (clk_larpix),
     .reset_n_larpix         (reset_n_larpix),
     .trigger_larpix         (trigger_larpix),
+    .digital_monitor        (digital_monitor_mc),
     .kill_your_neighbor     (kill_your_neighbor),
     .piso                   ({1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1,1'b1, piso[3],piso[2],piso[1],piso[0]}),
     .lvds_rx_bit            (dout_pacman),
