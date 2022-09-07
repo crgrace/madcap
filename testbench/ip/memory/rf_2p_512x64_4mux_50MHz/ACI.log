@@ -1,0 +1,63 @@
+8:40:25 AM - Artisan Components, Inc.
+8:40:25 AM - SunOS sol.gam 5.9 Generic_122300-61 sun4u sparc SUNW,Sun-Fire-V240
+8:40:25 AM - Version 2003Q2V2
+8:40:25 AM - GUI version 4.58.13
+8:40:25 AM - 
+8:40:25 AM - CONFIDENTIAL AND PROPRIETARY SOFTWARE OF ARTISAN COMPONENTS, INC.
+8:40:25 AM - 
+8:40:25 AM - Copyright (c) 2019 Artisan Components, Inc.  All Rights Reserved.
+8:40:25 AM - 
+8:40:25 AM - Use of this Software is subject to the terms and conditions of the
+8:40:25 AM - applicable license agreement between Artisan Components, Inc. and
+8:40:25 AM - Taiwan Semiconductor Manufacturing Company Ltd.  In addition, this Software
+8:40:25 AM - is protected by copyright law and international treaties.
+8:40:25 AM - 
+8:40:25 AM - The copyright notice(s) in this Software does not indicate actual or
+8:40:25 AM - intended publication of this Software.
+8:40:25 AM - 
+8:40:25 AM - RF-2P-HS Register File Generator, TSMC CL018G Process
+8:40:25 AM - 
+8:40:25 AM - Log file is ACI.log
+8:40:25 AM - 
+8:41:14 AM - ASCII Datatable updated
+8:41:28 AM - Created spec file: rf2p_512x64_4_50.spec
+8:41:43 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh postscript -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:41:43 AM - PostScript Datasheet generator succeeded, created:
+8:41:43 AM -    rf2p_512x64_4_50.ps
+8:41:44 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh ascii -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:41:44 AM - ASCII Datatable generator succeeded, created:
+8:41:44 AM -    rf2p_512x64_4_50.dat
+8:41:44 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh verilog -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:41:45 AM - Verilog Model generator succeeded, created:
+8:41:45 AM -    rf2p_512x64_4_50.v
+8:41:45 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh vhdl -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:41:45 AM - VHDL Model generator succeeded, created:
+8:41:45 AM -    rf2p_512x64_4_50.vhd
+8:41:46 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh synopsys -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND -libname USERLIB
+8:41:50 AM - Synopsys Model generator succeeded, created:
+8:41:50 AM -    rf2p_512x64_4_50_fast@-40C_syn.lib
+8:41:50 AM -    rf2p_512x64_4_50_fast@0C_syn.lib
+8:41:50 AM -    rf2p_512x64_4_50_typical_syn.lib
+8:41:50 AM -    rf2p_512x64_4_50_slow_syn.lib
+8:41:51 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh primetime -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:41:55 AM - PrimeTime Model generator succeeded, created:
+8:41:55 AM -    rf2p_512x64_4_50_fast@-40C.data
+8:41:55 AM -    rf2p_512x64_4_50_fast@0C.data
+8:41:55 AM -    rf2p_512x64_4_50_typical.data
+8:41:55 AM -    rf2p_512x64_4_50_slow.data
+8:41:55 AM -    rf2p_512x64_4_50.mod
+8:41:56 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh tlf -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND -libname USERLIB
+8:42:07 AM - TLF Model generator succeeded, created:
+8:42:07 AM -    rf2p_512x64_4_50_fast@-40C.tlf
+8:42:07 AM -    rf2p_512x64_4_50_fast@0C.tlf
+8:42:07 AM -    rf2p_512x64_4_50_typical.tlf
+8:42:07 AM -    rf2p_512x64_4_50_slow.tlf
+8:42:07 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh vclef-fp -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND -inst2ring blockages -site_def off
+8:42:14 AM - VCLEF Footprint generator succeeded, created:
+8:42:14 AM -    rf2p_512x64_4_50.vclef
+8:42:14 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh gds2 -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:42:22 AM - GDSII Layout generator succeeded, created:
+8:42:22 AM -    rf2p_512x64_4_50.gds2
+8:42:22 AM - command: /home/users/dgnani/rf_2p_512x64_4mux_50MHz/../rf2sh/bin/rf2sh lvs -instname "rf2p_512x64_4_50" -words 512 -bits 64 -frequency 50 -ring_width 10 -mux 4 -drive 3 -write_mask off -wp_size 8 -top_layer met6 -power_type rings -horiz met3 -vert met2 -cust_comment "" -left_bus_delim "[" -right_bus_delim "]" -pwr_gnd_rename "VDD:VDD,GND:VSS" -prefix "" -pin_space 0.0 -name_case upper -check_instname on -diodes on -inside_ring_type GND
+8:42:25 AM - LVS Netlist generator succeeded, created:
+8:42:25 AM -    rf2p_512x64_4_50.cdl

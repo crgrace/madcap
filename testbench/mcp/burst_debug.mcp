@@ -1,0 +1,55 @@
+// mcp program to test a single LArPix instance
+$display("RUNNING BURST_DEBUG.MCP");
+
+#10000
+  $display("Change Chip ID to 8'h02");
+  sendWordToLarpix(CONFIG_WRITE,8'h01,CHIP_ID,8'h02);
+
+#10000
+  $display("Enable Downstream PISO0 (for returning data to FPGA)");
+  sendWordToLarpix(CONFIG_WRITE,8'h02,ENABLE_PISO_DOWN,8'h01);
+
+#10000
+  $display("read out CHIP_ID"); 
+  sendWordToLarpix(CONFIG_READ,8'h02,CHIP_ID,0);
+
+#10000
+  $display("write 10d to GLOBAL_THRESH"); 
+  sendWordToLarpix(CONFIG_WRITE,8'h02,GLOBAL_THRESH,8'h0a);
+
+#10000
+  $display("enable channels 0 - 7 (enable CSA)");
+  sendWordToLarpix(CONFIG_WRITE,8'h02,CSA_ENABLE,8'hFF);
+ 
+#10000 
+  $display("set ADC Burst mode to 4");
+  sendWordToLarpix(CONFIG_WRITE,8'h02,ADC_BURST,8'h04);
+
+#10000 
+  $display("enable channels 0-7 (turn off channel mask)");
+  sendWordToLarpix(CONFIG_WRITE,8'h02,CHANNEL_MASK,0);
+
+
+#10000
+    $display("HIT! Channel 2");
+    charge_in_r[2] = -20e-15; // two mips (140 mV at CSA)
+#500  
+//  charge_in_r[59] = -2.8e-15; // two mips (140 mV at CSA)
+#2   
+    charge_in_r[2] = 0.0;
+#2   
+    charge_in_r[59] = 0.0;
+
+//#10000
+//  charge_in_r[2] = -5.6e-15; // two mips (140 mV at CSA)https://lbnl.zoom.us/j/3481438541
+//    $display("SHOULDN'T BE IN HERE");
+//#500  charge_in_r[59] = -2.8e-15; // two mips (140 mV at CSA)
+//#20 charge_in_r[2] = 0.0;
+//#20    charge_in_r[59] = 0.0;
+//
+
+
+ 
+
+
+

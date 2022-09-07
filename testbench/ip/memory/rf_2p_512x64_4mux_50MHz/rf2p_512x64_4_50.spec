@@ -1,0 +1,30 @@
+#user spec file, version 2003Q2V2
+#Mon Feb 18 08:41:28 PST 2019
+prefix=
+frequency=50
+right_bus_delim=]
+ring_width=10
+power_type=rings
+pwr_gnd_rename=VDD:VDD,GND:VSS
+pin_space=0.0
+check_instname=on
+vert=met2
+name_case=upper
+mux=4
+synopsys.libname=USERLIB
+tlf.libname=USERLIB
+vclef-fp.site_def=off
+write_mask=off
+inside_ring_type=GND
+vclef-fp.inst2ring=blockages
+top_layer=met6
+bits=64
+instname=rf2p_512x64_4_50
+left_bus_delim=[
+horiz=met3
+acroread=acroread
+diodes=on
+drive=3
+cust_comment=
+wp_size=8
+words=512

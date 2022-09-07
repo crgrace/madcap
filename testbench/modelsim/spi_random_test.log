@@ -1,0 +1,53 @@
+Test Date = Fri Feb 10 14:47:16 PST 2017
+Test Block = spi_random
+PASS: spi_random.test: Test #8, spi_ctrl_word = 0000 measured = 101, expected = 101
+PASS: spi_random.test: Test #9, spi_ctrl_word = 0001 measured = 101, expected = 101
+PASS: spi_random.test: Test #10, spi_ctrl_word = 0002 measured = 101, expected = 101
+PASS: spi_random.test: Test #11, spi_ctrl_word = 0000 measured = 127, expected = 127
+PASS: spi_random.test: Test #12, spi_ctrl_word = 0000 measured = 127, expected = 127
+PASS: spi_random.test: Test #13, spi_ctrl_word = 0002 measured = 89, expected = 89
+PASS: spi_random.test: Test #14, spi_ctrl_word = 0001 measured = 32, expected = 32
+PASS: spi_random.test: Test #15, spi_ctrl_word = 0002 measured = 61, expected = 61
+PASS: spi_random.test: Test #16, spi_ctrl_word = 0001 measured = 32, expected = 32
+PASS: spi_random.test: Test #17, spi_ctrl_word = 0002 measured = 47, expected = 47
+PASS: spi_random.test: Test #18, spi_ctrl_word = 0002 measured = 49, expected = 49
+PASS: spi_random.test: Test #19, spi_ctrl_word = 0000 measured = 73, expected = 73
+PASS: spi_random.test: Test #20, spi_ctrl_word = 0002 measured = 49, expected = 49
+PASS: spi_random.test: Test #21, spi_ctrl_word = 0002 measured = 49, expected = 49
+PASS: spi_random.test: Test #22, spi_ctrl_word = 0002 measured = 49, expected = 49
+PASS: spi_random.test: Test #23, spi_ctrl_word = 0000 measured = 2, expected = 2
+PASS: spi_random.test: Test #24, spi_ctrl_word = 0000 measured = 2, expected = 2
+PASS: spi_random.test: Test #25, spi_ctrl_word = 0002 measured = 95, expected = 95
+PASS: spi_random.test: Test #26, spi_ctrl_word = 0001 measured = 125, expected = 125
+PASS: spi_random.test: Test #27, spi_ctrl_word = 0002 measured = 95, expected = 95
+PASS: spi_random.test: Test #28, spi_ctrl_word = 0001 measured = 53, expected = 53
+PASS: spi_random.test: Test #29, spi_ctrl_word = 0002 measured = 57, expected = 57
+PASS: spi_random.test: Test #30, spi_ctrl_word = 0002 measured = 56, expected = 56
+PASS: spi_random.test: Test #31, spi_ctrl_word = 0000 measured = 105, expected = 105
+PASS: spi_random.test: Test #32, spi_ctrl_word = 0000 measured = 105, expected = 105
+PASS: spi_random.test: Test #33, spi_ctrl_word = 0002 measured = 56, expected = 56
+PASS: spi_random.test: Test #34, spi_ctrl_word = 0000 measured = 105, expected = 105
+PASS: spi_random.test: Test #35, spi_ctrl_word = 0000 measured = 105, expected = 105
+PASS: spi_random.test: Test #36, spi_ctrl_word = 0001 measured = 87, expected = 87
+PASS: spi_random.test: Test #37, spi_ctrl_word = 0000 measured = 105, expected = 105
+PASS: spi_random.test: Test #38, spi_ctrl_word = 0000 measured = 125, expected = 125
+PASS: spi_random.test: Test #39, spi_ctrl_word = 0002 measured = 31, expected = 31
+PASS: spi_random.test: Test #40, spi_ctrl_word = 0001 measured = 118, expected = 118
+PASS: spi_random.test: Test #41, spi_ctrl_word = 0001 measured = 118, expected = 118
+PASS: spi_random.test: Test #42, spi_ctrl_word = 0000 measured = 111, expected = 111
+PASS: spi_random.test: Test #43, spi_ctrl_word = 0000 measured = 111, expected = 111
+PASS: spi_random.test: Test #44, spi_ctrl_word = 0000 measured = 86, expected = 86
+PASS: spi_random.test: Test #45, spi_ctrl_word = 0000 measured = 86, expected = 86
+PASS: spi_random.test: Test #46, spi_ctrl_word = 0002 measured = 2, expected = 2
+PASS: spi_random.test: Test #47, spi_ctrl_word = 0001 measured = 118, expected = 118
+PASS: spi_random.test: Test #48, spi_ctrl_word = 0002 measured = 2, expected = 2
+PASS: spi_random.test: Test #49, spi_ctrl_word = 0000 measured = 38, expected = 38
+PASS: spi_random.test: Test #50, spi_ctrl_word = 0002 measured = 99, expected = 99
+PASS: spi_random.test: Test #51, spi_ctrl_word = 0002 measured = 99, expected = 99
+PASS: spi_random.test: Test #52, spi_ctrl_word = 0000 measured = 85, expected = 85
+PASS: spi_random.test: Test #53, spi_ctrl_word = 0002 measured = 58, expected = 58
+PASS: spi_random.test: Test #54, spi_ctrl_word = 0000 measured = 85, expected = 85
+
+
+spi_random TEST PASSED.  55 spi_random tests run.
+

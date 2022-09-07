@@ -1,0 +1,14 @@
+Test Date = Fri Feb 10 14:47:16 PST 2017
+Test Block = spi
+PASS: spi.determinisic test: Test #0, spi_ctrl_word = 0000 measured = 85, expected = 85
+PASS: spi.determinisic test: Test #1, spi_ctrl_word = 0001 measured = 85, expected = 85
+PASS: spi.determinisic test: Test #2, spi_ctrl_word = 0002 measured = 85, expected = 85
+PASS: spi.determinisic test: Test #3, spi_ctrl_word = 0003 measured = 85, expected = 85
+PASS: spi.determinisic test: Test #4, spi_ctrl_word = 0000 measured = 170, expected = 170
+PASS: spi.determinisic test: Test #5, spi_ctrl_word = 0001 measured = 170, expected = 170
+PASS: spi.determinisic test: Test #6, spi_ctrl_word = 0002 measured = 170, expected = 170
+PASS: spi.determinisic test: Test #7, spi_ctrl_word = 0003 measured = 170, expected = 170
+
+
+spi TEST PASSED.  8 spi tests run.
+

@@ -1,0 +1,164 @@
+///////////////////////////////////////////////////////////////////
+// File Name: event_router.sv
+// Engineer:  Carl Grace (crgrace@lbl.gov)
+//
+// Description: Routes event from one of 64 channels to shared FIFO.
+//     
+// For LightPix, there are a lot of dark counts so we integrate for
+// some number of clock cycles and only commit events to chip FIFO 
+// if we get enough hits before the integration window closes.
+// Otherwise, we can just ignore the integration either with a mode 
+// bit or by setting the threshold to 1 & integration to 1
+///////////////////////////////////////////////////////////////////
+
+module event_router
+    #(parameter WIDTH = 64,
+    parameter NUMCHANNELS = 64)
+    (output logic [WIDTH-2:0] channel_event_out,// routed event (pre-parity)
+    output logic [NUMCHANNELS-1:0] read_local_fifo_n, // low to read fifo
+    output logic load_event,    // event ready to put in FIFO
+    input logic [WIDTH-2:0] input_event [NUMCHANNELS-1:0], // data in
+    input logic [NUMCHANNELS-1:0] local_fifo_empty, // when low, event ready
+    input logic lightpix_mode, // high to integrate hits for timeout
+    input logic [6:0] hit_threshold, // how many hits to declare event?
+    input logic [7:0] timeout, // number of clk cycles to wait for hits
+    input logic clk,           // master clock
+    input logic reset_n);      // asynchronous digital reset (active low)
+
+// temp storage
+logic [NUMCHANNELS-1:0] channel_waiting; // each bit high for waiting chan
+logic [NUMCHANNELS-1:0] fifo_empty_hold; // hold FIFO state so
+                        // events do not get stale
+logic [6:0] total_hits;     // sum of all waiting channels
+logic [8:0] event_timer;    // how many clks we have been integrating for
+logic event_accepted;       // hits passed threshold within timeout
+logic event_complete;       // event done 
+logic [1:0] wait_counter; // wait state counter
+logic wait_counter_done; // wait state counter (used to allow time for FIFO)
+
+// count number of waiting channels 
+// Local FIFO not empty means event waiting for readout
+always_comb begin
+    total_hits = 7'b0;  
+    for (int i = 0; i < NUMCHANNELS; i++) begin
+        total_hits = total_hits + (~local_fifo_empty[i]);
+    end // for
+end // always_comb
+
+// state machine
+enum logic [2:0] // explicit state definitions 
+            {READY = 3'h0,
+            INTEGRATE_EVENTS = 3'h1,
+            READ_EVENT = 3'h2,
+            LATCH_EVENT = 3'h3,
+            CLEAN_UP = 3'h4,
+            WAIT_STATE = 3'h5} State, Next;
+
+always_ff @(posedge clk or negedge reset_n) begin
+    if (!reset_n)
+        State <= READY;
+    else
+        State <= Next;
+end // always_ff
+
+
+always_comb begin
+    case (State)
+        READY:  if (!(&local_fifo_empty))       Next = INTEGRATE_EVENTS; 
+                else                            Next = READY;
+        INTEGRATE_EVENTS:  if (event_accepted)  Next = READ_EVENT;
+                else if (event_complete)        Next = CLEAN_UP;
+                else                            Next = INTEGRATE_EVENTS;
+        READ_EVENT:                             Next = LATCH_EVENT;
+        LATCH_EVENT: if (!(&fifo_empty_hold)) Next = WAIT_STATE;  
+                else if (!event_complete)       Next = INTEGRATE_EVENTS;
+                else                            Next = READY;
+        CLEAN_UP:                               Next = READY;
+        WAIT_STATE: if (wait_counter_done)      Next = READ_EVENT;
+                else                            Next = WAIT_STATE;
+        default:                                Next = READY;
+    endcase
+end // always_comb
+
+// state machine 
+always_ff @(posedge clk or negedge reset_n) begin
+    if (!reset_n) begin
+        load_event <= 1'b0;
+        channel_event_out <= 63'b0;
+        channel_waiting <= 64'b0;
+        read_local_fifo_n <= {64{1'b1}};
+        event_accepted <= 1'b0;
+        event_complete <= 1'b0;
+        event_timer <= 9'b0;
+        wait_counter <= 2'b0;
+        wait_counter_done <= 1'b1;
+    end
+    else begin
+        load_event <= 1'b0;
+        case(Next)
+            READY:  begin
+                channel_waiting <= 64'b0;
+                channel_event_out <= 63'b0;
+                read_local_fifo_n <= {64{1'b1}};
+                event_accepted <= 1'b0;
+                event_complete <= 1'b0;
+                event_timer <= 6'b0;    
+            end // READY
+            INTEGRATE_EVENTS: begin
+                event_timer <= event_timer + 1'b1;
+                fifo_empty_hold <= local_fifo_empty;
+                if (lightpix_mode) begin
+                    if (event_timer >= timeout) begin
+                        event_accepted <= 1'b0; // event finished
+                        event_complete <= 1'b1;
+                    end
+                    else if (total_hits >= hit_threshold) begin
+                        event_accepted <= 1'b1;
+                    end
+                end // if lightpix_mode
+                else begin
+                    event_complete <= 1'b1; // LArPix auto-completes
+                    event_accepted <= 1'b1; // LArPix auto-accepts
+                end
+            end // INTEGRATE EVENTS
+            READ_EVENT: begin   
+                wait_counter <= 2'b0;
+                wait_counter_done <= 1'b0;
+                event_timer <= event_timer + 1'b1;
+                read_local_fifo_n <= {64{1'b1}};  
+                for (int i = 0; i < 64; i++) begin
+                    if ( (fifo_empty_hold[i] == 1'b0) ) begin
+                        channel_waiting[i] <= 1'b1;
+                        read_local_fifo_n[i] <= 1'b0;
+                        fifo_empty_hold[i] <= 1'b1;
+                        break; // only read out one 
+                    end
+                end
+            end // READ_EVENT
+            LATCH_EVENT: begin
+                event_timer <= event_timer + 1'b1;
+                if (event_accepted) begin
+                    load_event <= 1'b1;
+                end
+                for (int i = 0; i < 64; i++) begin
+                    if ( (channel_waiting[i] == 1'b1) ) begin
+                        channel_event_out <= input_event[i];
+                        channel_waiting[i] <= 1'b0;
+                    end
+                end
+            end // LATCH_EVENT
+            CLEAN_UP: begin // dump local fifos
+                read_local_fifo_n <= fifo_empty_hold;
+            end
+            WAIT_STATE: begin
+                wait_counter <= wait_counter + 1'b1;
+                if (wait_counter >= 2'b10) begin
+                    wait_counter_done <= 1'b1;
+                end // if
+            end // WAIT_STATE
+            default: ;
+        endcase
+    end
+end 
+endmodule           
+

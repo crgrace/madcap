@@ -1,0 +1,8 @@
+Test Date = Mon Jun 12 19:28:45 PDT 2017
+Test Block = uart
+FAIL: uart.UART raw test: Test #0, recoveredWord = aa measured = 9007199299355667, expected = 6004799503160661
+
+
+uart TEST FAILED.  1 errors in 1 toal tests.
+
+                                                1969320564
