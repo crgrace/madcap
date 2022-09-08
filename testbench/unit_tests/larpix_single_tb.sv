@@ -116,8 +116,8 @@ mcp_larpix_single
 
 // single LArPix
 // DUT (LArPix full-chip model) LArPix is connected to FPGA
-larpix_v2c
-    larpix_v2c_inst (
+larpix_v3
+    larpix_v3_inst (
     .piso               (piso),
     .digital_monitor    (digital_monitor),
     .monitor_out_r      (monitor_out_r),

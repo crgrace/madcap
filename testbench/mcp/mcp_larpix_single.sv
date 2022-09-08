@@ -117,8 +117,8 @@ always begin
 end
 
 always_comb begin
-    clk_rx = larpix_single_tb.larpix_v2c_inst.digital_core_inst.clk_rx;
-    clk_tx = larpix_single_tb.larpix_v2c_inst.digital_core_inst.clk_tx;
+    clk_rx = larpix_single_tb.larpix_v3_inst.digital_core_inst.clk_rx;
+    clk_tx = larpix_single_tb.larpix_v3_inst.digital_core_inst.clk_tx;
     clk = clk_master;
 end
 
