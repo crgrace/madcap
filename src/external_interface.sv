@@ -51,6 +51,7 @@ module external_interface
     
 // internal nets
 logic [WIDTH-2:0] data_wo_parity; // data without parity bit
+logic [WIDTH-2:0] config_data_wo_parity; // config_data without parity bit
 logic fifo_full_delayed; // delayed one clk
 logic fifo_half_delayed; // delayed one clk
 logic rx_data_flag;
@@ -70,6 +71,8 @@ logic [7:0] regmap_address;
 logic write_regmap;
 logic read_regmap;
 logic comms_busy;
+logic send_config_data; // send config data to hydra network
+
 
 // if this is config data from current chip, append fifo info, otherwise
 // just pass it on
@@ -79,10 +82,13 @@ always_ff @(posedge clk or negedge reset_n_clk) begin
         data_wo_parity <= 0;
     end 
     else begin
-        if ( (chip_id == tx_data[9:2]) && (tx_data[1:0] == 2'b11) )
-            data_wo_parity <= {tx_data[62],fifo_full_delayed,fifo_half_delayed,tx_data[59:0]};
+        if ( (chip_id == output_event[9:2]) && (output_event[1:0] == 2'b11) )
+            data_wo_parity <= {output_event[62],fifo_full_delayed,fifo_half_delayed,output_event[59:0]};
+        else if ( (output_event[1:0] == 2'b11) 
+                || (output_event[1:0] == 2'b10)) 
+            data_wo_parity <= output_event;
         else  
-        data_wo_parity <= tx_data;
+            data_wo_parity <= tx_data;
     end
 end // always
 
@@ -177,6 +183,7 @@ comms_ctrl
     .write_regmap       (write_regmap),
     .read_regmap        (read_regmap),
     .comms_busy         (comms_busy),
+    .send_config_data   (send_config_data),
     .rx_data            (rx_data),
     .pre_event          (pre_event),
     .chip_id            (chip_id),

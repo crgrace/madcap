@@ -65,11 +65,11 @@ initial begin
     restart_ramp = 0;
     disable_ramp = 1;
     external_trigger = 0;
-    posi[0] = 0;
+    posi[0] = 1;
 //    posi[1] = 1;
     posi[2] = 1;
     posi[3] = 1;
-
+/*
 #10000
 
     for (int trigNum = 0; trigNum < 20; trigNum++) begin
@@ -81,7 +81,7 @@ initial begin
         #1 external_trigger = 0;
         $display("EXTERNAL TRIGGER number %0d",trigNum);
     end // for
-
+*/
 
 /*
 #300000
