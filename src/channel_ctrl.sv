@@ -52,7 +52,7 @@ module channel_ctrl
     input logic [9:0] min_delta_adc, // min delta before rst triggered
     input logic fifo_full,            // high when shared fifo is full 
     input logic fifo_half,            // high when shared fifo is half full 
-    input logic enable_fifo_diagnostics, // high to embed fifo counts
+    input logic enable_local_fifo_diagnostics,// high to embed fifo counts
     input logic channel_mask,         // high to mask out this channel
     input logic external_trigger_mask,// high to disable external trigger
     input logic cross_trigger_mask,       // high to disable cross trigger
@@ -374,16 +374,15 @@ always_ff @(posedge clk  or negedge reset_n) begin
                              reset_event[1:0] <= 2'b01; // data packet
                              reset_event[9:2] <= chip_id;
                              reset_event[15:10] <= channel_id;
-                             reset_event[45:16] <= timestamp_latched[29:0];
-                             reset_event[47:46] <= 2'b11; // CDS reset  
-                             reset_event[55:48] <= adc_word;
+                             reset_event[43:16] <= timestamp_latched[27:0];
+                             reset_event[45:44] <= 2'b11; // CDS reset  
+                             reset_event[55:46] <= adc_word;
                              reset_event[57:56] <= trigger_type_latched;
                              reset_event[59:58] <= {fifo_full,fifo_half};
                              reset_event[61:60] <= {local_fifo_full,local_fifo_half};
                              reset_event[62] <= 1'b1; // flag downstream
-                            if (enable_fifo_diagnostics) begin
-                                reset_event[43:28] <= 16'b0;
-                                reset_event[42:39] <= local_fifo_counter;
+                            if (enable_local_fifo_diagnostics) begin
+                                reset_event[43:40] <= local_fifo_counter;
                             end
                             sample <= 1'b1; // begin tracking again
                             end  
@@ -393,18 +392,17 @@ always_ff @(posedge clk  or negedge reset_n) begin
                              pre_event[1:0]     <= 2'b01; // data packet
                              pre_event[9:2]     <= chip_id;
                              pre_event[15:10]   <= channel_id;
-                             pre_event[45:16]   <= timestamp_latched[29:0];
-                             pre_event[46]      <= 1'b0;
-                             pre_event[47]      <= cds_mode;
+                             pre_event[43:16]   <= timestamp_latched[27:0];
+                             pre_event[44]      <= 1'b0;
+                             pre_event[45]      <= cds_mode;
                              pre_event[55:48]   <= adc_word;
                              pre_event[57:56]   <= trigger_type_latched;
                              pre_event[59:58]   <= {fifo_full,fifo_half};
                              pre_event[61:60]   <= {local_fifo_full,local_fifo_half};
                              pre_event[62]      <= 1'b1; // flag downstream
                                                         
-                            if (enable_fifo_diagnostics) begin
-                                pre_event[43:28] <= 16'b0;
-                                pre_event[42:39] <= local_fifo_counter;
+                            if (enable_local_fifo_diagnostics) begin
+                                pre_event[43:40] <= local_fifo_counter;
                             end
                             if (threshold_polarity)
                                 delta_adc <= adc_word - previous_adc_word;

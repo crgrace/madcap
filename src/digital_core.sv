@@ -140,6 +140,8 @@ logic enable_rolling_periodic_reset; // make the reset rolling
 logic enable_periodic_trigger_veto; // does hit veto periodic trigger?
 logic enable_hit_veto;   // is hit required to go into hold mode?
 logic enable_fifo_diagnostics;   // high for diagnostics
+logic enable_local_fifo_diagnostics;   // high for local diagnostics
+logic enable_packet_diagnostics;   // high for bad packet diagnostics
 logic [15:0] adc_hold_delay;     // how many clock cycles for sampling?
 logic [7:0] adc_burst_length;  // how long is max adc burst?
 logic [2:0] reset_length;       // how many cycles to reset CSA?
@@ -298,6 +300,8 @@ always_comb begin
     enable_tx_dynamic_powerdown  = config_bits[DIGITAL][0];
     load_config_defaults = config_bits[DIGITAL][1];
     enable_fifo_diagnostics = config_bits[DIGITAL][2];
+    enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
+    enable_packet_diagnostics = config_bits[DIGITAL][4];
     clk_ctrl = config_bits[DIGITAL][4:3];
     tx_dynamic_powerdown_cycles = config_bits[DIGITAL][7:5];
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
@@ -316,7 +320,6 @@ always_comb begin
     enable_periodic_trigger_veto = config_bits[ENABLE_TRIG_MODES][5];
     enable_hit_veto = config_bits[ENABLE_TRIG_MODES][6];
     adc_hold_delay[7:0] = config_bits[ADC_HOLD_DELAY][7:0];
-
     shadow_reset_length = config_bits[SHADOW_RESET_LENGTH][7:0];
     adc_hold_delay[15:8] = config_bits[ADC_HOLD_DELAY+1][7:0];
     adc_burst_length = config_bits[ADC_BURST][7:0];

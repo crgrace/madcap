@@ -33,6 +33,7 @@ begin
     digital_threshold = 0;
     min_delta_adc = 30;
     enable_fifo_diagnostics = 0;
+    enable_local_fifo_diagnostics = 0;
     channel_mask = 0;
     external_trigger_mask = 0;
     cross_trigger_mask = 1;

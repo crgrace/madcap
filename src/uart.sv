@@ -16,12 +16,14 @@
 //
 //  bit range     | contents
 //  --------------------------
-//     1:0        | packet declaration (00: data, 01: test.
+//     1:0        | packet declaration (00: unused, 01: data,
 //                    10: configuration write, 11: configuration read)
 //     9:2        | chip id
 //   15:10        | channel id
-//   47:16        | 32-bit time stamp
-//   55:48        | 8-bit ADC data word
+//   43:16        | 28-bit time stamp
+//   44           | reset sample flag
+//   45           | cds flag
+//   55:46        | 10-bit ADC data word
 //   57:56        | trigger type (00: normal, 01: external, 10: cross, 
 //                    11: periodic)
 //   59:58        | local FIFO status (58: fifo half full,59: fifo full)
@@ -31,7 +33,7 @@
 //
 //  In configuration mode:  [17:10] is register address
 //                          [25:18] is register data
-//
+//                          [57:26] is magic number (0x89_50_4E_47)
 //  Output format: packet is sent LSB-first, preceded by a start bit = 0
 //  and followed by a stop bit = 1    
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +59,9 @@ module uart
     input logic enable_tx_dynamic_powerdown, // high to power down idle
     input logic [2:0] tx_dynamic_powerdown_cycles, // how many to wait
     input logic enable_fifo_diagnostics, // high to embed fifo counts
+    input logic enable_packet_diagnostics, //high to embed bad packet counts
     input logic [FIFO_BITS:0] fifo_counter,  // current shared fifo count
+    input logic [FIFO_BITS:0] bad_packets,  // bad packets received count
     input logic rxclk,     // 2X oversampling receiving clock
     input logic txclk,     // 5 MHz UART TX clock
     input logic reset_n,   // digital reset (active low)
@@ -83,6 +87,8 @@ always_comb begin
     if (test_mode == 2'b00) begin
         if (enable_fifo_diagnostics)
             uart_tx_data = {~^{fifo_data[62:44],fifo_counter,fifo_data[31:0]},{fifo_data[62:44],fifo_counter,fifo_data[31:0]}};
+        else if (enable_packet_diagnostics)
+            uart_tx_data = {~^{fifo_data[62:44],bad_packets,fifo_data[31:0]},{fifo_data[62:44],bad_packets,fifo_data[31:0]}};
         else 
             uart_tx_data = {~^fifo_data,fifo_data};
         ld_prbs_data = 1'b0;
@@ -95,6 +101,8 @@ always_comb begin
     end else if (test_mode == 2'b11) begin
         if (enable_fifo_diagnostics)
             uart_tx_data = {~^{fifo_data[62:44],fifo_counter,fifo_data[31:0]},{fifo_data[62:44],fifo_counter,fifo_data[31:0]}};
+        else if (enable_packet_diagnostics)
+            uart_tx_data = {~^{fifo_data[62:44],bad_packets,fifo_data[31:0]},{fifo_data[62:44],bad_packets,fifo_data[31:0]}};
         else 
             uart_tx_data = {~^fifo_data,fifo_data};
         ld_prbs_data = 1'b0;

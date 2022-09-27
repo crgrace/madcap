@@ -129,6 +129,7 @@ generate
                 .enable_tx_dynamic_powerdown (enable_tx_dynamic_powerdown),
                 .tx_dynamic_powerdown_cycles (tx_dynamic_powerdown_cycles),
                 .enable_fifo_diagnostics    (enable_fifo_diagnostics),
+                .enable_packet_diagnostics  (enable_packet_diagnostics),
                 .fifo_counter           (fifo_counter),
                 .rxclk                  (clk_rx),
                 .txclk                  (clk_tx),

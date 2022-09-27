@@ -48,6 +48,7 @@ logic [7:0] dynamic_reset_threshold; // rst threshold
 logic [7:0] digital_threshold; // rst threshold
 logic [9:0] min_delta_adc; // min delta before rst triggered
 logic enable_fifo_diagnostics; // high to embed fifo counts
+logic enable_local_fifo_diagnostics; // high to embed local fifo counts
 logic channel_mask;         // high to mask out this channel
 logic external_trigger_mask;// high to disable external trigger
 logic cross_trigger_mask;       // high to disable cross trigger
@@ -193,7 +194,7 @@ channel_ctrl
     .min_delta_adc          (min_delta_adc),
     .fifo_full              (fifo_full),
     .fifo_half              (fifo_half),
-    .enable_fifo_diagnostics    (enable_fifo_diagnostics),
+    .enable_local_fifo_diagnostics    (enable_local_fifo_diagnostics),
     .channel_mask           (channel_mask),
     .external_trigger_mask  (external_trigger_mask),
     .cross_trigger_mask     (cross_trigger_mask), 

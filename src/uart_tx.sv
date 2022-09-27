@@ -14,8 +14,10 @@
 //                    10: configuration write, 11: configuration read
 //     9:2        | chip id
 //   15:10        | channel id
-//   47:16        | 32-bit time stamp
-//   55:48        | 8-bit ADC data word
+//   43:16        | 32-bit time stamp
+//   44           | reset sample flag
+//   45           | CDS flag
+//   55:46        | 8-bit ADC data word
 //   57:56        | trigger type (00: normal, 01: external, 10: cross, 
 //                    11: periodic)
 //   59:58        | local FIFO status (58: fifo half full,59: fifo full)

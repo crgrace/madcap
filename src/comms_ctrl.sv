@@ -17,7 +17,7 @@ module comms_ctrl
     (output logic [WIDTH-2:0] output_event,  // event to put into the fifo
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
-    output logic [3:0] bad_packets,    // number of bad config packets observed 
+    output logic [11:0] bad_packets,//number of bad config packets observed 
     output logic write_fifo_n,    // write event into fifo (active low) 
     output logic read_fifo_n,    // read event from fifo (active low)
     output logic ld_tx_data,      // high to transfer data to tx uart
@@ -48,7 +48,7 @@ enum logic [3:0] // explicit state definitions
             PASS_ALONG_CONFIG2 = 4'h6,
             WAIT_FOR_WRITE = 4'h7,
             WRITE_FIFO = 4'h8,
-            WAIT_STATE = 4'h9
+            WAIT_STATE = 4'h9,
             BAD_PACKET = 4'ha} State, Next;
             
 // local registers
@@ -72,7 +72,11 @@ end // always_ff
 always_comb begin
     Next = READY;
     case (State)
-        READY:  if ( (rx_data_flag) && (rx_data[1:0] == 2'b10) 
+        READY:  if ( (rx_data_flag) 
+                    && ((rx_data[1:0] == 2'b11)
+                    || (rx_data[1:0] == 2'b10))
+                    && (rx_data[57:26] != MAGIC_NUMBER)) Next = BAD_PACKET; 
+                else if ( (rx_data_flag) && (rx_data[1:0] == 2'b10) 
                     && ( (rx_data[9:2] == chip_id) 
                     || (rx_data[9:2] == GLOBAL_ID) ) ) 
                                                         Next = CONFIG_WRITE;
@@ -118,7 +122,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         timeout <= 4'b0;
         comms_busy <= 1'b0;
         send_config_data <= 1'b0;
-        bad_packets <= 4'b0;
+        bad_packets <= 11'b0;
     end
     else begin
         write_fifo_n <= 1'b1;
