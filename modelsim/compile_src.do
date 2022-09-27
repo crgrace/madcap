@@ -74,7 +74,7 @@ vlog -incr -sv "../testbench/unit_tests/uart_tx_fpga.sv"
 #
 # analog behavioral models
 #
-vlog -incr -vopt -sv "../testbench/analog_core/sar_adc_core.sv" 
+vlog -incr -vopt -sv "../testbench/analog_core/sar_async_adc.sv" 
 vlog -incr -vopt -sv "../testbench/analog_core/discriminator.sv" 
 vlog -incr -vopt -sv "../testbench/analog_core/csa.sv" 
 vlog -incr -vopt -sv "../testbench/analog_core/analog_channel.sv" 

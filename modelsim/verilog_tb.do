@@ -11,7 +11,8 @@ switch $SIM_LEVEL {
   # compile source
     do {compile_src.do}
 # run vsim
-    vsim -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
+    vsim -L tsmc_tcb013ghp channel_ctrl_tb -vopt -voptargs="+acc=npr" 
+#    vsim -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
     
 #   vsim -L rf2p_512x64_4_50 -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 larpix_hydra_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
   }
@@ -20,7 +21,7 @@ switch $SIM_LEVEL {
   # compile source
     do {compile_syn.do}
 # run vsim
-    vsim -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" -sdftyp :larpix_single_tb:larpix_v3_inst:digital_core_inst=[pwd]/../par/r2g.sdf
+    vsim -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" -sdftyp :larpix_single_tb:larpix_v2c_inst:digital_core_inst=[pwd]/../par/r2g.sdf
 
     
 #   vsim -L rf2p_512x64_4_50 -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 larpix_hydra_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
@@ -30,13 +31,13 @@ switch $SIM_LEVEL {
 
  #   vsim -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
    vsim   -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb \
-        -vopt -voptargs="+acc -xprop,mode=resolve" -sdfmin :larpix_single_tb:larpix_v3_inst:digital_core_inst=[pwd]/../par/digital_core_av_hold_bc_tempus_signoff.sdf
+        -vopt -voptargs="+acc -xprop,mode=resolve" -sdfmin :larpix_single_tb:larpix_v2c_inst:digital_core_inst=[pwd]/../par/digital_core_av_hold_bc_tempus_signoff.sdf
 #   vsim   -L tsmc_tcb013ghp -suppress 12027 larpix_single_tb \
-#        -sdfnoerror -vopt -voptargs="+acc -xprop,mode=resolve" -sdfmin :larpix_single_tb:larpix_v3_inst:digital_core_inst=[pwd]/../par/digital_core_av_hold_bc_tempus_signoff.sdf \
-# -sdfmin :larpix_single_tb:larpix_v3_inst:digital_core_inst=[pwd]/../par/digital_core_av_setup_wc_tempus_signoff.sdf 
+#        -sdfnoerror -vopt -voptargs="+acc -xprop,mode=resolve" -sdfmin :larpix_single_tb:larpix_v2c_inst:digital_core_inst=[pwd]/../par/digital_core_av_hold_bc_tempus_signoff.sdf \
+# -sdfmin :larpix_single_tb:larpix_v2c_inst:digital_core_inst=[pwd]/../par/digital_core_av_setup_wc_tempus_signoff.sdf 
 
 #   vsim   -L rf2p_512x64_4_50 -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 larpix_hydra_tb \
-        -sdfnoerror -vopt -voptargs="+acc -xprop,mode=resolve" -sdftyp :larpix_hydra_tb:larpix_v3_inst0:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v3_inst1:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v3_inst2:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v3_inst3:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf \
+        -sdfnoerror -vopt -voptargs="+acc -xprop,mode=resolve" -sdftyp :larpix_hydra_tb:larpix_v2c_inst0:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v2c_inst1:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v2c_inst2:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf -sdftyp :larpix_hydra_tb:larpix_v2c_inst3:digital_core_inst=[pwd]/../par/digital_core.signoff.sdf \
 
 
 

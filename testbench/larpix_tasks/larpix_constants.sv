@@ -89,8 +89,7 @@ localparam TRX16 = 255;
 
 
 // UART ops
-localparam DATA = 2'b00;
-localparam TEST = 2'b01;
+localparam DATA = 2'b01;
 localparam CONFIG_WRITE = 2'b10;
 localparam CONFIG_READ = 2'b11;
 

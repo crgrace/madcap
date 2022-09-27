@@ -16,25 +16,29 @@
 module channel_ctrl
     #(parameter integer unsigned WIDTH = 64,  // width of packet (w/o start & stop bits) 
     parameter integer unsigned MAIN_FIFO_BITS = 12,
-    parameter integer unsigned LOCAL_FIFO_DEPTH = 4) 
+    parameter integer unsigned LOCAL_FIFO_DEPTH = 8) 
     (output logic [WIDTH-2:0] channel_event, // event to shared fifo
     output logic [7:0] dac_word,   // DAC control word sent to SAR ADC
-    output logic [7:0] adc_word, // helpful for debugging (not used by RTL)
-    output logic fifo_empty,   // is data eady to write to shared FIFO?
+    output logic [9:0] adc_word, // helpful for debugging (not used by RTL)
+    output logic fifo_empty,    // is data eady to write to shared FIFO?
     output logic triggered_natural,  // high to indicate valid hit
-    output logic csa_reset, // reset CSA
+    output logic csa_reset,     // reset CSA
     output logic sample,        // high to sample CSA output
     output logic strobe,        // high to strobe SAR ADC
     output logic clk_out,       // copy of master clock used in TDC
+    input logic async_mode,    // high if asynchronous ADC used
     input logic comp,           // bit from comparator in SAR
     input logic hit,            // high when discriminator fires
-    input logic [7:0] chip_id, // unique id for each chip
+    input logic [9:0] dout,     // ADC output bits
+    input logic done,           // async ADC conversion complete    
+    input logic [7:0] chip_id,  // unique id for each chip
     input logic [5:0] channel_id,// unique identifier for each ADC channel 
     input logic [7:0] adc_burst,// how many conversions to do each hit
     input logic [15:0] adc_hold_delay,// number of clock cycles for sampling
     input logic [31:0] timestamp_32b,     // time stamp to write to event
     input logic unsigned [7:0] reset_length,   // # of cycles to hold CSA in reset
     input logic enable_dynamic_reset,  // high for data-driven reset
+    input logic cds_mode,           // high to send CDS reset packet
     input logic mark_first_packet, // MSB of timestamp = 1 for first packet 
     input logic read_local_fifo_n,  // low to read out local fifo
     input logic external_trigger,     // high when external trigger raised
@@ -45,7 +49,7 @@ module channel_ctrl
     input logic threshold_polarity, // high for ADC above threshold
     input logic [7:0] dynamic_reset_threshold, // rst threshold
     input logic [7:0] digital_threshold, // only write if adc > this
-    input logic [7:0] min_delta_adc, // min delta before rst triggered
+    input logic [9:0] min_delta_adc, // min delta before rst triggered
     input logic fifo_full,            // high when shared fifo is full 
     input logic fifo_half,            // high when shared fifo is half full 
     input logic enable_fifo_diagnostics, // high to embed fifo counts
@@ -62,15 +66,19 @@ module channel_ctrl
 localparam LOCAL_FIFO_BITS = $clog2(LOCAL_FIFO_DEPTH); // bits in fifo addr
 
 // define states
-enum logic [2:0] // explicit state definitions 
-            {IDLE = 3'h0,
-            SAMPLE = 3'h1,
-            RESET_CSA = 3'h2,
-            CONVERT = 3'h3,
-            SAR_DONE = 3'h4,
-            REQUEST_READOUT = 3'h5,
-            TRANSFER = 3'h6,
-            MODE_RESET = 3'h7} State, Next;
+enum logic [3:0] // explicit state definitions 
+            {IDLE = 4'h0,
+            SAMPLE = 4'h1,
+            GET_RESET_SAMPLE = 4'h2,
+            RESET_CSA = 4'h3,
+            CONVERT = 4'h4,
+            SAR_DONE = 4'h5,
+            SAVE_RESET_SAMPLE = 4'h6,
+            REQUEST_READOUT = 4'h7,
+            TRANSFER_RESET_SAMPLE = 4'h8,
+            WAIT_STATE = 4'h9, 
+            TRANSFER_ADC_CODE = 4'ha,
+            MODE_RESET = 4'hb} State, Next;
 
 // triggers
 logic triggered_external;   // high if valid external trigger
@@ -87,10 +95,15 @@ logic strobe_en;  // enables clk to be used as ADC strobe
 
 // internal registers
 logic [7:0] adc_burst_counter; // current ADC conversion number
+logic [2:0] wait_counter; // waits for event router
+logic [2:0] wait_length;    // how long to wait for event router
 logic unsigned [7:0] reset_counter; // clock cycle currently in reset
 logic [WIDTH-2:0] pre_event; // event before put into local FIFO
-logic [8:0] delta_adc; // difference between two adcs
-logic [7:0] previous_adc_word; // value of last conversion
+logic [WIDTH-2:0] reset_event; // CDS reset sample for local FIFO
+logic [WIDTH-2:0] fifo_event; // event to load into local FIFO
+
+logic [10:0] delta_adc; // difference between two adcs
+logic [9:0] previous_adc_word; // value of last conversion
 logic first_conversion; // high when ADC is doing 1st conversion after hit
 logic periodic_reset_triggered; // execute a periodic reset (not vetoed)
 logic csa_reset_triggered; // programmatic reset trigger
@@ -101,8 +114,9 @@ logic final_conversion; // high during final conversion of reset threshold
 logic readout_mode; // high when controller is attempting FIFO write
 
 // internal signals
+logic have_reset_sample; // high if reset sample has been taken already
 logic write_local_fifo_n; // low to write event to local memory
-logic [2:0] local_fifo_counter; // max 16 memory locations
+logic [LOCAL_FIFO_BITS:0] local_fifo_counter; // max 16 memory locations
 logic local_fifo_full; // high when fifo is in overflow 
 logic local_fifo_half; // high when fifo is half full 
 logic strobe_BAR; // inverted strobe
@@ -113,6 +127,7 @@ gate_posedge_clk
     .CLK(clk),
     .ENCLK(strobe_BAR)
     );
+
 always_comb strobe = ~strobe_BAR;
 always_comb clk_out = clk;
 
@@ -155,6 +170,14 @@ always_comb begin
                 | periodic_reset_triggered);
 end // always_comb
 
+// FIFO mux
+always_comb begin
+    if (have_reset_sample)
+        fifo_event = reset_event;
+    else
+        fifo_event = pre_event;
+end // always_comb 
+    
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         csa_reset_held <= 1'b0;
@@ -197,22 +220,37 @@ end // always_ff
 always_comb begin
     case (State)
         IDLE:   if (triggered_channel)      Next = SAMPLE; 
+                else if ((cds_mode == 1'b1)
+                        && (have_reset_sample == 1'b0)) Next = GET_RESET_SAMPLE;
                 else                        Next = IDLE;
         SAMPLE: if (trigger_type_latched != 2'b00)  Next = RESET_CSA;
                 else if (sample_counter < adc_hold_delay) Next = SAMPLE;
                 else if (adc_burst_counter < adc_burst) Next = RESET_CSA;
                 else if (enable_hit_veto & !hit) Next = IDLE; 
                 else                        Next = RESET_CSA;
+        GET_RESET_SAMPLE: if (sample_counter < adc_hold_delay) Next = GET_RESET_SAMPLE;
+                else                        Next = CONVERT;
         RESET_CSA: if (!first_conversion & enable_dynamic_reset)   Next = CONVERT; 
                 else if (adc_burst >= adc_burst_counter) Next = CONVERT;
                 else if (reset_counter >= reset_length)   Next = CONVERT;
                 else                        Next = CONVERT;
-        CONVERT: if (sar_mask <= 8'b0)      Next = SAR_DONE;
+        CONVERT: if ((sar_mask <= 8'b0)      
+                    || (done == 1'b1))       Next = SAR_DONE;
                 else                        Next = CONVERT;
-        SAR_DONE:                           Next = REQUEST_READOUT;
-        REQUEST_READOUT: if (!local_fifo_full)    Next = TRANSFER;
+        SAR_DONE: if ((cds_mode == 1'b1)
+                        && (have_reset_sample == 1'b0)) Next = SAVE_RESET_SAMPLE;
+                  else Next = REQUEST_READOUT;
+        SAVE_RESET_SAMPLE: Next = IDLE;
+        REQUEST_READOUT: if ((!local_fifo_full)
+                            && (cds_mode == 1'b0))    Next = TRANSFER_ADC_CODE;
+                        else if ((!local_fifo_full)
+                            && (cds_mode == 1'b1)
+                            && (have_reset_sample == 1'b1)) Next = TRANSFER_RESET_SAMPLE;
                 else                        Next = REQUEST_READOUT;
-        TRANSFER: if (adc_burst == 8'h00)   Next = IDLE;
+        TRANSFER_RESET_SAMPLE:              Next = WAIT_STATE;
+        WAIT_STATE:   if (wait_counter >= 3'b100)  Next = TRANSFER_ADC_CODE;
+                    else                            Next = WAIT_STATE;
+        TRANSFER_ADC_CODE: if (adc_burst == 8'h00)   Next = IDLE;
                   else if ((adc_burst_counter >= adc_burst) 
                         && (adc_burst > 8'h00)) Next = IDLE;
                   else if (final_conversion == 1'b1)   Next = IDLE;
@@ -244,6 +282,8 @@ always_ff @(posedge clk  or negedge reset_n) begin
         final_conversion <= 1'b0;
         readout_mode <= 1'b0;
         last_call <= 1'b0;
+        have_reset_sample <= 1'b0;
+        wait_counter <= 3'b0;
     end else begin
         csa_reset_triggered <= 1'b0;
         periodic_reset_triggered <= 1'b0;
@@ -264,6 +304,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             delta_adc <= 9'h1ff;
                             previous_adc_word <= 8'b0;
                             last_call <= 1'b0;
+                            wait_counter <= 3'b0;
                             // only respond to periodic resets in IDLE state
                             // (else veto them)
                             if (periodic_reset) begin
@@ -282,66 +323,105 @@ always_ff @(posedge clk  or negedge reset_n) begin
                                 final_conversion <= 1'b1;
                             end
                         end
+            GET_RESET_SAMPLE: begin
+                            sar_mask <= 8'b10000000;
+                            adc_word <= 8'b0;
+                            sample_counter <= sample_counter + 1'b1;
+                        end
             RESET_CSA:  begin
                             strobe_en <= 1'b1;
                             timestamp_latched <= timestamp_32b;
                             if (mark_first_packet) begin
                                 if (first_conversion) begin 
-                                    timestamp_latched[31] <= 1'b1; 
+                                    timestamp_latched[27] <= 1'b1; 
                                 end
                                 else begin
-                                    timestamp_latched[31] <= 1'b0; 
+                                    timestamp_latched[27] <= 1'b0; 
                                 end
                             end
                             if ( ((reset_counter <= reset_length) 
-                                & (first_conversion & (adc_burst == 8'h00)))
-                                & (!enable_dynamic_reset)
-                                & (!enable_min_delta_adc) 
-                                | (adc_burst_counter == (adc_burst-1'b1) )
-                                | (final_conversion == 1'b1)) begin
+                                && (first_conversion & (adc_burst == 8'h00)))
+                                && (!enable_dynamic_reset)
+                                && (!enable_min_delta_adc) 
+                                || (adc_burst_counter == (adc_burst-1'b1) )
+                                || (final_conversion == 1'b1)) begin
                                 csa_reset_triggered <= 1'b1;
                             end
                         end
-
-            CONVERT:  begin    
-                            strobe_en <= 1'b1;                  
-                            if (comp) begin
-                                 adc_word <= adc_word | (sar_mask);
+            CONVERT:  begin 
+                            if (!async_mode) begin
+                                strobe_en <= 1'b1;                  
+                                if (comp) begin
+                                    adc_word <= adc_word | (sar_mask);
+                                end
+                                sar_mask <= (sar_mask >> 1'b1);
                             end
-                            sar_mask <= (sar_mask >> 1'b1);
                             first_conversion <= 1'b0;
                             last_call <= 1'b0;
                             sample_counter <= 16'b0;
                         end  
             SAR_DONE:  begin
-                            if (comp) begin
+                            if (async_mode) begin
+                                adc_word <= dout;
+                            end
+                            else if (comp) begin
                                 adc_word <= adc_word | (sar_mask);
                             end
                             sample <= 1'b1;
                         end
-            REQUEST_READOUT:begin
-                             readout_mode <= 1'b1;
-                             pre_event[1:0] <= 2'b00; // data packet
-                             pre_event[9:2] <= chip_id;
-                             pre_event[15:10] <= channel_id;
-                             pre_event[47:16] <= timestamp_latched;
-                             pre_event[55:48] <= adc_word;
-                             pre_event[57:56] <= trigger_type_latched;
-                             pre_event[59:58] <= {fifo_full,fifo_half};
-                             pre_event[61:60] <= {local_fifo_full,local_fifo_half};
-                             pre_event[62] <= 1'b1; // flag downstream
+            SAVE_RESET_SAMPLE: begin
+                             have_reset_sample <= 1'b1;
+                             reset_event[1:0] <= 2'b01; // data packet
+                             reset_event[9:2] <= chip_id;
+                             reset_event[15:10] <= channel_id;
+                             reset_event[45:16] <= timestamp_latched[29:0];
+                             reset_event[47:46] <= 2'b11; // CDS reset  
+                             reset_event[55:48] <= adc_word;
+                             reset_event[57:56] <= trigger_type_latched;
+                             reset_event[59:58] <= {fifo_full,fifo_half};
+                             reset_event[61:60] <= {local_fifo_full,local_fifo_half};
+                             reset_event[62] <= 1'b1; // flag downstream
                             if (enable_fifo_diagnostics) begin
-                                pre_event[47:32] <= 16'b0;
-                                pre_event[46:44] <= local_fifo_counter;
+                                reset_event[43:28] <= 16'b0;
+                                reset_event[42:39] <= local_fifo_counter;
+                            end
+                            sample <= 1'b1; // begin tracking again
+                            end  
+
+            REQUEST_READOUT:begin
+                             readout_mode       <= 1'b1;
+                             pre_event[1:0]     <= 2'b01; // data packet
+                             pre_event[9:2]     <= chip_id;
+                             pre_event[15:10]   <= channel_id;
+                             pre_event[45:16]   <= timestamp_latched[29:0];
+                             pre_event[46]      <= 1'b0;
+                             pre_event[47]      <= cds_mode;
+                             pre_event[55:48]   <= adc_word;
+                             pre_event[57:56]   <= trigger_type_latched;
+                             pre_event[59:58]   <= {fifo_full,fifo_half};
+                             pre_event[61:60]   <= {local_fifo_full,local_fifo_half};
+                             pre_event[62]      <= 1'b1; // flag downstream
+                                                        
+                            if (enable_fifo_diagnostics) begin
+                                pre_event[43:28] <= 16'b0;
+                                pre_event[42:39] <= local_fifo_counter;
                             end
                             if (threshold_polarity)
                                 delta_adc <= adc_word - previous_adc_word;
                             else
                                 delta_adc <= previous_adc_word - adc_word;
-                                previous_adc_word <= adc_word;
-                                sample <= 1'b1; // begin tracking again
+                            previous_adc_word <= adc_word;
+                            sample <= 1'b1; // begin tracking again
                             end  
-            TRANSFER:   begin
+            TRANSFER_RESET_SAMPLE: begin
+                            readout_mode <= 1'b1;
+                            write_local_fifo_n <= 1'b0;
+                            end
+            WAIT_STATE: begin
+                            have_reset_sample <= 1'b0;  
+                            wait_counter <= wait_counter + 1'b1;      
+                        end                    
+            TRANSFER_ADC_CODE:   begin
                             readout_mode <= 1'b1;
                             adc_burst_counter <= adc_burst_counter + 1'b1;
                             if (adc_word >= digital_threshold)
@@ -354,7 +434,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                                 && (adc_word <= dynamic_reset_threshold) )
                                 last_call <= 1'b1;
                             else if ( (enable_min_delta_adc)
-                            && (delta_adc[7:0] < min_delta_adc) )
+                            && (delta_adc[9:0] < min_delta_adc) )
                                 last_call <= 1'b1;
                             if (final_conversion) last_call <= 1'b0;
                         end
@@ -378,7 +458,7 @@ fifo_ff
     .fifo_full      (local_fifo_full),
     .fifo_half      (local_fifo_half),
     .fifo_empty     (fifo_empty),
-    .data_in        (pre_event),
+    .data_in        (fifo_event),
     .read_n         (read_local_fifo_n),
     .write_n        (write_local_fifo_n),
     .clk            (clk),

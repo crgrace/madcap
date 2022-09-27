@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////
 // File Name: digital_core.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
-// Description: LightPix synthesized digital core.  
+// Description: LArPix-v3 synthesized digital core.  
 //              Includes:
 //              UARTs for chip-to-chip communications.
-//              238-byte Register Map for configuration bits.
-//              2048-word deep RAM-based FIFO memory.
-//              SAR ADC controllers.
+//              255-byte Register Map for configuration bits.
+//              2048-word deep latch-based FIFO memory.
+//              Hydra I/O resilient data routing.
 //              Event builder.
 //
 //              Note that the "primary" is the chip writing to and reading
@@ -20,6 +20,7 @@ module digital_core
     parameter NUMCHANNELS = 64,     // number of analog channels
     parameter WORDWIDTH = 8,     // size of word
     parameter REGNUM = 256,          // number of configuration registers
+    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter CHIP_ID_W = 8,        // width of chip ID
     parameter GLOBAL_ID = 255,      // global broadcast ID
     parameter integer unsigned FIFO_DEPTH = 1024,      // number of FIFO memory locations
@@ -516,6 +517,7 @@ external_interface
     #(.WIDTH(WIDTH),
     .GLOBAL_ID(255),
     .REGNUM(REGNUM),
+    .MAGIC_NUMBER(MAGIC_NUMBER),
     .FIFO_BITS(FIFO_BITS)
     ) external_interface_inst (
     .tx_out                 (piso),

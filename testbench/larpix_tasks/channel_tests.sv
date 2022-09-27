@@ -15,6 +15,8 @@ task Initialize_Tests;
 begin
     vin_r = 0;
     hit = 0;
+    cds_mode = 0;
+    comp = 0;
     chip_id = 8'h0f;
     channel_id = 6'h03;
     adc_burst = 8'h00;
@@ -23,13 +25,13 @@ begin
     external_trigger = 0;
     cross_trigger = 0;
     enable_dynamic_reset = 0;
+    mark_first_packet = 0;
     periodic_reset = 0;
     enable_min_delta_adc = 0;
     threshold_polarity = 1;
     dynamic_reset_threshold = 200;
     digital_threshold = 0;
     min_delta_adc = 30;
-    fifo_counter = 0;
     enable_fifo_diagnostics = 0;
     channel_mask = 0;
     external_trigger_mask = 0;
@@ -40,6 +42,9 @@ begin
     enable_periodic_rolling_trigger = 0;
     periodic_trigger_cycles = 0;
     enable_hit_veto = 0;
+    lightpix_mode = 0;
+    hit_threshold = 0;
+    timeout = 0;
     clk = 0;
 // execute reset
     reset_n = 1;
@@ -48,20 +53,37 @@ begin
 end 
 endtask
 
+task Test_CDS;
+// task for basic CDS test. One hit (450)
+begin
+    $display("\nTest_CDS running.");
+    cds_mode = 1;
+    vin_r = 0.72; // ADC code = 450
+    #100 hit = 1;
+    @(posedge csa_reset)
+    hit = 0;
+    #1000 cds_mode = 0;
+end
+endtask
+
 task Test_Normal_Trigger;
 // task for normal mode expect three hits
-// 112, 138, 204
+// 450, 552, 819
 begin
+    $display("\nTest_Normal_Trigger running.");
     //vin_r = 0.89;
-    vin_r = 0.72;
+    vin_r = 0.72; // ADC code = 450
     #100 hit = 1;
-    #28 hit = 0;
-    vin_r = 0.77; // ADC code = 138
+    @(posedge csa_reset)
+    hit = 0;
+    # 25 vin_r = 0.77; // ADC code = 552 
     #200 hit = 1;
-    #28 hit = 0;
-    vin_r = 0.9; // ADC code = 204
-    #100 hit = 1;
-    #28 hit = 0;
+    @(posedge csa_reset)
+    hit = 0;
+    # 38 vin_r = 0.9; // ADC code = 819
+    #200 hit = 1;
+    @(posedge csa_reset)
+    hit = 0;
 end
 endtask
 

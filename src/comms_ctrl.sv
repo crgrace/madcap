@@ -12,10 +12,12 @@
 
 module comms_ctrl
     #(parameter WIDTH = 64,
+    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter GLOBAL_ID = 255)      // global broadcast ID
     (output logic [WIDTH-2:0] output_event,  // event to put into the fifo
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
+    output logic [3:0] bad_packets,    // number of bad config packets observed 
     output logic write_fifo_n,    // write event into fifo (active low) 
     output logic read_fifo_n,    // read event from fifo (active low)
     output logic ld_tx_data,      // high to transfer data to tx uart
@@ -46,7 +48,8 @@ enum logic [3:0] // explicit state definitions
             PASS_ALONG_CONFIG2 = 4'h6,
             WAIT_FOR_WRITE = 4'h7,
             WRITE_FIFO = 4'h8,
-            WAIT_STATE = 4'h9} State, Next;
+            WAIT_STATE = 4'h9
+            BAD_PACKET = 4'ha} State, Next;
             
 // local registers
 logic [2:0] read_latency; // counter used to wait for FIFO
@@ -96,6 +99,7 @@ always_comb begin
                      else                               Next = WAIT_STATE;
         WAIT_STATE: if (!rx_data_flag || (timeout == 4'hF)) Next = READY;
                     else                                Next = WAIT_STATE;
+        BAD_PACKET:                                     Next = READY;
         default:                                        Next = READY;
     endcase
 end // always_comb
@@ -114,6 +118,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         timeout <= 4'b0;
         comms_busy <= 1'b0;
         send_config_data <= 1'b0;
+        bad_packets <= 4'b0;
     end
     else begin
         write_fifo_n <= 1'b1;
@@ -171,7 +176,9 @@ always_ff @(posedge clk or negedge reset_n) begin
         WAIT_STATE: begin
                     //    write_fifo_n <= 1'b0;
                         timeout <= timeout + 1'b1;
-                    
+                    end
+        BAD_PACKET: begin
+                        bad_packets <= bad_packets + 1'b1;
                     end
         default:    ;
         endcase

@@ -11,6 +11,7 @@ module external_interface
     #(parameter WIDTH = 64, // width of packet (w/o start & stop bits) 
     parameter GLOBAL_ID = 256,      // global broadcast ID
     parameter REGNUM = 256,
+    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter FIFO_BITS = 11)
     (output logic [3:0] tx_out ,     // LArPix TX UART output bits // TP: changed unpacked to packed to remove genus errors
     output logic [WIDTH-2:0] output_event, // event to put into the fifo
@@ -172,6 +173,7 @@ hydra_ctrl
 // communication controller
 comms_ctrl
     #(.WIDTH(WIDTH),
+    .MAGIC_NUMBER(MAGIC_NUMBER),
     .GLOBAL_ID(GLOBAL_ID)
     ) comms_ctrl_inst (
     .output_event       (output_event),
