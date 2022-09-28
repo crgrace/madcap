@@ -49,7 +49,7 @@ module channel_ctrl
     input logic threshold_polarity, // high for ADC above threshold
     input logic [7:0] dynamic_reset_threshold, // rst threshold
     input logic [7:0] digital_threshold, // only write if adc > this
-    input logic [9:0] min_delta_adc, // min delta before rst triggered
+    input logic [7:0] min_delta_adc, // min delta before rst triggered
     input logic fifo_full,            // high when shared fifo is full 
     input logic fifo_half,            // high when shared fifo is half full 
     input logic enable_local_fifo_diagnostics,// high to embed fifo counts

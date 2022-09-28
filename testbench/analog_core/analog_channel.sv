@@ -11,14 +11,15 @@
 module analog_channel 
     #(parameter VREF = 1.0,
     parameter VCM = 0.5,                 // top end of ADC range
-    parameter ADCBITS = 8,              // number of bits in ADC
+    parameter ADCBITS = 10,              // number of bits in ADC
     parameter PIXEL_TRIM_DAC_BITS = 5,  // number of bits in pixel trim DAC
     parameter GLOBAL_DAC_BITS = 8, // number of bits in global threshold DAC
     parameter CFB_CSA = 40e-15,     // feedback capacitor in CSA
     parameter VOUT_DC_CSA = 0.5,   // nominal dc output voltage of CSA
     parameter VDDA = 1.8,           // nominal analog supply
     parameter VOFFSET = 0.47)       // discriminator threshold offset
-    (output logic comp,             // decision bit from ADC comparator
+    (output logic [ADCBITS-1:0] dout,             // digital bits from ADC
+    output logic comp,             // decision bit from ADC comparator
     output logic hit,               // high when discriminator fires
     input real charge_in_r,           // input signal
     input logic [ADCBITS-1:0] dac_word,       // test words sent to DAC
@@ -32,8 +33,13 @@ module analog_channel
 // internal nets
 
 real csa_vout_r;
- 
+real vref_r, vcm_r, vin_r; 
 // instantiate channel components
+
+initial begin
+    vref_r = VREF;
+    vcm_r = VCM;
+end // initial
 
 // CSA
 csa
@@ -56,17 +62,17 @@ discriminator
     .pixel_trim_dac     (pixel_trim_dac[4:0])
     );
 
-// SAR ADC
-sar_adc_core
-    #(.VREF(VREF),
-    .VCM(VCM),
+// analog model of SAR ADC
+sar_async_adc
+    #(
     .ADCBITS(ADCBITS)
-    ) sar_adc_core_inst (
-    .comp       (comp),
-    .sample     (sample),
-    .strobe     (strobe),
-    .dac_word   (dac_word),
-    .vin_r       (csa_vout_r)
-     );
+    ) sar_asynch_adc_inst( 
+        .dout           (dout),
+        .done           (done),
+        .sample         (sample),
+        .vref_r         (vref_r),
+        .vcm_r          (vcm_r),
+        .vin_r          (csa_vout_r)
+    );// SAR ADC
 
 endmodule

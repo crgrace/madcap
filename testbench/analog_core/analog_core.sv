@@ -14,7 +14,7 @@ module analog_core
     #(parameter NUMCHANNELS = 64,       // number of ADC channels
     parameter VREF = 1.3,               // top end of ADC range
     parameter VCM = 0.3,                // bottom end of ADC range
-    parameter ADCBITS = 8,              // number of bits in ADC
+    parameter ADCBITS = 10,              // number of bits in ADC
     parameter PIXEL_TRIM_DAC_BITS = 6,  // number of bits in pixel trim DAC
     parameter GLOBAL_DAC_BITS = 8, // number of bits in global threshold DAC
     parameter DACBITS = 6,              // number of bits in threshold DAC
@@ -22,7 +22,8 @@ module analog_core
     parameter VOUT_DC_CSA = 0.5,        // nominal dc output voltage of CSA
     parameter VDDA = 1.8,              // nominal analog supply
     parameter VOFFSET = 0.47)         // discriminator threshold offset
-    (output logic [NUMCHANNELS-1:0] comp,// decision bit from ADC comparator
+    (output logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],             // digital bits from ADC
+    output logic [NUMCHANNELS-1:0] comp,// decision bit from ADC comparator
     output logic [NUMCHANNELS-1:0] hit,  // high when discriminator fires
     input logic [PIXEL_TRIM_DAC_BITS*NUMCHANNELS-1:0] pixel_trim_dac,
     input logic [GLOBAL_DAC_BITS-1:0] threshold_global,
@@ -31,9 +32,9 @@ module analog_core
     input logic [NUMCHANNELS-1:0] csa_monitor_select,
     input logic [NUMCHANNELS-1:0] csa_bypass_select,
     input logic [NUMCHANNELS*ADCBITS-1:0] dac_word,// test words sent to DAC
-    input logic sample [NUMCHANNELS-1:0],      // high to sample CSA output
-    input logic strobe [NUMCHANNELS-1:0],      // high to strobe ADC
-    input logic csa_reset [NUMCHANNELS-1:0],   // arming signal
+    input logic [NUMCHANNELS-1:0] sample,      // high to sample CSA output
+    input logic [NUMCHANNELS-1:0] strobe,      // high to strobe ADC
+    input logic [NUMCHANNELS-1:0] csa_reset,   // arming signal
     input real charge_in_r [NUMCHANNELS-1:0]);  // input  signal
 
 
@@ -52,6 +53,7 @@ generate
         .VDDA(VDDA),
         .VOFFSET(VOFFSET)
         ) analog_channel_inst (
+        .dout               (dout[i]), 
         .comp               (comp[i]),
         .hit                (hit[i]),
         .charge_in_r        (charge_in_r[i]),

@@ -27,7 +27,7 @@ parameter VCM = 0.3;        // bottom end of ADC range
 parameter WIDTH = 64;       // width of packet (w/o start & stop bits) 
 parameter WORDWIDTH = 8;    // width of programming registers
 parameter NUMCHANNELS = 64; // number of analog channels
-parameter ADCBITS = 8;      // number of bits in ADC
+parameter ADCBITS = 10;      // number of bits in ADC
 parameter PIXEL_TRIM_DAC_BITS = 5;  // number of bits in pixel trim DAC
 parameter GLOBAL_DAC_BITS = 8;  // number of bits in global threshold DAC
 parameter TESTPULSE_DAC_BITS = 8;  // number of bits in testpulse DAC
@@ -38,6 +38,7 @@ parameter CHIP_ID_W = 8;    // width of chip ID
 parameter VDDA = 1.8;              // nominal analog supply
 parameter VOFFSET = 0.47;         // discriminator threshold offset
 
+logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0];           // bits from ADC
 // control signals
 logic [NUMCHANNELS*ADCBITS-1:0] dac_word;  
 //logic sample [NUMCHANNELS-1:0]; 
@@ -45,7 +46,7 @@ logic [NUMCHANNELS-1:0] sample;
 //logic strobe [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] strobe; 
 //logic csa_reset [NUMCHANNELS-1:0]; 
-logic [NUMCHANNELS-1:0] csa_reset ; 
+logic [NUMCHANNELS-1:0] csa_reset; 
 logic [NUMCHANNELS-1:0] hit; 
 logic [NUMCHANNELS-1:0] comp; 
 logic [3:0] tx_enable;  // high to enable TX PHY
@@ -108,6 +109,7 @@ logic [3:0] v_cm_lvds_tx0;   // TX0 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx1;   // TX1 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx2;   // TX2 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx3;   // TX3 CM output voltage (lvds mode)
+logic done;                 // high when ADC conversion finished
 
 
 // real-number modeled analog circuits
@@ -123,6 +125,7 @@ analog_core
     .VDDA(VDDA),
     .VOFFSET(VOFFSET)
     ) analog_core_inst (
+    .dout                   (dout),
     .comp                   (comp),
     .hit                    (hit),
     .pixel_trim_dac         (pixel_trim_dac),
@@ -215,6 +218,8 @@ digital_core
     .v_cm_lvds_tx1                  (v_cm_lvds_tx1),
     .v_cm_lvds_tx2                  (v_cm_lvds_tx2),
     .v_cm_lvds_tx3                  (v_cm_lvds_tx3),
+    .dout                           (dout),
+    .done                           (done),
     .comp                           (comp),
     .hit                            (hit),
     .external_trigger               (external_trigger),

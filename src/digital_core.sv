@@ -26,7 +26,7 @@ module digital_core
     parameter integer unsigned FIFO_DEPTH = 1024,      // number of FIFO memory locations
     parameter LOCAL_FIFO_DEPTH = 4, // number of locations in channel FIFO
     parameter PIXEL_TRIM_DAC_BITS = 5, // number of bits per dac
-    parameter ADCBITS = 8,         // number of bits in ADC
+    parameter ADCBITS = 10,         // number of bits in ADC
     parameter GLOBAL_DAC_BITS = 8,
     parameter TESTPULSE_DAC_BITS = 8)
     
@@ -100,6 +100,8 @@ module digital_core
     output logic [3:0] v_cm_lvds_tx2,   // TX2 CM output voltage (lvds mode)
     output logic [3:0] v_cm_lvds_tx3,   // TX3 CM output voltage (lvds mode)
 // INPUTS
+    input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
+    input logic done,               // high when ADC conversion finished
     input logic [NUMCHANNELS-1:0] comp,   // decision bit from comparator 
     input logic [NUMCHANNELS-1:0] hit,    // high when discriminator fires
     input logic external_trigger,     // high to trigger channel
@@ -119,7 +121,7 @@ localparam FIFO_BITS = $clog2(FIFO_DEPTH);//bits in fifo addr range
 `include "larpix_constants.sv"
     
 // internal nets
-logic [7:0] adc_word [NUMCHANNELS-1:0]; // useful for simulation debugging, not brought to pins
+logic [ADCBITS-1:0] adc_word [NUMCHANNELS-1:0]; // useful for simulation debugging, not brought to pins
 
 // digital config 
 logic [7:0] chip_id; // unique id for each chip
@@ -182,6 +184,7 @@ logic reset_n_config_sync;  // synced version of reset_n_config
 logic clk_core; // LArPix core clock
 logic clk_rx;    // 2x oversampling rx clock
 logic clk_tx;  // slow tx clock
+logic cds_mode; // high for correlated double sampling
 logic v3_mode;            // high for v3 mode (no oversampling)
 logic read_fifo_n;  // read data from shared fifo (active low)
 logic write_fifo_n;  // write data from shared fifo (active low)
@@ -302,7 +305,7 @@ always_comb begin
     enable_fifo_diagnostics = config_bits[DIGITAL][2];
     enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
     enable_packet_diagnostics = config_bits[DIGITAL][4];
-    clk_ctrl = config_bits[DIGITAL][4:3];
+    cds_mode = config_bits[DIGITAL][5];
     tx_dynamic_powerdown_cycles = config_bits[DIGITAL][7:5];
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
     enable_piso_downstream = config_bits[ENABLE_PISO_DOWN][3:0];
@@ -447,15 +450,19 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .sample                 (sample[i]),
         .strobe                 (strobe[i]),
         .clk_out                (),
+        .async_mode             (1'b1),
         .comp                   (comp[i]),
         .hit                    (hit[i]),
         .chip_id                (chip_id),
+        .dout                   (dout[i]),
+        .done                   (done),
         .channel_id             (i[5:0]),
         .adc_burst              (adc_burst_length),
         .adc_hold_delay         (adc_hold_delay),
         .timestamp_32b          (timestamp_32b),
         .reset_length           (reset_length_channel),
         .enable_dynamic_reset   (enable_dynamic_reset),
+        .cds_mode               (cds_mode),
         .mark_first_packet      (mark_first_packet),
         .read_local_fifo_n      (read_local_fifo_n[i]),
         .external_trigger       (external_trigger_sync),
@@ -469,7 +476,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .min_delta_adc          (min_delta_adc),
         .fifo_full              (fifo_full),
         .fifo_half              (fifo_half),
-        .enable_fifo_diagnostics    (enable_fifo_diagnostics),
+        .enable_local_fifo_diagnostics    (enable_local_fifo_diagnostics),
         .channel_mask           (channel_mask[i]),
         .external_trigger_mask  (external_trigger_mask[i]),
         .cross_trigger_mask     (cross_trigger_mask[i]), 
