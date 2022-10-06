@@ -73,6 +73,7 @@ logic [NUMCHANNELS-1:0] csa_bypass_enable; // inject into adc from test pin
 logic [NUMCHANNELS-1:0] csa_bypass_select; // adc channels(s)
 logic [NUMCHANNELS-1:0] csa_monitor_select; // monitor channels 
 logic [NUMCHANNELS-1:0] csa_testpulse_enable;
+logic [NUMCHANNELS-1:0] done;                 // high when ADC conversion finished
 logic [TESTPULSE_DAC_BITS-1:0] csa_testpulse_dac;
 logic [3:0] current_monitor_bank0; // one hot monitor (see docs)
 logic [3:0] current_monitor_bank1; // one hot monitor (see docs)
@@ -109,7 +110,6 @@ logic [3:0] v_cm_lvds_tx0;   // TX0 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx1;   // TX1 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx2;   // TX2 CM output voltage (lvds mode)
 logic [3:0] v_cm_lvds_tx3;   // TX3 CM output voltage (lvds mode)
-logic done;                 // high when ADC conversion finished
 
 
 // real-number modeled analog circuits
@@ -128,6 +128,7 @@ analog_core
     .dout                   (dout),
     .comp                   (comp),
     .hit                    (hit),
+    .done                   (done),
     .pixel_trim_dac         (pixel_trim_dac),
     .threshold_global       (threshold_global),
     .csa_gain               (csa_gain),
@@ -220,7 +221,7 @@ digital_core
     .v_cm_lvds_tx3                  (v_cm_lvds_tx3),
     .dout                           (dout),
     .done                           (done),
-    .comp                           (comp),
+    .comp                           (64'b0),
     .hit                            (hit),
     .external_trigger               (external_trigger),
     .posi                           (posi),

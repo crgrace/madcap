@@ -3,11 +3,8 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: SystemVerilog model of analog core of LArPix-v2 
 //              Analog core comprises 64 channels of Charge-Sensitive
-//              amplifiers, discriminator and 8-bit SAR ADC
+//              amplifiers, discriminator and 10-bit async SAR ADC
 //          
-//              TO DO: add common services block (e.g. bandgap, current 
-//              biases, etc)
-//
 ///////////////////////////////////////////////////////////////////
 
 module analog_core 
@@ -25,6 +22,7 @@ module analog_core
     (output logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],             // digital bits from ADC
     output logic [NUMCHANNELS-1:0] comp,// decision bit from ADC comparator
     output logic [NUMCHANNELS-1:0] hit,  // high when discriminator fires
+    output logic [NUMCHANNELS-1:0] done,  // high when ADC conversion finished
     input logic [PIXEL_TRIM_DAC_BITS*NUMCHANNELS-1:0] pixel_trim_dac,
     input logic [GLOBAL_DAC_BITS-1:0] threshold_global,
     input logic [NUMCHANNELS-1:0] csa_gain,
@@ -56,6 +54,7 @@ generate
         .dout               (dout[i]), 
         .comp               (comp[i]),
         .hit                (hit[i]),
+        .done               (done[i]),
         .charge_in_r        (charge_in_r[i]),
         .dac_word           (dac_word[ADCBITS*(i+1)-1:ADCBITS*i]),        
         .sample             (sample[i]),

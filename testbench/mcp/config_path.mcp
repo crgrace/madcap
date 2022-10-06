@@ -19,4 +19,8 @@ $display("RUNNING CONFIG_PATH.MCP");
     $display("Read Back test: 10d/0x0A expected");  
     sendWordToLarpix(CONFIG_READ,8'h01,GLOBAL_THRESH,8'h01);
 
+#10000
+    $display("write 10d to GLOBAL_THRESH (different chip)"); 
+    sendWordToLarpix(CONFIG_WRITE,8'h06,GLOBAL_THRESH,8'h0a);
+
 

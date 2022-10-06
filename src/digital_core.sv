@@ -101,7 +101,7 @@ module digital_core
     output logic [3:0] v_cm_lvds_tx3,   // TX3 CM output voltage (lvds mode)
 // INPUTS
     input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
-    input logic done,               // high when ADC conversion finished
+    input logic [NUMCHANNELS-1:0] done,   // high when ADC conversion finished
     input logic [NUMCHANNELS-1:0] comp,   // decision bit from comparator 
     input logic [NUMCHANNELS-1:0] hit,    // high when discriminator fires
     input logic external_trigger,     // high to trigger channel
@@ -455,7 +455,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .hit                    (hit[i]),
         .chip_id                (chip_id),
         .dout                   (dout[i]),
-        .done                   (done),
+        .done                   (done[i]),
         .channel_id             (i[5:0]),
         .adc_burst              (adc_burst_length),
         .adc_hold_delay         (adc_hold_delay),

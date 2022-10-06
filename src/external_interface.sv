@@ -53,6 +53,8 @@ module external_interface
 // internal nets
 logic [WIDTH-2:0] data_wo_parity; // data without parity bit
 logic [WIDTH-2:0] config_data_wo_parity; // config_data without parity bit
+logic [11:0] bad_packets;
+logic [11:0] packet_count;
 logic fifo_full_delayed; // delayed one clk
 logic fifo_half_delayed; // delayed one clk
 logic rx_data_flag;
@@ -180,6 +182,8 @@ comms_ctrl
     .output_event       (output_event),
     .regmap_write_data  (regmap_write_data),
     .regmap_address     (regmap_address),
+    .bad_packets        (bad_packets),
+    .packet_count       (packet_count),
     .write_fifo_n       (write_fifo_n),
     .read_fifo_n        (read_fifo_n),
     .ld_tx_data         (ld_tx_data),

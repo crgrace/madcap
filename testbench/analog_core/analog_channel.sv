@@ -21,6 +21,7 @@ module analog_channel
     (output logic [ADCBITS-1:0] dout,             // digital bits from ADC
     output logic comp,             // decision bit from ADC comparator
     output logic hit,               // high when discriminator fires
+    output logic done,                 // high when ADC conversion finished
     input real charge_in_r,           // input signal
     input logic [ADCBITS-1:0] dac_word,       // test words sent to DAC
     input logic sample,                       // high to sample CSA output

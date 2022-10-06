@@ -18,6 +18,7 @@ module comms_ctrl
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
     output logic [11:0] bad_packets,//number of bad config packets observed 
+    output logic [11:0] packet_count, // number of packets that have been generated
     output logic write_fifo_n,    // write event into fifo (active low) 
     output logic read_fifo_n,    // read event from fifo (active low)
     output logic ld_tx_data,      // high to transfer data to tx uart
@@ -56,7 +57,6 @@ logic [2:0] read_latency; // counter used to wait for FIFO
 logic global_read_flag; // high when executing a global read
 logic [3:0] timeout; // don't get hung up in wait state
 logic ld_tx_data_fifo; // tells uart to load data from FIFO
-
 always_comb begin
     ld_tx_data = ld_tx_data_fifo || send_config_data;
 end // always_comb
@@ -123,6 +123,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         comms_busy <= 1'b0;
         send_config_data <= 1'b0;
         bad_packets <= 11'b0;
+        packet_count <= 11'b0;
     end
     else begin
         write_fifo_n <= 1'b1;
@@ -151,6 +152,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                         regmap_address <= rx_data[17:10];
                         read_regmap <= 1'b1;
                         read_latency <= read_latency + 1'b1;
+                        packet_count <= packet_count + 1'b1;
                         if (rx_data[9:2] == GLOBAL_ID) begin
                             global_read_flag <= 1'b1;
                         end
@@ -173,6 +175,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                     
         WAIT_FOR_WRITE: begin
                             output_event <= pre_event;
+                            packet_count <= packet_count + 1'b1;
                         end
         WRITE_FIFO: begin
                         write_fifo_n <= 1'b0;
