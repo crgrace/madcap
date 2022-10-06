@@ -20,7 +20,6 @@ module digital_core
     parameter NUMCHANNELS = 64,     // number of analog channels
     parameter WORDWIDTH = 8,     // size of word
     parameter REGNUM = 256,          // number of configuration registers
-    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter CHIP_ID_W = 8,        // width of chip ID
     parameter GLOBAL_ID = 255,      // global broadcast ID
     parameter integer unsigned FIFO_DEPTH = 1024,      // number of FIFO memory locations
@@ -288,14 +287,14 @@ always_comb begin
     vcm_dac = config_bits[DAC_VCM][7:0];
     csa_testpulse_dac = config_bits[CSA_TEST_DAC][7:0]; //DG: mod
     current_monitor_bank0 = config_bits[IMONITOR0][3:0];
-    current_monitor_bank1 = config_bits[IMONITOR1][3:0];
-    current_monitor_bank2 = config_bits[IMONITOR2][3:0];
-    current_monitor_bank3 = config_bits[IMONITOR3][3:0];
+    current_monitor_bank1 = config_bits[IMONITOR0][7:4];
+    current_monitor_bank2 = config_bits[IMONITOR1][3:0];
+    current_monitor_bank3 = config_bits[IMONITOR1][7:4];
     voltage_monitor_bank0 = config_bits[VMONITOR0][2:0];
-    voltage_monitor_bank1 = config_bits[VMONITOR1][2:0];
-    voltage_monitor_bank2 = config_bits[VMONITOR2][2:0];
-    voltage_monitor_bank3 = config_bits[VMONITOR3][2:0];
-    voltage_monitor_refgen = config_bits[VMONITOR4][7:0];
+    voltage_monitor_bank1 = config_bits[VMONITOR0][5:3];
+    voltage_monitor_bank2 = config_bits[VMONITOR1][2:0];
+    voltage_monitor_bank3 = config_bits[VMONITOR1][5:3];
+    voltage_monitor_refgen = config_bits[VMONITOR2][7:0];
     digital_monitor_enable = config_bits[DMONITOR0][0];
     digital_monitor_select = config_bits[DMONITOR0][4:1];
     digital_monitor_chan = config_bits[DMONITOR1][5:0];
@@ -527,7 +526,6 @@ external_interface
     #(.WIDTH(WIDTH),
     .GLOBAL_ID(255),
     .REGNUM(REGNUM),
-    .MAGIC_NUMBER(MAGIC_NUMBER),
     .FIFO_BITS(FIFO_BITS)
     ) external_interface_inst (
     .tx_out                 (piso),

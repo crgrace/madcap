@@ -32,7 +32,7 @@ begin
     data_to_larpix[17:10] = addr;
     data_to_larpix[25:18] = data;
     if (use_magic_number) begin
-        data_to_larpix[57:26] = 32'h89_50_4E_47;
+        data_to_larpix[57:26] = MAGIC_NUMBER;
     end
     if (debug) begin
         $display("\nin task:sending work to LArPix");

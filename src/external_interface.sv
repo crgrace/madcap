@@ -11,7 +11,6 @@ module external_interface
     #(parameter WIDTH = 64, // width of packet (w/o start & stop bits) 
     parameter GLOBAL_ID = 256,      // global broadcast ID
     parameter REGNUM = 256,
-    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter FIFO_BITS = 11)
     (output logic [3:0] tx_out ,     // LArPix TX UART output bits // TP: changed unpacked to packed to remove genus errors
     output logic [WIDTH-2:0] output_event, // event to put into the fifo
@@ -54,7 +53,6 @@ module external_interface
 logic [WIDTH-2:0] data_wo_parity; // data without parity bit
 logic [WIDTH-2:0] config_data_wo_parity; // config_data without parity bit
 logic [11:0] bad_packets;
-logic [11:0] packet_count;
 logic fifo_full_delayed; // delayed one clk
 logic fifo_half_delayed; // delayed one clk
 logic rx_data_flag;
@@ -176,14 +174,12 @@ hydra_ctrl
 // communication controller
 comms_ctrl
     #(.WIDTH(WIDTH),
-    .MAGIC_NUMBER(MAGIC_NUMBER),
     .GLOBAL_ID(GLOBAL_ID)
     ) comms_ctrl_inst (
     .output_event       (output_event),
     .regmap_write_data  (regmap_write_data),
     .regmap_address     (regmap_address),
     .bad_packets        (bad_packets),
-    .packet_count       (packet_count),
     .write_fifo_n       (write_fifo_n),
     .read_fifo_n        (read_fifo_n),
     .ld_tx_data         (ld_tx_data),
@@ -195,6 +191,7 @@ comms_ctrl
     .pre_event          (pre_event),
     .chip_id            (chip_id),
     .regmap_read_data   (regmap_read_data),
+    .fifo_counter       (fifo_counter),
     .rx_data_flag       (rx_data_flag),
     .fifo_empty         (fifo_empty),
     .tx_busy            (tx_busy_any),

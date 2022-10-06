@@ -132,119 +132,119 @@ initial begin
 
 // send word to register 1 of chip 1
     @(posedge clk2x)
-//    sendWordToLarpix(CONFIG_WRITE,8'h00,CHIP_ID,8'h01);
+//    sendWordToLarpix(CONFIG_WRITE_OP,8'h00,CHIP_ID,8'h01);
 //    $display("EXTERNAL CONFIG WRITE TO larpix, chip = %h, register=0 DATA = 0x01",chip_id);
 #10000
   $display("write value 8'hfe to IBIAS_TDAC"); 
-  sendWordToLarpix(CONFIG_WRITE,8'h00,IBIAS_TDAC,8'hfe);
+  sendWordToLarpix(CONFIG_WRITE_OP,8'h00,IBIAS_TDAC,8'hfe);
 
 #10000
   $display("read out IBIAS_TDAC0"); 
-  sendWordToLarpix(CONFIG_READ,8'h00,IBIAS_TDAC,0);
+  sendWordToLarpix(CONFIG_READ_OP,8'h00,IBIAS_TDAC,0);
 
 #10000
   $display("send data to wrong chip (pass along)"); 
-  sendWordToLarpix(CONFIG_READ,8'h01,IBIAS_TDAC,0);
+  sendWordToLarpix(CONFIG_READ_OP,8'h01,IBIAS_TDAC,0);
 
 
 /*
 
 
 
-    sendWordToLarpix(CONFIG_WRITE,chip_id2,0,8'hf0);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id2,0,8'hf0);
     $display("EXTERNAL CONFIG WRITE TO larpix, chip = %h, register=0 DATA = 0xf0",chip_id2);
 
 #10000
 
 
 
-   sendWordToLarpix(CONFIG_WRITE,GLOBAL_ID,1,8'h0f);
+   sendWordToLarpix(CONFIG_WRITE_OP,GLOBAL_ID,1,8'h0f);
 
 
 #10000
 
 #10000
   $display("read out logic 1 of chip 2"); 
-  sendWordToLarpix(CONFIG_READ,chip_id,1,0);
+  sendWordToLarpix(CONFIG_READ_OP,chip_id,1,0);
 
 
 #10000
 
 //  write word to logic 5 of chip 1 
 
-    sendWordToLarpix(CONFIG_WRITE,chip_id,5,8'h0F);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,5,8'h0F);
 #10000
 
 //  pass packet along (not meant for this chip)
-    sendWordToLarpix(CONFIG_WRITE,chip_id1,5,0);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,5,0);
 
 // global read
 #10000
-   sendWordToLarpix(CONFIG_READ,GLOBAL_ID,1,8'h0f);
+   sendWordToLarpix(CONFIG_READ_OP,GLOBAL_ID,1,8'h0f);
 
 */
 
 
 // enable fifo diagnostics
 //    $display("FIFO DIAGNOSTICS ENABLED (CHIP 3)");
-//    sendWordToLarpix(CONFIG_WRITE,chip_id3,47,8'h10);
+//    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,47,8'h10);
 
 
 /*
 // enable external trigger for channels 8 through 15 (CHIP 3)
     $display("EXTERNAL TRIGGER ENABLED, CHANNEL 24 through 31, CHIP 3");
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,59,8'h00);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,59,8'h00);
     $display("EXTERNAL TRIGGER ENABLED, CHANNEL 16 through 23, CHIP 3");
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,58,8'h00);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,58,8'h00);
     $display("EXTERNAL TRIGGER ENABLED, CHANNEL 8 through 15, CHIP 3");
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,57,8'h00);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,57,8'h00);
     $display("EXTERNAL TRIGGER ENABLED, CHANNEL 0 through 7, CHIP 3");
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,56,8'h00);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,56,8'h00);
 */
 /*#1000
 
 // enable fifo diagnostics
     $display("FIFO DIAGNOSTICS ENABLED");
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,47,8'h10);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,47,8'h10);
 #1000
 // mask out channel 0 of chip 1
     $display("MASK OUT CHANNEL 0, CHIP 1");
-    sendWordToLarpix(CONFIG_WRITE,chip_id1,52,8'h01);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,52,8'h01);
 
 // send cross trigger of chip 1
     $display("CROSS TRIGGER ENABLED, CHIP 1");
-    sendWordToLarpix(CONFIG_WRITE,chip_id1,47,8'h04);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,47,8'h04);
 #1000
 // send word to register 38 of chip 1
     $display("MONITOR SELECT ENABLED, CHANNEL 0, CHIP 1");
-    sendWordToLarpix(CONFIG_WRITE,chip_id1,38,8'h01);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,38,8'h01);
 #1000
 // send word to register 4 of chip 3
-    sendWordToLarpix(CONFIG_WRITE,chip_id3,4,8'hFE);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id3,4,8'hFE);
 #1000
 //  read out logic 0 of chip 1 
-    sendWordToLarpix(CONFIG_READ,chip_id1,0,0);
+    sendWordToLarpix(CONFIG_READ_OP,chip_id1,0,0);
 #1000
 //  read out logic 4 of chip 3 
-    sendWordToLarpix(CONFIG_READ,chip_id3,4,0);
+    sendWordToLarpix(CONFIG_READ_OP,chip_id3,4,0);
 #1000
 // send word to register 34 of chip 1
     $display("CSA BYPASS ENABLED, CHANNEL 0 through 3, CHIP 1");
-    sendWordToLarpix(CONFIG_WRITE,chip_id1,34,8'h0F);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,34,8'h0F);
 */
 // test periodic reset
 //    $display("ENABLE PERIODIC RESET");
-//    sendWordToLarpix(CONFIG_WRITE,chip_id1,47,8'h18);
+//    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,47,8'h18);
 //#10000
 //     $display("DISABLE PERIODIC RESET");
-//    sendWordToLarpix(CONFIG_WRITE,chip_id1,47,8'h10);
+//    sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,47,8'h10);
    
 
 //    #4000
 // write a word to chip 2 (pixel trim 1) 
-//   sendWordToLarpix(CONFIG_WRITE,chip_id2,0,8'hFF);
+//   sendWordToLarpix(CONFIG_WRITE_OP,chip_id2,0,8'hFF);
 // write a word to chip 1 to mask hot channel
-//   sendWordToLarpix(CONFIG_WRITE,chip_id1,51,8'h01);
+//   sendWordToLarpix(CONFIG_WRITE_OP,chip_id1,51,8'h01);
 
 //#1000
 //    $display("config_test");   

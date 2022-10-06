@@ -15,6 +15,7 @@ localparam TRUE = 1;
 localparam FALSE = 0;
 localparam SILENT = 0;
 localparam VERBOSE = 1;          // high to print out verification results
+localparam MAGIC_NUMBER = 32'h89_50_4E_47;
 
 // localparams to define config registers
 // configuration word definitions
@@ -38,15 +39,16 @@ localparam CSA_TEST_ENABLE = 100;
 localparam CSA_TEST_DAC = 108;
 localparam IMONITOR0 = 109;
 localparam IMONITOR1 = 110;
-localparam IMONITOR2 = 111;
-localparam IMONITOR3 = 112;
-localparam VMONITOR0 = 113;
-localparam VMONITOR1 = 114;
-localparam VMONITOR2 = 115;
-localparam VMONITOR3 = 116;
-localparam VMONITOR4 = 117;
-localparam DMONITOR0 = 118;
-localparam DMONITOR1 = 119;
+localparam VMONITOR0 = 111;
+localparam VMONITOR1 = 112;
+localparam VMONITOR2 = 113;
+localparam DMONITOR0 = 114;
+localparam DMONITOR1 = 115;
+localparam FIFO_HW_LSB = 116;
+localparam FIFO_HW_MSB = 117;
+localparam TOTAL_PACKETS_LSB = 118;
+localparam TOTAL_PACKETS_MSB = 119;
+localparam BAD_PACKETS = 120;
 localparam ADC_HOLD_DELAY = 120;
 localparam CHIP_ID = 122;
 localparam DIGITAL = 123;
@@ -89,9 +91,9 @@ localparam TRX16 = 255;
 
 
 // UART ops
-localparam DATA = 2'b01;
-localparam CONFIG_WRITE = 2'b10;
-localparam CONFIG_READ = 2'b11;
+localparam DATA_OP = 2'b01;
+localparam CONFIG_WRITE_OP = 2'b10;
+localparam CONFIG_READ_OP = 2'b11;
 
 // SPI ops
 localparam WRITE = 1;

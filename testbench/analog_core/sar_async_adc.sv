@@ -36,6 +36,7 @@ assign #(DELAY) dout = dout_local;
 always_ff @(negedge sample) begin
     vcommon_r = vin_r - vcm_r;
     vdac_r = vref_r-vcm_r;
+    $display("%m:"); 
     $display("ADC: vin_r = %f, vref_r = %f, vcommon_r = %f, vcm_r = %f, vdac_r = %f",vin_r,vref_r,vcommon_r,vcm_r,vdac_r);
     for (i = ADCBITS-1; i >= 0; i = i - 1) begin
         vdac_r = vdac_r/2;

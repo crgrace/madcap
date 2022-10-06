@@ -161,7 +161,7 @@ initial begin
 // `include "/home/lxusers/c/crgrace/verilog/verilog_larpix_rev2_syn/testbench/mcp/hydra_larpix.mcp"
 
 
- `include "/home/lxusers/c/crgrace/verilog/larpix_v2b/testbench/mcp/hydra_clk_debug.mcp"
+ `include "./hydra_clk_debug.mcp"
 
     
 end //initial

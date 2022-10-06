@@ -34,15 +34,16 @@
         config_bits[CSA_TEST_DAC] <= 8'h00;
         config_bits[IMONITOR0] <= 8'h00;
         config_bits[IMONITOR1] <= 8'h00;
-        config_bits[IMONITOR2] <= 8'h00;
-        config_bits[IMONITOR3] <= 8'h00;
         config_bits[VMONITOR0] <= 8'h00;
         config_bits[VMONITOR1] <= 8'h00;
         config_bits[VMONITOR2] <= 8'h00;
-        config_bits[VMONITOR3] <= 8'h00;
-        config_bits[VMONITOR4] <= 8'h00;
         config_bits[DMONITOR0] <= 8'h00;
         config_bits[DMONITOR1] <= 8'h00;
+        config_bits[FIFO_HW_LSB] <= 8'h00;
+        config_bits[FIFO_HW_MSB] <= 8'h00;
+        config_bits[TOTAL_PACKETS_LSB] <= 8'h00;
+        config_bits[TOTAL_PACKETS_MSB] <= 8'h00;
+        config_bits[BAD_PACKETS] <= 8'h00;
         for (int i = 0; i < 2; i++) begin
             config_bits[ADC_HOLD_DELAY + i] <= 8'h00;
         end

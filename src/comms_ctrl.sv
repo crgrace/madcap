@@ -12,13 +12,12 @@
 
 module comms_ctrl
     #(parameter WIDTH = 64,
-    parameter MAGIC_NUMBER = 32'h89_50_4E_47,
     parameter GLOBAL_ID = 255)      // global broadcast ID
     (output logic [WIDTH-2:0] output_event,  // event to put into the fifo
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
     output logic [11:0] bad_packets,//number of bad config packets observed 
-    output logic [11:0] packet_count, // number of packets that have been generated
+    output logic [15:0] total_packets, // number of packets that have been generated
     output logic write_fifo_n,    // write event into fifo (active low) 
     output logic read_fifo_n,    // read event from fifo (active low)
     output logic ld_tx_data,      // high to transfer data to tx uart
@@ -30,6 +29,7 @@ module comms_ctrl
     input logic [WIDTH-2:0] pre_event, // event from router (pre-parity) 
     input logic [7:0] chip_id,        // unique id for each chip
     input logic [7:0] regmap_read_data,       // data to read from regmap
+    input logic [11:0] fifo_counter,  // number of words in FIFO
     input logic rx_data_flag,        // high if rx data ready
     input logic fifo_empty,       // high if no data waiting in fifo
     input logic tx_busy,         // high when tx uart sending data
@@ -42,25 +42,65 @@ module comms_ctrl
 enum logic [3:0] // explicit state definitions
             {READY = 4'h0,
             CONFIG_WRITE = 4'h1,
-            CONFIG_READ = 4'h2,
-            CONFIG_READ_LATCH = 4'h3,
-            PASS_ALONG = 4'h4,
-            PASS_ALONG_CONFIG = 4'h5,
-            PASS_ALONG_CONFIG2 = 4'h6,
-            WAIT_FOR_WRITE = 4'h7,
-            WRITE_FIFO = 4'h8,
-            WAIT_STATE = 4'h9,
-            BAD_PACKET = 4'ha} State, Next;
+            CONFIG_WRITE_MAILBOX_LSB = 4'h2,
+            CONFIG_WRITE_MAILBOX_MSB = 4'h3,
+            CONFIG_READ = 4'h4,
+            CONFIG_READ_LATCH = 4'h5,
+            PASS_ALONG = 4'h6,
+            PASS_ALONG_CONFIG = 4'h7,
+            PASS_ALONG_CONFIG2 = 4'h8,
+            WAIT_FOR_WRITE = 4'h9,
+            WRITE_FIFO = 4'ha,
+            WAIT_STATE = 4'hb,
+            BAD_PACKET = 4'hc} State, Next;
+
+// configuration word definitions
+// located at ../testbench/larpix_tasks/
+// example compilation: 
+//vlog +incdir+../testbench/larpix_tasks/ -incr -sv "../src/digital_core.sv"
+`include "larpix_constants.sv"
             
 // local registers
-logic [2:0] read_latency; // counter used to wait for FIFO
-logic global_read_flag; // high when executing a global read
-logic [3:0] timeout; // don't get hung up in wait state
-logic ld_tx_data_fifo; // tells uart to load data from FIFO
+logic load_mailbox;         // want to load the mailbox into the config registers
+logic ch_fifo_high_water;   // high if fifo_counter reaches high water
+logic ch_total_packets;     // high if total_packets changes
+logic ch_bad_packets;       // high if bad packets changed
+logic [15:0] fifo_high_water; // max FIFO count since reset
+logic [2:0] read_latency;   // counter used to wait for FIFO
+logic global_read_flag;     // high when executing a global read
+logic [3:0] timeout;        // don't get hung up in wait state
+logic ld_tx_data_fifo;      // tells uart to load data from FIFO
+
 always_comb begin
     ld_tx_data = ld_tx_data_fifo || send_config_data;
 end // always_comb
 
+always_ff @(posedge clk or negedge reset_n) begin
+    if (!reset_n) begin
+        fifo_high_water <= 11'b0;
+        ch_fifo_high_water <= 1'b0;
+    end 
+    else if (ch_fifo_high_water && write_regmap) begin
+        ch_fifo_high_water <= 1'b0;
+    end
+    else if (fifo_counter > fifo_high_water) begin
+        fifo_high_water <= {4'b0,fifo_counter};
+        ch_fifo_high_water <= 1'b1;
+    end
+end // always_ff
+
+always_ff @(posedge clk or negedge reset_n) begin
+    if (!reset_n)
+        load_mailbox <= 1'b0;
+    else if (load_mailbox == 1'b0) begin
+        if (ch_fifo_high_water || ch_total_packets || ch_bad_packets) begin
+            load_mailbox <= 1'b1;
+        end
+    end
+    else begin 
+            load_mailbox <= 1'b0;
+    end
+end // always_ff
 
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)
@@ -73,24 +113,28 @@ always_comb begin
     Next = READY;
     case (State)
         READY:  if ( (rx_data_flag) 
-                    && ((rx_data[1:0] == 2'b11)
-                    || (rx_data[1:0] == 2'b10))
-                    && (rx_data[57:26] != MAGIC_NUMBER)) Next = BAD_PACKET; 
-                else if ( (rx_data_flag) && (rx_data[1:0] == 2'b10) 
+                    && (((rx_data[1:0] == CONFIG_WRITE_OP)
+                    || (rx_data[1:0] == CONFIG_READ_OP))
+                    && (rx_data[57:26] != MAGIC_NUMBER)) ) Next = BAD_PACKET;
+                else if ((rx_data_flag) && (rx_data[1:0] == 2'b00)) Next = BAD_PACKET; 
+                else if ( (rx_data_flag) && (rx_data[1:0] == CONFIG_WRITE_OP) 
                     && ( (rx_data[9:2] == chip_id) 
                     || (rx_data[9:2] == GLOBAL_ID) ) ) 
                                                         Next = CONFIG_WRITE;
-                else if ( (rx_data_flag) && (rx_data[1:0] == 2'b11) 
+                else if ( (rx_data_flag) && (rx_data[1:0] == CONFIG_READ_OP) 
                     && ( (rx_data[9:2] == chip_id) 
                     || (rx_data[9:2] == GLOBAL_ID) ) )  Next = CONFIG_READ;
                 else if ( (rx_data_flag) 
-                    && ((rx_data[1:0] == 2'b11)
-                    || (rx_data[1:0] == 2'b10)) ) Next = PASS_ALONG_CONFIG;
+                    && ((rx_data[1:0] == CONFIG_WRITE_OP)
+                    || (rx_data[1:0] == CONFIG_READ_OP)) ) Next = PASS_ALONG_CONFIG;
                 else if (rx_data_flag)                  Next = PASS_ALONG;
                 else if (load_event)              Next = WAIT_FOR_WRITE;
+                else if (load_mailbox)            Next = CONFIG_WRITE_MAILBOX_LSB;
                 else                                    Next = READY;
         CONFIG_WRITE:   if (rx_data[9:2] == GLOBAL_ID)  Next = PASS_ALONG;
                 else                                    Next = WAIT_STATE;
+        CONFIG_WRITE_MAILBOX_LSB:                       Next = WAIT_STATE;
+        CONFIG_WRITE_MAILBOX_MSB:                       Next = WAIT_STATE;
         CONFIG_READ: if (read_latency == 3'b101) Next = CONFIG_READ_LATCH;
                 else                                    Next = CONFIG_READ;
         CONFIG_READ_LATCH:                              Next = WAIT_STATE;
@@ -101,7 +145,8 @@ always_comb begin
         WRITE_FIFO:  if ( (rx_data[9:2] == GLOBAL_ID) 
                      && (global_read_flag == 1'b1))     Next = PASS_ALONG;
                      else                               Next = WAIT_STATE;
-        WAIT_STATE: if (!rx_data_flag || (timeout == 4'hF)) Next = READY;
+        WAIT_STATE: if (ch_total_packets || ch_fifo_high_water) Next = CONFIG_WRITE_MAILBOX_MSB;
+                    else if (!rx_data_flag || (timeout == 4'hF)) Next = READY;
                     else                                Next = WAIT_STATE;
         BAD_PACKET:                                     Next = READY;
         default:                                        Next = READY;
@@ -123,7 +168,9 @@ always_ff @(posedge clk or negedge reset_n) begin
         comms_busy <= 1'b0;
         send_config_data <= 1'b0;
         bad_packets <= 11'b0;
-        packet_count <= 11'b0;
+        ch_bad_packets <= 1'b0;
+        total_packets <= 11'b0;
+        ch_total_packets <= 1'b0;
     end
     else begin
         write_fifo_n <= 1'b1;
@@ -135,15 +182,42 @@ always_ff @(posedge clk or negedge reset_n) begin
         timeout <= 4'b0;
         comms_busy <= 1'b1;
         send_config_data <= 1'b0;
-        case (Next)
+       case (Next)
         READY:       begin
                         comms_busy <= 1'b0;
                     end
-        CONFIG_WRITE:begin
+        CONFIG_WRITE: begin
                         regmap_address <= rx_data[17:10];
                         regmap_write_data <= rx_data[25:18];
                         write_regmap <= 1'b1;
                     end
+        CONFIG_WRITE_MAILBOX_LSB: begin
+                        if (ch_total_packets == 1'b1) begin
+                            regmap_address <= TOTAL_PACKETS_LSB;
+                            regmap_write_data <= total_packets[7:0];
+                        end
+                        else if (ch_bad_packets == 1'b1) begin
+                            regmap_address <= BAD_PACKETS;
+                            regmap_write_data <= bad_packets[7:0];
+                            ch_bad_packets <= 1'b0;
+                        end
+                        else if (ch_fifo_high_water == 1'b1) begin
+                            regmap_address <= FIFO_HW_LSB;
+                            regmap_write_data <= fifo_high_water[7:0];
+                        end
+                     end
+        CONFIG_WRITE_MAILBOX_MSB: begin
+                        if (ch_total_packets == 1'b1) begin
+                            regmap_address <= TOTAL_PACKETS_MSB;
+                            regmap_write_data <= total_packets[15:8];
+                            ch_total_packets <= 1'b0;
+                        end
+                        else if (ch_fifo_high_water == 1'b1) begin
+                            regmap_address <= FIFO_HW_MSB;
+                            regmap_write_data <= fifo_high_water[15:8];
+                            ch_fifo_high_water <= 1'b0;
+                        end
+                     end
         CONFIG_READ: begin
                         output_event <= rx_data;
                         output_event[62] <= 1'b1; // flag downstream
@@ -152,7 +226,8 @@ always_ff @(posedge clk or negedge reset_n) begin
                         regmap_address <= rx_data[17:10];
                         read_regmap <= 1'b1;
                         read_latency <= read_latency + 1'b1;
-                        packet_count <= packet_count + 1'b1;
+                        total_packets <= total_packets + 1'b1;
+                        ch_total_packets <= 1'b1;
                         if (rx_data[9:2] == GLOBAL_ID) begin
                             global_read_flag <= 1'b1;
                         end
@@ -175,7 +250,8 @@ always_ff @(posedge clk or negedge reset_n) begin
                     
         WAIT_FOR_WRITE: begin
                             output_event <= pre_event;
-                            packet_count <= packet_count + 1'b1;
+                            total_packets <= total_packets + 1'b1;
+                            ch_total_packets <= 1'b1;
                         end
         WRITE_FIFO: begin
                         write_fifo_n <= 1'b0;
@@ -186,6 +262,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                     end
         BAD_PACKET: begin
                         bad_packets <= bad_packets + 1'b1;
+                        ch_bad_packets <= 1'b1;
                     end
         default:    ;
         endcase

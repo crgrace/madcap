@@ -30,14 +30,14 @@ begin
     if (WriteToLog == 1) initFile(block_name);
 
 // return Larpix to normal mode
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000000); 
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000000); 
 
 // configure Larpix for burst size
-    sendWordToLarpix(CONFIG_WRITE,chip_id,BURST_LENGTH,BurstSize[7:0]);      
-    sendWordToLarpix(CONFIG_WRITE,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);  
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,BURST_LENGTH,BurstSize[7:0]);      
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);  
 
 // put into UART test mode
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000001);   
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000001);   
     #10000            
     wait (uld_rx_data);
     #100
@@ -47,7 +47,7 @@ begin
 
 // return Larpix to normal mode
     //wait (larpix_tb.larpix_inst.digital_core_inst.fifo_empty); 
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000000); 
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000000); 
 
     reportResults(block_name,WriteToLog);
 end
@@ -74,12 +74,12 @@ begin
     if (WriteToLog == 1) initFile(block_name);
 
 // return Larpix to normal mode
-//    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000000); 
+//    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000000); 
 
 // configure Larpix for burst size
-    sendWordToLarpix(CONFIG_WRITE,chip_id,BURST_LENGTH,BurstSize[7:0]);      
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,BURST_LENGTH,BurstSize[7:0]);      
 #1000
-    sendWordToLarpix(CONFIG_WRITE,chip_id,(BURST_LENGTH+1),BurstSize[15:8]); 
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,(BURST_LENGTH+1),BurstSize[15:8]); 
 #1000     
 // put UART into burst test mode
     // wait until FIFO is empty to start test
@@ -89,7 +89,7 @@ begin
  
     // configure FIFO diagnostics
     $display("CONFIGURE FIFO DIAGNOSTICS");
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b0001_0010);  
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b0001_0010);  
 //    @(posedge uld_rx_data); // account for tx_data delay 
 /*
     for (i = 0; i < BurstSize; i = i + 1) begin            
@@ -102,7 +102,7 @@ begin
     end 
 */  
  //return Larpix to normal mode
-//   sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b0010_0000); 
+//   sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b0010_0000); 
 //   reportResults(block_name,WriteToLog);
 end
 endtask
@@ -127,8 +127,8 @@ begin
 
 // configure Larpix for burst size
     BurstSize = 10;
-    sendWordToLarpix(CONFIG_WRITE,chip_id,BURST_LENGTH,BurstSize[7:0]);      
-    sendWordToLarpix(CONFIG_WRITE,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);      
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,BURST_LENGTH,BurstSize[7:0]);      
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);      
 
 // wait until FIFO is empty to start test
     $display("WAITING FOR FIFO TO EMPTY TO START PANIC TEST");
@@ -137,8 +137,8 @@ begin
 // first make sure test can fail
 // put UART into burst test mode
     
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000010);
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000000);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000010);
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000000);
    
     for (i = 0; i < 10; i = i + 1) begin            
         @(posedge uld_rx_data);
@@ -154,10 +154,10 @@ begin
     Panic = 0;
 // configure Larpix for burst size
     BurstSize = FifoDepth + 1'b1;
-    sendWordToLarpix(CONFIG_WRITE,chip_id,BURST_LENGTH,BurstSize[7:0]);      
-    sendWordToLarpix(CONFIG_WRITE,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);    
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,BURST_LENGTH,BurstSize[7:0]);      
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,(BURST_LENGTH+1),BurstSize[15:8]);    
 // put UART into burst test mode
-    sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000010);   
+    sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000010);   
     for (i = 0; i <= FifoDepth; i = i + 1) begin
         // if FIFO isn't empty, wait for next read...
         //if (!larpix_tb.larpix_inst.digital_core_inst.fifo_empty) 
@@ -170,7 +170,7 @@ begin
     checkFault(block_log,block_name,"FIFO panic test",Panic,1,recoveredWord,WriteToLog,Verbose,FALSE);
 
 // return Larpix to normal mode
-   sendWordToLarpix(CONFIG_WRITE,chip_id,CONFIG_CTRL,8'b00000000); 
+   sendWordToLarpix(CONFIG_WRITE_OP,chip_id,CONFIG_CTRL,8'b00000000); 
  
    reportResults(block_name,WriteToLog);
 end
