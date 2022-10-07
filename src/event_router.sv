@@ -88,6 +88,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         load_event <= 1'b0;
         channel_event_out <= 63'b0;
         channel_waiting <= 64'b0;
+        fifo_empty_hold <= 64'b0;
         read_local_fifo_n <= {64{1'b1}};
         event_accepted <= 1'b0;
         event_complete <= 1'b0;

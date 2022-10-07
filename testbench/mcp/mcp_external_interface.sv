@@ -18,7 +18,7 @@ module mcp_external_interface
     )
     
 (output mosi,       // MASTER OUT, SLAVE IN (input of larpix from FPGA)
-    output logic clk2x,       // 4x oversampled clock sent to larpix 
+    output logic clk,       // 4x oversampled clock sent to larpix 
     output logic reset_n,     // digital reset (active low)
     input miso);            // MASTER IN, SLAVE OUT (output of larpix to FPGA) 
 
@@ -37,7 +37,6 @@ logic [WIDTH-2:0] data_from_larpix; // received by FPGA from DUT
 logic [WIDTH-2:0] sent_data;
 logic [WIDTH-2:0] receivedData;
 
-logic clk_tx;
 logic [7:0] chip_id;      // unique id for each chip
 logic [7:0] chip_id1;      // unique id for each chip
 logic [7:0] chip_id2;      // unique id for each chip
@@ -108,12 +107,11 @@ initial begin
     chip_id2 = 8'b0001_1111; // chip ID is 31
     receivedData = 0;
     uld_rx_data = 0;
-    clk2x = 0;
-    clk_tx = 0;
+    clk = 0;
     reset_n = 1;
     #45 reset_n = 0;
     #100
-    @(negedge clk2x) 
+    @(negedge clk) 
         reset_n = 1;
     $display("RESET COMPLETE");
     
@@ -131,7 +129,7 @@ initial begin
 //#10000
 
 // send word to register 1 of chip 1
-    @(posedge clk2x)
+    @(posedge clk)
 //    sendWordToLarpix(CONFIG_WRITE_OP,8'h00,CHIP_ID,8'h01);
 //    $display("EXTERNAL CONFIG WRITE TO larpix, chip = %h, register=0 DATA = 0x01",chip_id);
 #10000
@@ -269,31 +267,27 @@ initial begin
 end //initial
 
 initial begin
-    clk_tx = 0;
-    #100 clk_tx = 1;
-    forever #100 clk_tx = ~clk_tx;
+    clk = 0;
+    #100 clk = 1;
+    forever #100 clk = ~clk;
 end 
 
 initial begin
-    clk2x = 0;
-    #50 clk2x = 1;
-    forever #50 clk2x = ~clk2x;
+    clk = 0;
+    #50 clk = 1;
+    forever #50 clk = ~clk;
 end 
-
-// Clock generation
-//always #50 clk2x = ~clk2x;
-//always #100 clk_tx = ~clk_tx;
 
 // read out FPGA received UART
 always @(negedge rx_empty) begin
 //    #20
-    @(posedge clk_tx);
+    @(posedge clk);
     uld_rx_data = 1;
-    @(posedge clk_tx);
+    @(posedge clk);
     //#100
     receivedData = data_from_larpix;
 //    #20 
-    @(posedge clk_tx);
+    @(posedge clk);
     uld_rx_data = 0;
 end
 
@@ -388,7 +382,7 @@ uart_tx
     #(.WIDTH(WIDTH)
     ) tx (
     .reset_n    (reset_n),
-    .txclk      (clk_tx),
+    .txclk      (clk),
     .ld_tx_data (ld_tx_data),
     .tx_data    (data_to_larpix),
     .tx_out     (mosi),
@@ -400,7 +394,7 @@ uart_rx
     #(.WIDTH(WIDTH)
     ) rx (
     .reset_n      (reset_n),
-    .rxclk        (clk2x),
+    .rxclk        (clk),
     .uld_rx_data  (uld_rx_data),
     .rx_data      (data_from_larpix),
     .rx_in        (miso),

@@ -40,8 +40,7 @@ module uart_rx
     output logic parity_error,      // high if last word has bad parity
     input logic rx_in,              // input bit
     input logic uld_rx_data,        // transfer data to output (rx_data)
-    input logic v3_mode,            // high for v3 mode (no oversampling)
-    input logic clk_rx,             // receive clock
+    input logic clk,             // receive clock
     input logic reset_n);           // digital reset (active low) 
 
 // Internal Variables 
@@ -53,7 +52,7 @@ logic rx_d2;
 logic rx_busy;
 
 // UART RX Logic
-always_ff @ (negedge clk_rx or negedge reset_n) begin
+always_ff @ (posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         rx_reg <= 0; 
         rx_data <= 0;
@@ -65,7 +64,7 @@ always_ff @ (negedge clk_rx or negedge reset_n) begin
         rx_busy <= 1'b0;
         parity_error <= 1'b0;
     end else begin
-        if (v3_mode) rx_sample_cnt <= 1'b1;
+        rx_sample_cnt <= 1'b1;
         // Synchronize the asynch signal
         rx_d1 <= rx_in;
         rx_d2 <= rx_d1;
@@ -78,34 +77,24 @@ always_ff @ (negedge clk_rx or negedge reset_n) begin
         if (!rx_busy && !rx_d2) begin
             rx_busy <= 1'b1;
             rx_sample_cnt <= 1'b1;
-            rx_cnt <= (v3_mode) ? 8'h01 : 8'b0;
+            rx_cnt <= 8'h01;
         end
         // Start of frame detected, Proceed with rest of data
         if (rx_busy) begin
-            rx_sample_cnt <= rx_sample_cnt + 1'b1;
-            // Logic to sample at middle of data
-            // makes sure we don't start based on runt start bit
-            if (rx_sample_cnt == 1'b1) begin
-                if ((rx_d2 == 1'b1) && (rx_cnt == 8'b0)) begin
-                    if (!v3_mode) rx_busy <= 1'b0;
-                end 
-                else begin
-                    rx_cnt <= rx_cnt + 1'b1; 
-                    // Start storing the rx data
-                    if ((rx_cnt >= 8'd1) && (rx_cnt <= WIDTH)) begin
-                        rx_reg[rx_cnt - 1'b1] <= rx_d2;
-                    end
-                    if (rx_cnt > WIDTH) begin
-                        rx_busy <= 1'b0;
-                        rx_empty <= 1'b0;
-                        rx_data <= rx_reg[WIDTH-1:0];
-                        if ( (rx_reg[WIDTH-1]) != (~^rx_reg[WIDTH-2:0]))
-                            parity_error <= 1'b1;
-                        else
-                            parity_error <= 1'b0;
-                    end
+            rx_cnt <= rx_cnt + 1'b1; 
+               // Start storing the rx data
+            if ((rx_cnt >= 8'd1) && (rx_cnt <= WIDTH)) begin
+                rx_reg[rx_cnt - 1'b1] <= rx_d2;
+            end
+                if (rx_cnt > WIDTH) begin
+                    rx_busy <= 1'b0;
+                    rx_empty <= 1'b0;
+                    rx_data <= rx_reg[WIDTH-1:0];
+                    if ( (rx_reg[WIDTH-1]) != (~^rx_reg[WIDTH-2:0]))
+                        parity_error <= 1'b1;
+                    else
+                        parity_error <= 1'b0;
                 end
-            end 
         end 
     end
 end // always_ff

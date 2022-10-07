@@ -18,7 +18,7 @@ module mcp_larpix_single
     ) 
     (output logic posi,       // PRIMARY OUT, SECONDARY IN (input of larpix from FPGA)
     output real charge_in_r [63:0], 
-    output logic clk,       // 4x oversampled clock sent to larpix 
+    output logic clk,       // clock sent to larpix 
     output logic reset_n,     // digital reset (active low)
     input piso);            // PRIMARY IN, SECONDARY OUT (output of larpix to FPGA) 
 
@@ -37,18 +37,8 @@ logic [WIDTH-2:0] data_from_larpix; // received by FPGA from DUT
 logic [WIDTH-2:0] sent_data;
 logic [WIDTH-2:0] receivedData;
 
-//          clock speeds relative to clk_core
-//  clk_ctrl    clk_rx    clk_tx note
-//      00         1       1/2      core_clock is 2X to tx clock
-//      01         1/2       1/4    core_clock is 4X tx clock
-//      10         1/4       1/8    core_clock is 8X tx clock
-//      11         1/8       1/16   core_clock is 16X tx clock
-
-logic clk_master;
 logic posi_predelay;
 //logic [1:0] clk_ctrl; // clock config
-logic clk_rx;
-logic clk_tx;
 logic [7:0] chip_id;      // unique id for each chip
 logic [7:0] chip_id1;      // unique id for each chip
 logic [7:0] chip_id2;      // unique id for each chip
@@ -121,11 +111,6 @@ always begin
     posi = #1 posi_predelay;
 end
 
-always_comb begin
-    clk_rx = larpix_single_tb.larpix_v3_inst.digital_core_inst.clk_rx;
-    clk_tx = larpix_single_tb.larpix_v3_inst.digital_core_inst.clk_tx;
-    clk = clk_master;
-end
 
 initial begin
     for (int i = 0; i < 64; i++) begin
@@ -146,7 +131,6 @@ initial begin
     chip_id2 = 8'b0001_1111; // chip ID is 31
     receivedData = 0;
     uld_rx_data = 0;
-    clk_master = 0;
     reset_n = 1;
     local_reset_n = 1;
     #25
@@ -196,7 +180,6 @@ initial begin
 //`include "sanity_check.mcp"
 //`include "config_path.mcp"
 //`include "single_larpix.mcp"
-//`include "./testbench/mcp/single_larpix.mcp"
 //`include "larpix_minimal.mcp"
 `include "cds_minimal.mcp"
 // `include "hydra_larpix.mcp"
@@ -213,9 +196,9 @@ end //initial
 
 
 initial begin
-    clk_master = 0;
-    #50 clk_master = 1;
-    forever #50 clk_master = ~clk_master;
+    clk = 0;
+    #50 clk = 1;
+    forever #50 clk = ~clk;
 end 
 
 
@@ -223,27 +206,31 @@ end
 // read out FPGA received UART
 always @(negedge rx_empty) begin
 //    #20
-    @(posedge clk_tx);
+    @(posedge clk);
     uld_rx_data = 1;
-    @(posedge clk_tx);
+    @(posedge clk);
     //#100
     receivedData = data_from_larpix;
     packetNumber++;
 //    #20 
-    @(posedge clk_tx);
+    @(posedge clk);
     uld_rx_data = 0;
 end
 
 always @(negedge uld_rx_data) begin
     #10
-    $display("\n--------------------");
-    $display("\nData Received: %h",receivedData);
-    $display("Packet Number: %0d",packetNumber);
-    if (parity_error) $display("ERROR: PARITY BAD");
-    else $display("Parity good.");
+    if (packetNumber != 0) begin
+        $display("\n--------------------");
+        $display("\nData Received: %h",receivedData);
+        $display("Packet Number: %0d",packetNumber);
+        if (parity_error) $display("ERROR: PARITY BAD");
+        else $display("Parity good.");
+    end
     case(rcvd_packet_declare)
         0 : begin
-                $display("ERROR: BAD PACKET. 2'b00 INVALID DECLARATION");
+                if (packetNumber != 0) begin
+                    $display("ERROR: BAD PACKET. 2'b00 INVALID DECLARATION");
+                end
              end
         1 : begin
                 $display("data packet");
@@ -305,9 +292,11 @@ always @(sentTag) begin
     eventCount = eventCount + 1;
     scoreBoardCount = scoreBoardCount + 1;
     if (debug) begin
-        $display("event %h written to scoreboard at time %0d",sentTag,$time);
-        $display("currently %0d events digitized",eventCount);
-        $display("currently %0d events in scoreboard",scoreBoardCount);
+        if (packetNumber != 0) begin
+            $display("event %h written to scoreboard at time %0d",sentTag,$time);
+            $display("currently %0d events digitized",eventCount);
+            $display("currently %0d events in scoreboard",scoreBoardCount);
+        end
     end
 end // always
 
@@ -336,7 +325,7 @@ uart_tx_fpga
     .enable_tx_dynamic_powerdown (1'b0),
     .tx_dynamic_powerdown_cycles (3'b0), 
     .reset_n        (local_reset_n),
-    .txclk          (clk_tx)
+    .txclk          (clk)
 );
 
 // UART RX for testing TX here (this is in the receive FPGA)
@@ -344,11 +333,11 @@ uart_rx_fpga
     #(.WIDTH(WIDTH)
     ) uart_rx_inst  (
     .reset_n        (local_reset_n),
-    .clk_rx         (clk_rx),
+    .clk_rx         (clk),
     .uld_rx_data    (uld_rx_data),
     .rx_data        (data_from_larpix),
     .rx_in          (piso),
-    .v3_mode        (1'b0),
+    .v3_mode        (1'b1),
     .rx_empty       (rx_empty),
     .parity_error   (parity_error)
 );

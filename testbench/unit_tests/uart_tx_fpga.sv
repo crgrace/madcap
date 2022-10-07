@@ -63,7 +63,7 @@ always_comb begin
 end // always_comb
        
 // UART TX Logic
-always_ff @(posedge txclk or negedge reset_n) begin
+always_ff @(negedge txclk or negedge reset_n) begin
     if (!reset_n) begin
         tx_reg <= 0;
         tx_busy <= 1'b0;

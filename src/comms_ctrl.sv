@@ -16,7 +16,6 @@ module comms_ctrl
     (output logic [WIDTH-2:0] output_event,  // event to put into the fifo
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
-    output logic [11:0] bad_packets,//number of bad config packets observed 
     output logic [15:0] total_packets, // number of packets that have been generated
     output logic write_fifo_n,    // write event into fifo (active low) 
     output logic read_fifo_n,    // read event from fifo (active low)
@@ -67,6 +66,7 @@ logic ch_fifo_high_water;   // high if fifo_counter reaches high water
 logic ch_total_packets;     // high if total_packets changes
 logic ch_bad_packets;       // high if bad packets changed
 logic [15:0] fifo_high_water; // max FIFO count since reset
+logic [15:0] bad_packets;   // number of dropped packets since reset
 logic [2:0] read_latency;   // counter used to wait for FIFO
 logic global_read_flag;     // high when executing a global read
 logic [3:0] timeout;        // don't get hung up in wait state
@@ -168,9 +168,9 @@ always_ff @(posedge clk or negedge reset_n) begin
         timeout <= 4'b0;
         comms_busy <= 1'b0;
         send_config_data <= 1'b0;
-        bad_packets <= 11'b0;
+        bad_packets <= 16'b0;
         ch_bad_packets <= 1'b0;
-        total_packets <= 11'b0;
+        total_packets <= 16'b0;
         ch_total_packets <= 1'b0;
         fifo_ack <= 1'b0;
     end

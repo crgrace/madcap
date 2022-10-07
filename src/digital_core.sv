@@ -128,11 +128,6 @@ logic load_config_defaults; // high to soft reset LArPix (set to low after)
 logic [3:0] enable_piso_upstream; // enable different upstream PISOs
 logic [3:0] enable_piso_downstream; // enable different downstream PISOs
 logic [3:0] enable_posi;              // high for different POSIs
-logic [1:0] test_mode_uart0;          // put uart0 into test mode
-logic [1:0] test_mode_uart1;          // put uart1 into test mode
-logic [1:0] test_mode_uart2;          // put uart2 into test mode
-logic [1:0] test_mode_uart3;          // put uart3 into test mode
-logic [7:0] test_mode;            // concat uart test modes
 logic enable_cross_trigger;      // high for cross trigger mode
 logic enable_periodic_trigger;      // high for periodic trigger mode
 logic enable_rolling_periodic_trigger; // make the trigger rolling
@@ -158,9 +153,6 @@ logic [23:0] periodic_reset_cycles; // time between periodic reset
 logic [31:0] periodic_trigger_cycles; // time between periodic triggers
 logic [1:0] clk_ctrl;   // divide ratio
 logic fifo_ack;         // acknowledge data consumed from FIFO
-
-logic enable_tx_dynamic_powerdown; // high to power down of TX when idle
-logic [2:0] tx_dynamic_powerdown_cycles; // how long to wait after powerup
 logic enable_dynamic_reset; // high to enable dynamic reset mode
 logic enable_min_delta_adc; // high to enable min delta ADC mode
 logic threshold_polarity; // high to trigger when ABOVE threshold
@@ -182,11 +174,7 @@ logic fifo_empty;    // high when shared fifo empty
 logic [FIFO_BITS:0] fifo_counter; // how full is shared fifo?
 logic reset_n_sync;  // synced version of reset_n
 logic reset_n_config_sync;  // synced version of reset_n_config
-logic clk_core; // LArPix core clock
-logic clk_rx;    // 2x oversampling rx clock
-logic clk_tx;  // slow tx clock
 logic cds_mode; // high for correlated double sampling
-logic v3_mode;            // high for v3 mode (no oversampling)
 logic read_fifo_n;  // read data from shared fifo (active low)
 logic write_fifo_n;  // write data from shared fifo (active low)
 logic [WIDTH-2:0] output_event; // event to put into the fifo
@@ -301,21 +289,14 @@ always_comb begin
     digital_monitor_select = config_bits[DMONITOR0][4:1];
     digital_monitor_chan = config_bits[DMONITOR1][5:0];
     chip_id = config_bits[CHIP_ID][7:0];
-    enable_tx_dynamic_powerdown  = config_bits[DIGITAL][0];
+    cds_mode = config_bits[DIGITAL][0];
     load_config_defaults = config_bits[DIGITAL][1];
     enable_fifo_diagnostics = config_bits[DIGITAL][2];
     enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
     enable_packet_diagnostics = config_bits[DIGITAL][4];
-    cds_mode = config_bits[DIGITAL][5];
-    tx_dynamic_powerdown_cycles = config_bits[DIGITAL][7:5];
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
     enable_piso_downstream = config_bits[ENABLE_PISO_DOWN][3:0];
     enable_posi = config_bits[ENABLE_POSI][3:0];
-    v3_mode = config_bits[ENABLE_POSI][4];
-    test_mode_uart0 = config_bits[UART_TEST_MODE][1:0];
-    test_mode_uart1 = config_bits[UART_TEST_MODE][3:2];
-    test_mode_uart2 = config_bits[UART_TEST_MODE][5:4];
-    test_mode_uart3 = config_bits[UART_TEST_MODE][7:6]; 
     enable_cross_trigger = config_bits[ENABLE_TRIG_MODES][0];
     enable_periodic_reset = config_bits[ENABLE_TRIG_MODES][1];
     enable_rolling_periodic_reset = config_bits[ENABLE_TRIG_MODES][2];
@@ -398,12 +379,6 @@ always_comb begin
 end
  // always_comb
 
-// combine UART test modes
-always_comb begin
-    test_mode =
-        {test_mode_uart3,test_mode_uart2,test_mode_uart1,test_mode_uart0};
-end // always_comb
-
 // cross trigger
 always_comb begin
     cross_trigger = |triggered_natural;
@@ -485,7 +460,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .periodic_trigger_mask  (periodic_trigger_mask[i]),
         .enable_periodic_trigger_veto  (enable_periodic_trigger_veto),
         .enable_hit_veto        (enable_hit_veto),
-        .clk                    (clk_core),
+        .clk                    (clk),
         .reset_n                (reset_n_sync)
         );
     end // for loop
@@ -503,7 +478,7 @@ event_router
     .hit_threshold      (hit_threshold),
     .timeout            (timeout),
     .fifo_ack           (fifo_ack),
-    .clk                (clk_core),
+    .clk                (clk),
     .reset_n            (reset_n_sync)
     );
 
@@ -522,7 +497,7 @@ fifo_top
     .write_n            (write_fifo_n),
     .chip_id            (chip_id),
     .timestamp_32b      (timestamp_32b),
-    .clk                (clk_core),
+    .clk                (clk),
     .reset_n            (reset_n_sync)
     );
 
@@ -532,38 +507,32 @@ external_interface
     .REGNUM(REGNUM),
     .FIFO_BITS(FIFO_BITS)
     ) external_interface_inst (
-    .tx_out                 (piso),
-    .output_event           (output_event),
-    .config_bits            (config_bits),
-    .tx_enable              (tx_enable),
-    .tx_powerdown           (tx_powerdown),
-    .write_fifo_n           (write_fifo_n),
-    .read_fifo_n            (read_fifo_n),
-    .fifo_ack               (fifo_ack),
-    .tx_data                (tx_data),
-    .chip_id                (chip_id),
-    .v3_mode                (v3_mode),
-    .pre_event              (pre_event),
-    .fifo_full              (fifo_full),
-    .fifo_half              (fifo_half),
-    .fifo_empty             (fifo_empty),
-    .load_event             (load_event),
-    .load_config_defaults   (load_config_defaults),
-    .test_mode              (test_mode),
-    .timestamp_32b          (timestamp_32b),
-    .enable_piso_upstream   (enable_piso_upstream),
-    .enable_piso_downstream (enable_piso_downstream),
-    .enable_posi            (enable_posi),
-    .rx_in                  (posi),
-    .enable_tx_dynamic_powerdown (enable_tx_dynamic_powerdown),
-    .tx_dynamic_powerdown_cycles (tx_dynamic_powerdown_cycles),
-    .enable_fifo_diagnostics     (enable_fifo_diagnostics),
-    .fifo_counter           (fifo_counter),
-    .clk_rx                 (clk_rx),
-    .clk_tx                 (clk_tx),
-    .clk                    (clk_core),
-    .reset_n_clk            (reset_n_sync),
-    .reset_n_config         (reset_n_config_sync)
+    .tx_out                     (piso),
+    .output_event               (output_event),
+    .config_bits                (config_bits),
+    .tx_enable                  (tx_enable),
+    .write_fifo_n               (write_fifo_n),
+    .read_fifo_n                (read_fifo_n),
+    .fifo_ack                   (fifo_ack),
+    .tx_data                    (tx_data),
+    .chip_id                    (chip_id),
+    .pre_event                  (pre_event),
+    .fifo_full                  (fifo_full),
+    .fifo_half                  (fifo_half),
+    .fifo_empty                 (fifo_empty),
+    .load_event                 (load_event),
+    .load_config_defaults       (load_config_defaults),
+    .timestamp_32b              (timestamp_32b),
+    .enable_piso_upstream       (enable_piso_upstream),
+    .enable_piso_downstream     (enable_piso_downstream),
+    .enable_posi                (enable_posi),
+    .rx_in                      (posi),
+    .enable_fifo_diagnostics    (enable_fifo_diagnostics),
+    .enable_packet_diagnostics  (enable_packet_diagnostics),
+    .fifo_counter               (fifo_counter),
+    .clk                        (clk),
+    .reset_n_clk                (reset_n_sync),
+    .reset_n_config             (reset_n_config_sync)
     );
 
 // this module generates the 32b timestamp
@@ -571,7 +540,7 @@ timestamp_gen
     timestamp_gen_inst (
         .timestamp_32b      (timestamp_32b),
         .sync_timestamp     (sync_timestamp),
-        .clk                (clk_core),
+        .clk                (clk),
         .reset_n            (reset_n_sync)
     );
 
@@ -591,19 +560,7 @@ async2sync
     async2sync_inst (
         .sync                   (external_trigger_sync),
         .async                  (external_trigger),
-        .clk                    (clk_core)
-    );
-
-// this module sets the relationship between core, rx, and tx clock
-clk_manager
-    clk_manager_inst (
-    .clk_core       (clk_core),
-    .clk_rx         (clk_rx),
-    .clk_tx         (clk_tx),
-    .v3_mode        (v3_mode),
-    .clk_ctrl       (clk_ctrl),
-    .clk            (clk),
-    .reset_n        (reset_n_sync)
+        .clk                    (clk)
     );
 
 // this pulser generates the periodic trigger pulse    
@@ -615,7 +572,7 @@ periodic_pulser
     .pulse_cycles       (periodic_trigger_cycles),
     .enable             (enable_periodic_trigger),
     .enable_rolling_pulse   (enable_rolling_periodic_trigger),
-    .clk                (clk_core),
+    .clk                (clk),
     .reset_n            (reset_n_sync)
     );
 
@@ -624,12 +581,12 @@ periodic_pulser
     #(.PERIODIC_PULSER_W(24),
     .NUMCHANNELS(NUMCHANNELS))
     periodic_reset_inst (
-    .periodic_pulse     (periodic_reset),
-    .pulse_cycles       (periodic_reset_cycles),
-    .enable             (enable_periodic_reset),
+    .periodic_pulse         (periodic_reset),
+    .pulse_cycles           (periodic_reset_cycles),
+    .enable                 (enable_periodic_reset),
     .enable_rolling_pulse   (enable_rolling_periodic_reset),
-    .clk                (clk_core),
-    .reset_n            (reset_n_sync)
+    .clk                    (clk),
+    .reset_n                (reset_n_sync)
     );
 
 // digital monitor

@@ -21,10 +21,10 @@ begin
     debug = 0;
     use_magic_number = 1;
     if (debug) $display("in task: sending word to LArPix");
-    #100
-    @(negedge clk_tx)
+    #10000
+    @(negedge clk)
 //    #100 
-    @(negedge clk_tx)
+    @(negedge clk)
     ld_tx_data = 0;
     data_to_larpix= {(WIDTH-1){1'b0}};
     data_to_larpix[1:0] = op;  
@@ -45,13 +45,13 @@ begin
     sent_data = data_to_larpix;
     if (debug) $display("word sent (hex) = %h\n",data_to_larpix);
 //    #150 
-    if (debug) $display("waiting for clk_tx");
-    @(negedge clk_tx) 
+    if (debug) $display("waiting for clk");
+    @(negedge clk) 
     if (debug) $display("set ld_tx_data = 1");
     ld_tx_data = 1;
 //    #150 
-    if (debug) $display("waiting for clk_tx");
-    @(negedge clk_tx)
+    if (debug) $display("waiting for clk");
+    @(negedge clk)
     ld_tx_data = 0;
     wait (!tx_busy);
 end
