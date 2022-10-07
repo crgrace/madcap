@@ -28,7 +28,7 @@ module fifo_top
     input logic clk,                    // master clock
     input logic reset_n);             // digital reset (active low)
 //`define SRAM
-`define FF_RAM
+//`define FF_RAM
 
 // FIFO instantion logic
 // if SRAM is defined, use macro for FIFO

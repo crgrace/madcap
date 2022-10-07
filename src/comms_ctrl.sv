@@ -29,7 +29,7 @@ module comms_ctrl
     input logic [WIDTH-2:0] pre_event, // event from router (pre-parity) 
     input logic [7:0] chip_id,        // unique id for each chip
     input logic [7:0] regmap_read_data,       // data to read from regmap
-    input logic [10:0] fifo_counter,  // number of words in FIFO
+    input logic [11:0] fifo_counter,  // number of words in FIFO
     input logic rx_data_flag,        // high if rx data ready
     input logic fifo_empty,       // high if no data waiting in fifo
     input logic tx_busy,         // high when tx uart sending data
@@ -85,7 +85,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         ch_fifo_high_water <= 1'b0;
     end
     else if (fifo_counter > fifo_high_water) begin
-        fifo_high_water <= {5'b0,fifo_counter};
+        fifo_high_water <= {4'b0,fifo_counter};
         ch_fifo_high_water <= 1'b1;
     end
 end // always_ff

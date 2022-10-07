@@ -22,8 +22,8 @@ module digital_core
     parameter REGNUM = 256,          // number of configuration registers
     parameter CHIP_ID_W = 8,        // width of chip ID
     parameter GLOBAL_ID = 255,      // global broadcast ID
-    parameter integer unsigned FIFO_DEPTH = 1024,      // number of FIFO memory locations
-    parameter LOCAL_FIFO_DEPTH = 4, // number of locations in channel FIFO
+    parameter integer unsigned FIFO_DEPTH = 2048,      // number of FIFO memory locations
+    parameter LOCAL_FIFO_DEPTH = 8, // number of locations in channel FIFO
     parameter PIXEL_TRIM_DAC_BITS = 5, // number of bits per dac
     parameter ADCBITS = 10,         // number of bits in ADC
     parameter GLOBAL_DAC_BITS = 8,
@@ -390,24 +390,6 @@ always_comb begin
         csa_reset[i] = csa_reset_channel[i] | !csa_enable[i];
     end
 end // always_comb
-
-// TX PHY enable
-//always_comb begin
-//    tx_enable = enable_piso_upstream | enable_piso_downstream;
-//end
-
-// tx PHY power down 
-/*
-always_comb begin
-    for (int i=0; i <= 3; i=i+1) begin
-        if ( (enable_piso_upstream[i] | enable_piso_downstream[i] 
-        && enable_tx_dynamic_powerdown) ) 
-            tx_powerdown[i] = tx_powerdown_int;
-        else
-            tx_powerdown[i] = 1'b0;
-    end // for
-end // always_comb
-*/
 
 // instantiate sub-blocks
 genvar i;
