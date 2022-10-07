@@ -67,7 +67,7 @@ discriminator
 sar_async_adc
     #(
     .ADCBITS(ADCBITS)
-    ) sar_asynch_adc_inst( 
+    ) sar_async_adc_inst( 
         .dout           (dout),
         .done           (done),
         .sample         (sample),

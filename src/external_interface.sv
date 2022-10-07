@@ -19,6 +19,7 @@ module external_interface
     output logic [3:0] tx_powerdown,  // high to power down TX PHY
     output logic write_fifo_n,      // write event into fifo (active low) 
     output logic read_fifo_n,       // read event from fifo (active low)
+    output logic fifo_ack,          // acknowledge data consumed from FIFO
     input logic [WIDTH-2:0] tx_data,// fifo data to be transmitted off-chip
     input logic [7:0] chip_id,      // unique id for each chip
     input logic v3_mode,            // high for v3 mode (no oversampling)
@@ -187,6 +188,7 @@ comms_ctrl
     .read_regmap        (read_regmap),
     .comms_busy         (comms_busy),
     .send_config_data   (send_config_data),
+    .fifo_ack           (fifo_ack),
     .rx_data            (rx_data),
     .pre_event          (pre_event),
     .chip_id            (chip_id),

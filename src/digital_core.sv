@@ -157,6 +157,8 @@ logic [NUMCHANNELS-1:0] periodic_trigger_mask; // high to disable channel
 logic [23:0] periodic_reset_cycles; // time between periodic reset
 logic [31:0] periodic_trigger_cycles; // time between periodic triggers
 logic [1:0] clk_ctrl;   // divide ratio
+logic fifo_ack;         // acknowledge data consumed from FIFO
+
 logic enable_tx_dynamic_powerdown; // high to power down of TX when idle
 logic [2:0] tx_dynamic_powerdown_cycles; // how long to wait after powerup
 logic enable_dynamic_reset; // high to enable dynamic reset mode
@@ -449,8 +451,9 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .sample                 (sample[i]),
         .strobe                 (strobe[i]),
         .clk_out                (),
+        .channel_enabled        (csa_enable[i]),
         .async_mode             (1'b1),
-        .comp                   (comp[i]),
+        .comp                   (1'b0),
         .hit                    (hit[i]),
         .chip_id                (chip_id),
         .dout                   (dout[i]),
@@ -499,6 +502,7 @@ event_router
     .lightpix_mode      (lightpix_mode),
     .hit_threshold      (hit_threshold),
     .timeout            (timeout),
+    .fifo_ack           (fifo_ack),
     .clk                (clk_core),
     .reset_n            (reset_n_sync)
     );
@@ -535,6 +539,7 @@ external_interface
     .tx_powerdown           (tx_powerdown),
     .write_fifo_n           (write_fifo_n),
     .read_fifo_n            (read_fifo_n),
+    .fifo_ack               (fifo_ack),
     .tx_data                (tx_data),
     .chip_id                (chip_id),
     .v3_mode                (v3_mode),

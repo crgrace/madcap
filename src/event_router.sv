@@ -22,6 +22,7 @@ module event_router
     input logic lightpix_mode, // high to integrate hits for timeout
     input logic [6:0] hit_threshold, // how many hits to declare event?
     input logic [7:0] timeout, // number of clk cycles to wait for hits
+    input logic fifo_ack,   // comms controller acknowledge FIFO read
     input logic clk,           // master clock
     input logic reset_n);      // asynchronous digital reset (active low)
 
@@ -70,9 +71,10 @@ always_comb begin
                 else if (event_complete)        Next = CLEAN_UP;
                 else                            Next = INTEGRATE_EVENTS;
         READ_EVENT:                             Next = LATCH_EVENT;
-        LATCH_EVENT: if (!(&fifo_empty_hold)) Next = WAIT_STATE;  
+        LATCH_EVENT: if (!(&fifo_empty_hold))   Next = WAIT_STATE;  
                 else if (!event_complete)       Next = INTEGRATE_EVENTS;
-                else                            Next = READY;
+                else if (fifo_ack)              Next = READY;
+                else                            Next = LATCH_EVENT;
         CLEAN_UP:                               Next = READY;
         WAIT_STATE: if (wait_counter_done)      Next = READ_EVENT;
                 else                            Next = WAIT_STATE;
@@ -95,11 +97,11 @@ always_ff @(posedge clk or negedge reset_n) begin
     end
     else begin
         load_event <= 1'b0;
+        read_local_fifo_n <= {64{1'b1}};
         case(Next)
             READY:  begin
                 channel_waiting <= 64'b0;
                 channel_event_out <= 63'b0;
-                read_local_fifo_n <= {64{1'b1}};
                 event_accepted <= 1'b0;
                 event_complete <= 1'b0;
                 event_timer <= 6'b0;    
@@ -125,7 +127,6 @@ always_ff @(posedge clk or negedge reset_n) begin
                 wait_counter <= 2'b0;
                 wait_counter_done <= 1'b0;
                 event_timer <= event_timer + 1'b1;
-                read_local_fifo_n <= {64{1'b1}};  
                 for (int i = 0; i < 64; i++) begin
                     if ( (fifo_empty_hold[i] == 1'b0) ) begin
                         channel_waiting[i] <= 1'b1;

@@ -28,16 +28,23 @@ real vcommon_r, vdac_r;
 integer i;
 logic done_local;
 logic [ADCBITS-1:0] dout_local;
+logic debug; // set to 1 for debug mode
 
 assign #(DELAY) done = done_local;
 assign #(DELAY) dout = dout_local;
+
+initial begin
+    debug = 1;
+end // initial
 
 // ADC model (in LArPix, SAR tracks input until falling edge of sample)
 always_ff @(negedge sample) begin
     vcommon_r = vin_r - vcm_r;
     vdac_r = vref_r-vcm_r;
+    if (debug) begin
     $display("%m:"); 
     $display("ADC: vin_r = %f, vref_r = %f, vcommon_r = %f, vcm_r = %f, vdac_r = %f",vin_r,vref_r,vcommon_r,vcm_r,vdac_r);
+    end // if debug
     for (i = ADCBITS-1; i >= 0; i = i - 1) begin
         vdac_r = vdac_r/2;
         if (vcommon_r > vdac_r) begin
@@ -46,9 +53,11 @@ always_ff @(negedge sample) begin
         end
         else
             dout_local[i] = 1'b0;
-        $display("ADC: step %1d:, vcommon_r = %f, vdac_r = %f, dout_local[%1d] = %d",i,vcommon_r,vdac_r,i,dout_local[i]);
+        if (debug)
+            $display("ADC: step %1d:, vcommon_r = %f, vdac_r = %f, dout_local[%1d] = %d",i,vcommon_r,vdac_r,i,dout_local[i]);
     end // for
-    $display("ADC: vin_r = %f, dout = %d, vref_r = %f, vcm_r = %f;\n", vin_r, dout_local,vref_r,vcm_r);
+    if (debug)
+        $display("ADC: vin_r = %f, dout = %d, vref_r = %f, vcm_r = %f;\n", vin_r, dout_local,vref_r,vcm_r);
 end // always_ff
 
 always_ff @(sample) begin

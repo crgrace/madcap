@@ -101,7 +101,6 @@ always_comb begin
     rcvd_local_fifo_half_bit    = receivedData[60];
     rcvd_local_fifo_full_bit    = receivedData[61];
     rcvd_downstream_marker_bit  = receivedData[62];
-
     rcvd_regmap_addr            = receivedData[17:10];
     rcvd_regmap_data            = receivedData[25:18];
     rcvd_magic_number           = receivedData[57:26];
@@ -198,7 +197,8 @@ initial begin
 //`include "config_path.mcp"
 //`include "single_larpix.mcp"
 //`include "./testbench/mcp/single_larpix.mcp"
-`include "larpix_minimal.mcp"
+//`include "larpix_minimal.mcp"
+`include "cds_minimal.mcp"
 // `include "hydra_larpix.mcp"
 //   #25000 $display("TEST RESET SYNC");
 //    #25 reset_n = 0;
@@ -252,6 +252,8 @@ always @(negedge uld_rx_data) begin
                 $display("time stamp (hex) = %h",rcvd_time_stamp);
                 $display("local fifo counter (if configured) = %d",rcvd_local_fifo_cnt);
                 $display("fifo counter (if configured) = %d",rcvd_fifo_cnt);
+                $display("reset_sample_flag = %d",rcvd_reset_sample_flag);
+                $display("cds_mode_flag = %d",rcvd_cds_flag);
                 $display("data word = %d",rcvd_data_word);
                 case(rcvd_trigger_type) 
                     2'b00 : $display("trigger_type = NATURAL");
@@ -275,7 +277,8 @@ always @(negedge uld_rx_data) begin
                 $display("fifo full bit = %d",rcvd_fifo_full_bit);
                 $display("local fifo half bit = %d",rcvd_local_fifo_half_bit);
                 $display("local fifo full bit = %d",rcvd_local_fifo_full_bit);
-               $display("marker bit = %d",rcvd_downstream_marker_bit);
+                $display("magic number = %h",rcvd_magic_number);
+                $display("marker bit = %d",rcvd_downstream_marker_bit);
             end
         3 : begin
                 $display("configuration read");
@@ -286,7 +289,8 @@ always @(negedge uld_rx_data) begin
                 $display("fifo full bit = %d",rcvd_fifo_full_bit);
                 $display("local fifo half bit = %d",rcvd_local_fifo_half_bit);
                 $display("local fifo full bit = %d",rcvd_local_fifo_full_bit);
-               $display("marker bit = %d",rcvd_downstream_marker_bit);
+                $display("magic number = %h",rcvd_magic_number);
+                $display("marker bit = %d",rcvd_downstream_marker_bit);
             end
     endcase
     $display("\n--------------------\n");

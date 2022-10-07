@@ -26,6 +26,7 @@ module channel_ctrl
     output logic sample,        // high to sample CSA output
     output logic strobe,        // high to strobe SAR ADC
     output logic clk_out,       // copy of master clock used in TDC
+    input logic channel_enabled, // high if channel enabled
     input logic async_mode,    // high if asynchronous ADC used
     input logic comp,           // bit from comparator in SAR
     input logic hit,            // high when discriminator fires
@@ -96,7 +97,6 @@ logic strobe_en;  // enables clk to be used as ADC strobe
 // internal registers
 logic [7:0] adc_burst_counter; // current ADC conversion number
 logic [2:0] wait_counter; // waits for event router
-logic [2:0] wait_length;    // how long to wait for event router
 logic unsigned [7:0] reset_counter; // clock cycle currently in reset
 logic [WIDTH-2:0] pre_event; // event before put into local FIFO
 logic [WIDTH-2:0] reset_event; // CDS reset sample for local FIFO
@@ -129,7 +129,8 @@ gate_posedge_clk
     );
 
 always_comb strobe = ~strobe_BAR;
-always_comb clk_out = clk;
+//always_comb clk_out = clk; // remove if clk_needed
+always_comb clk_out = 1'b0;
 
 // trigger logic
 always_comb begin
@@ -219,9 +220,12 @@ end // always_ff
 
 always_comb begin
     case (State)
-        IDLE:   if (triggered_channel)      Next = SAMPLE; 
-                else if ((cds_mode == 1'b1)
-                        && (have_reset_sample == 1'b0)) Next = GET_RESET_SAMPLE;
+        IDLE:   if (channel_enabled) begin
+                    if (triggered_channel)      Next = SAMPLE; 
+                    else if ((cds_mode == 1'b1)
+                            && (have_reset_sample == 1'b0)) Next = GET_RESET_SAMPLE;
+                    else                        Next = IDLE;
+                end
                 else                        Next = IDLE;
         SAMPLE: if (trigger_type_latched != 2'b00)  Next = RESET_CSA;
                 else if (sample_counter < adc_hold_delay) Next = SAMPLE;
@@ -265,6 +269,7 @@ end // always_comb
 always_ff @(posedge clk  or negedge reset_n) begin
     if (!reset_n) begin
         pre_event <= 63'b0;
+        reset_event <= 63'b0;
         csa_reset_triggered <= 1'b1;
         periodic_reset_triggered <= 1'b0;
         sample <= 1'b1;
@@ -317,7 +322,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             sample_counter <= sample_counter + 1'b1;
                             if (adc_burst_counter >= adc_burst)
                                 trigger_type_latched <= trigger_type;
-                            strobe_en <= 1'b1;
+                            //strobe_en <= 1'b1; REMOVE IF WANT STROBE
                             sample <= 1'b1;
                             if (last_call) begin
                                 final_conversion <= 1'b1;
@@ -329,8 +334,8 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             sample_counter <= sample_counter + 1'b1;
                         end
             RESET_CSA:  begin
-                            strobe_en <= 1'b1;
-                            timestamp_latched <= timestamp_32b;
+                           // strobe_en <= 1'b1;
+                            //timestamp_latched <= timestamp_32b;
                             if (mark_first_packet) begin
                                 if (first_conversion) begin 
                                     timestamp_latched[27] <= 1'b1; 
@@ -350,7 +355,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                         end
             CONVERT:  begin 
                             if (!async_mode) begin
-                                strobe_en <= 1'b1;                  
+                            //    strobe_en <= 1'b1;                  
                                 if (comp) begin
                                     adc_word <= adc_word | (sar_mask);
                                 end
@@ -395,7 +400,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                              pre_event[43:16]   <= timestamp_latched[27:0];
                              pre_event[44]      <= 1'b0;
                              pre_event[45]      <= cds_mode;
-                             pre_event[55:48]   <= adc_word;
+                             pre_event[55:46]   <= adc_word;
                              pre_event[57:56]   <= trigger_type_latched;
                              pre_event[59:58]   <= {fifo_full,fifo_half};
                              pre_event[61:60]   <= {local_fifo_full,local_fifo_half};
@@ -414,10 +419,12 @@ always_ff @(posedge clk  or negedge reset_n) begin
             TRANSFER_RESET_SAMPLE: begin
                             readout_mode <= 1'b1;
                             write_local_fifo_n <= 1'b0;
+                            sample <= 1'b1;
                             end
             WAIT_STATE: begin
                             have_reset_sample <= 1'b0;  
-                            wait_counter <= wait_counter + 1'b1;      
+                            wait_counter <= wait_counter + 1'b1;
+                            sample <= 1'b1;      
                         end                    
             TRANSFER_ADC_CODE:   begin
                             readout_mode <= 1'b1;
@@ -439,6 +446,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
             MODE_RESET:  begin
                             readout_mode <= 1'b1;
                             csa_reset_triggered <= 1'b1;
+                            sample <= 1'b1;
                         end
             default:    ;
         endcase
