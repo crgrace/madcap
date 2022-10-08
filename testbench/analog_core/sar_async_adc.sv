@@ -7,7 +7,7 @@
 //      of sample.
 //      Digital output is valid and done signal 
 //      goes high after ADCDELAY time.
-//      "zero" of the ADC is set by vcm_r 
+//      "zero" of the ADC is set by groud 
 //      Full scale of the ADC is set by vref_r
 //
 ///////////////////////////////////////////////////////////////////
@@ -20,7 +20,7 @@ module sar_async_adc
     output logic done,                      // high when conversion done
     input logic sample,                     // sample commmand
     input real vref_r,                      // full-scale reference
-    input real vcm_r,                       // zero reference
+    input real vcm_r,                       // not used in conversion
     input real vin_r                        // analog stage input
     );
 
@@ -39,8 +39,10 @@ end // initial
 
 // ADC model (in LArPix, SAR tracks input until falling edge of sample)
 always_ff @(negedge sample) begin
-    vcommon_r = vin_r - vcm_r;
-    vdac_r = vref_r-vcm_r;
+    vcommon_r = vin_r;
+    //vcommon_r = vin_r - vcm_r;
+    vdac_r = vref_r;
+    //vdac_r = vref_r-vcm_r;
     if (debug) begin
     $display("%m:"); 
     $display("ADC: vin_r = %f, vref_r = %f, vcommon_r = %f, vcm_r = %f, vdac_r = %f",vin_r,vref_r,vcommon_r,vcm_r,vdac_r);

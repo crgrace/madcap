@@ -33,7 +33,6 @@ module digital_core
     output logic digital_monitor, // digital test port
     output logic [ADCBITS*NUMCHANNELS-1:0] dac_word,  // words sent to DAC
     output logic [NUMCHANNELS-1:0] sample,   // high to sample CSA output
-    output logic [NUMCHANNELS-1:0] strobe,   // high to strobe ADC
     output logic [3:0] tx_enable, // high to enable TX (PHY + keepalive)
     output logic [3:0] tx_powerdown,  // high to power down TX PHY
                                         // keepalive current remains
@@ -101,7 +100,6 @@ module digital_core
 // INPUTS
     input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
     input logic [NUMCHANNELS-1:0] done,   // high when ADC conversion finished
-    input logic [NUMCHANNELS-1:0] comp,   // decision bit from comparator 
     input logic [NUMCHANNELS-1:0] hit,    // high when discriminator fires
     input logic external_trigger,     // high to trigger channel
     input logic [3:0] posi,// PRIMARY-OUT-SECONDARY-IN: RX UART input bit  
@@ -406,7 +404,6 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .triggered_natural      (triggered_natural[i]),
         .csa_reset              (csa_reset_channel[i]),
         .sample                 (sample[i]),
-        .strobe                 (strobe[i]),
         .clk_out                (),
         .channel_enabled        (csa_enable[i]),
         .async_mode             (1'b1),
@@ -580,7 +577,7 @@ digital_monitor
     .digital_monitor_select (digital_monitor_select),
     .digital_monitor_chan   (digital_monitor_chan),
     .hit                    (hit),
-    .comp                   (comp),
+    .comp                   ({64{1'b0}}),
     .sample                 (sample),
     .csa_reset              (csa_reset),
     .triggered_natural      (triggered_natural),

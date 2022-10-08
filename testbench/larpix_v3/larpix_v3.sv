@@ -43,12 +43,9 @@ logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0];           // bits from ADC
 logic [NUMCHANNELS*ADCBITS-1:0] dac_word;  
 //logic sample [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] sample; 
-//logic strobe [NUMCHANNELS-1:0]; 
-logic [NUMCHANNELS-1:0] strobe; 
 //logic csa_reset [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] csa_reset; 
 logic [NUMCHANNELS-1:0] hit; 
-logic [NUMCHANNELS-1:0] comp; 
 logic [3:0] tx_enable;  // high to enable TX PHY
 logic [3:0] tx_powerdown;  // high to power down TX PHY
 
@@ -126,7 +123,6 @@ analog_core
     .VOFFSET(VOFFSET)
     ) analog_core_inst (
     .dout                   (dout),
-    .comp                   (comp),
     .hit                    (hit),
     .done                   (done),
     .pixel_trim_dac         (pixel_trim_dac),
@@ -137,7 +133,6 @@ analog_core
     .csa_bypass_select      (csa_bypass_select),
     .dac_word               (dac_word),
     .sample                 (sample),
-    .strobe                 (strobe),
     .csa_reset              (csa_reset),   
     .charge_in_r            (charge_in_r)
     );
@@ -159,7 +154,6 @@ digital_core
     .digital_monitor                (digital_monitor),
     .dac_word                       (dac_word),
     .sample                         (sample),
-    .strobe                         (strobe),
     .tx_enable                      (tx_enable),
     .tx_powerdown                   (tx_powerdown),
     .pixel_trim_dac                 (pixel_trim_dac),
@@ -221,7 +215,6 @@ digital_core
     .v_cm_lvds_tx3                  (v_cm_lvds_tx3),
     .dout                           (dout),
     .done                           (done),
-    .comp                           (64'b0),
     .hit                            (hit),
     .external_trigger               (external_trigger),
     .posi                           (posi),

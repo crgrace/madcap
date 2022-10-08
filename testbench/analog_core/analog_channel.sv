@@ -19,13 +19,11 @@ module analog_channel
     parameter VDDA = 1.8,           // nominal analog supply
     parameter VOFFSET = 0.47)       // discriminator threshold offset
     (output logic [ADCBITS-1:0] dout,             // digital bits from ADC
-    output logic comp,             // decision bit from ADC comparator
     output logic hit,               // high when discriminator fires
     output logic done,                 // high when ADC conversion finished
     input real charge_in_r,           // input signal
     input logic [ADCBITS-1:0] dac_word,       // test words sent to DAC
     input logic sample,                       // high to sample CSA output
-    input logic strobe,                       // high to strobe ADC
     input logic [7:0] threshold_global,   // threshold DAC setting
     input logic [4:0] pixel_trim_dac, // threshold trim    
     input logic csa_reset);       // arming signal from master control

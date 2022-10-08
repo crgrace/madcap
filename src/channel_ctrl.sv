@@ -24,7 +24,7 @@ module channel_ctrl
     output logic triggered_natural,  // high to indicate valid hit
     output logic csa_reset,     // reset CSA
     output logic sample,        // high to sample CSA output
-    output logic strobe,        // high to strobe SAR ADC
+    //output logic strobe,        // high to strobe SAR ADC
     output logic clk_out,       // copy of master clock used in TDC
     input logic channel_enabled, // high if channel enabled
     input logic async_mode,    // high if asynchronous ADC used
@@ -93,6 +93,7 @@ logic [7:0] sar_mask; // which bit to test in binary search
 logic [15:0] sample_counter;
 logic [31:0] timestamp_latched; // grab timestamp as soon as we have a hit
 logic strobe_en;  // enables clk to be used as ADC strobe
+logic strobe;  // ADC strobe (not used anymore)
 
 // internal registers
 logic [7:0] adc_burst_counter; // current ADC conversion number
