@@ -136,6 +136,8 @@ logic enable_hit_veto;   // is hit required to go into hold mode?
 logic enable_fifo_diagnostics;   // high for diagnostics
 logic enable_local_fifo_diagnostics;   // high for local diagnostics
 logic enable_packet_diagnostics;   // high for bad packet diagnostics
+logic enable_external_trigger;  // high to process external triggers
+logic enable_external_sync;     // high to process external syncs
 logic [15:0] adc_hold_delay;     // how many clock cycles for sampling?
 logic [7:0] adc_burst_length;  // how long is max adc burst?
 logic [2:0] reset_length;       // how many cycles to reset CSA?
@@ -188,7 +190,9 @@ logic [6:0] hit_threshold; // how many hits to declare event?
 logic [7:0] timeout; // number of clk cycles to wait for hits
 logic [7:0] shadow_reset_length; // just in case...
 logic [7:0] reset_length_channel; // just in case...
-logic external_trigger_sync;
+logic external_trigger_sync_active;
+logic external_trigger_gated;
+
 // need to use generates for large config words
 // Cadence can't handle two dimensional ports
 genvar g_i;
@@ -292,6 +296,8 @@ always_comb begin
     enable_fifo_diagnostics = config_bits[DIGITAL][2];
     enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
     enable_packet_diagnostics = config_bits[DIGITAL][4];
+    enable_external_trigger = config_bits[DIGITAL][5];
+    enable_external_sync = config_bits[DIGITAL][5];
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
     enable_piso_downstream = config_bits[ENABLE_PISO_DOWN][3:0];
     enable_posi = config_bits[ENABLE_POSI][3:0];
@@ -389,6 +395,16 @@ always_comb begin
     end
 end // always_comb
 
+// external trigger/sync logic
+always_comb begin
+    if (enable_external_trigger) begin
+        external_trigger_gated = external_trigger_sync_active;
+    end
+    if (enable_external_sync) begin
+        sync_timestamp = external_trigger_sync_active;
+    end
+end // always_comb
+
 // instantiate sub-blocks
 genvar i;
 generate
@@ -421,7 +437,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .cds_mode               (cds_mode),
         .mark_first_packet      (mark_first_packet),
         .read_local_fifo_n      (read_local_fifo_n[i]),
-        .external_trigger       (external_trigger_sync),
+        .external_trigger       (external_trigger_gated),
         .cross_trigger          (cross_trigger),
         .periodic_trigger       (periodic_trigger[i]),
         .periodic_reset         (periodic_reset[i]),
@@ -523,21 +539,19 @@ timestamp_gen
         .reset_n            (reset_n_sync)
     );
 
-// this module does clock domain crossing for the reset_n pulse and
-// also generates the timestamp sync
+// this module does clock domain crossing for the reset_n pulse 
 reset_sync
     reset_sync_inst (
         .reset_n_sync           (reset_n_sync),
-        .sync_timestamp         (sync_timestamp),
         .reset_n_config_sync    (reset_n_config_sync),
         .clk                    (clk),
         .reset_n                (reset_n)
     );
 
-// this module synchronizes the external trigger
+// this module synchronizes the external trigger/sync
 async2sync
     async2sync_inst (
-        .sync                   (external_trigger_sync),
+        .sync                   (external_trigger_sync_active),
         .async                  (external_trigger),
         .clk                    (clk)
     );

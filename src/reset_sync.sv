@@ -2,12 +2,9 @@
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Synchronizes an asynchronous reset 
 //              to the different "clk" domains
-//              Also generates timestamp sync signal
 //
 //              if reset_n is held low for more than 4 clk cycles
 //              then timestamp sync will be asserted.
-//              if reset_n is held low for more than 16 clk cycles
-//              then the internal reset (minus config) will be asserted
 //              if reset_n is held low for more than 32 clk cycles
 //              then the config register reset will be asserted
 //              
@@ -16,7 +13,6 @@
 module reset_sync
 (
     output logic reset_n_sync, //synchronized reset in clk_2x domain
-    output logic sync_timestamp,    // high to reset timestamp
     output logic reset_n_config_sync, // reset config registers
     input clk,                   // master clk
     input reset_n                   // asynchronous external reset
@@ -24,20 +20,12 @@ module reset_sync
 
 // local registers
 logic [15:0] srg_clk;
-logic [3:0] srg_timestamp;
 logic [31:0] srg_config;
 logic all_0;
-logic all_0_timestamp;
 logic all_0_config;
-
-//always_comb begin
-//    reset_n_sync = reset_n_sync_clk_reg;
-//    reset_n_config_sync = ~sync_config_armed;
-//end // always_comb
 
 always_comb begin
     reset_n_sync = ~all_0;
-    sync_timestamp = all_0_timestamp;
     reset_n_config_sync = ~all_0_config;
 end
 
@@ -55,16 +43,6 @@ always_ff @(negedge clk) begin
         all_0 <= 1'b1;
     else
         all_0 <= 1'b0;
-end // always_ff
-
-//shift register for sync_timestamp
-always_ff @(negedge clk) begin
-    srg_timestamp <= {srg_timestamp[2:0],reset_n};
-    if (srg_timestamp [3:1] == 3'b000) begin
-        all_0_timestamp <= 1'b1;
-    end
-    else
-        all_0_timestamp <= 1'b0;
 end // always_ff
 
 //shift register for sync_config
