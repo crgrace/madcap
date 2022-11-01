@@ -84,6 +84,7 @@ fifo_latch
     .data_in        (data_in),
     .read_n         (read_n),
     .write_n        (write_n),
+    .clk            (clk),
     .reset_n        (reset_n)
     );
 `endif // ifdef FF_RAM
