@@ -136,6 +136,7 @@ logic enable_hit_veto;   // is hit required to go into hold mode?
 logic enable_fifo_diagnostics;   // high for diagnostics
 logic enable_local_fifo_diagnostics;   // high for local diagnostics
 logic enable_packet_diagnostics;   // high for bad packet diagnostics
+logic enable_data_stats;   // high to write stats to mailbox
 logic enable_external_trigger;  // high to process external triggers
 logic enable_external_sync;     // high to process external syncs
 logic [15:0] adc_hold_delay;     // how many clock cycles for sampling?
@@ -297,7 +298,8 @@ always_comb begin
     enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
     enable_packet_diagnostics = config_bits[DIGITAL][4];
     enable_external_trigger = config_bits[DIGITAL][5];
-    enable_external_sync = config_bits[DIGITAL][5];
+    enable_external_sync = config_bits[DIGITAL][6];
+    enable_data_stats = config_bits[DIGITAL][7];
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
     enable_piso_downstream = config_bits[ENABLE_PISO_DOWN][3:0];
     enable_posi = config_bits[ENABLE_POSI][3:0];
@@ -400,9 +402,14 @@ always_comb begin
     if (enable_external_trigger) begin
         external_trigger_gated = external_trigger_sync_active;
     end
+    else
+        external_trigger_gated = 1'b0;
+
     if (enable_external_sync) begin
         sync_timestamp = external_trigger_sync_active;
     end
+    else 
+        sync_timestamp = 1'b0;
 end // always_comb
 
 // instantiate sub-blocks
@@ -524,6 +531,7 @@ external_interface
     .rx_in                      (posi),
     .enable_fifo_diagnostics    (enable_fifo_diagnostics),
     .enable_packet_diagnostics  (enable_packet_diagnostics),
+    .enable_data_stats          (enable_data_stats), 
     .fifo_counter               (fifo_counter),
     .clk                        (clk),
     .reset_n_clk                (reset_n_sync),
@@ -597,7 +605,7 @@ digital_monitor
     .triggered_natural      (triggered_natural),
     .periodic_trigger       (periodic_trigger),
     .periodic_reset         (periodic_reset),
-    .external_trigger       (external_trigger_sync),
+    .external_trigger       (external_trigger_sync_active),
     .cross_trigger          (cross_trigger),
     .reset_n_config_sync    (reset_n_config_sync),
     .sync_timestamp         (sync_timestamp)

@@ -71,10 +71,12 @@ always_comb begin
                 else if (event_complete)        Next = CLEAN_UP;
                 else                            Next = INTEGRATE_EVENTS;
         READ_EVENT:                             Next = LATCH_EVENT;
-        LATCH_EVENT: if (!(&fifo_empty_hold))   Next = WAIT_STATE;  
-                else if (!event_complete)       Next = INTEGRATE_EVENTS;
-                else if (fifo_ack)              Next = READY;
-                else                            Next = LATCH_EVENT;
+        LATCH_EVENT: if (fifo_ack) begin
+                        if (!(&fifo_empty_hold))Next = READ_EVENT;  
+                        else if (!event_complete)Next = INTEGRATE_EVENTS;
+                        else                    Next = READY;
+                    end
+                    else                        Next = LATCH_EVENT;
         CLEAN_UP:                               Next = READY;
         WAIT_STATE: if (wait_counter_done)      Next = READ_EVENT;
                 else                            Next = WAIT_STATE;

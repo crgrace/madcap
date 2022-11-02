@@ -34,6 +34,7 @@ module external_interface
     input logic [3:0] rx_in,                // rx UART input bit // TP: changed unpacked to packed to remove genus errors 
     input logic enable_fifo_diagnostics, // high to embed fifo counts
     input logic enable_packet_diagnostics, // high for embeding packet count LSBs
+    input logic enable_data_stats, // high to write stats to mailbox
     input logic [FIFO_BITS:0] fifo_counter,  // current shared fifo count
     input logic clk,                  // master clock
     input logic reset_n_clk, // digital reset on clk domain (active low)
@@ -179,6 +180,7 @@ comms_ctrl
     .chip_id            (chip_id),
     .regmap_read_data   (regmap_read_data),
     .fifo_counter       (fifo_counter),
+    .enable_data_stats  (enable_data_stats),
     .rx_data_flag       (rx_data_flag),
     .fifo_empty         (fifo_empty),
     .tx_busy            (tx_busy_any),
