@@ -65,6 +65,7 @@ enum logic [3:0] // explicit state definitions
 // local registers
 logic load_mailbox;         // want to load the mailbox into the config registers
 logic ch_fifo_high_water;   // high if fifo_counter reaches high water
+logic fifo_high_water_executed;   // high if high water written to regmap
 logic ch_total_packets;     // high if total_packets changes
 logic ch_bad_packets;       // high if bad packets changed
 logic [15:0] fifo_high_water; // max FIFO count since reset
@@ -83,7 +84,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         fifo_high_water <= 11'b0;
         ch_fifo_high_water <= 1'b0;
     end 
-    else if (ch_fifo_high_water && write_regmap) begin
+    else if (ch_fifo_high_water && fifo_high_water_executed) begin
         ch_fifo_high_water <= 1'b0;
     end
     else if (fifo_counter > fifo_high_water) begin
@@ -177,6 +178,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         total_packets <= 16'b0;
         ch_total_packets <= 1'b0;
         fifo_ack <= 1'b0;
+        fifo_high_water_executed <= 1'b0;
     end
     else begin
         write_fifo_n <= 1'b1;
@@ -189,6 +191,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         comms_busy <= 1'b1;
         send_config_data <= 1'b0;
         fifo_ack <= 1'b0;
+        fifo_high_water_executed <= 1'b0;
        case (Next)
         READY:       begin
                         comms_busy <= 1'b0;
@@ -199,6 +202,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                         write_regmap <= 1'b1;
                     end
         CONFIG_WRITE_MAILBOX_LSB: begin
+                        write_regmap <= 1'b1;
                         if (ch_total_packets == 1'b1) begin
                             regmap_address <= TOTAL_PACKETS_LSB;
                             regmap_write_data <= total_packets[7:0];
@@ -214,6 +218,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                         end
                      end
         CONFIG_WRITE_MAILBOX_MSB: begin
+                        write_regmap <= 1'b1;
                         if (ch_total_packets == 1'b1) begin
                             regmap_address <= TOTAL_PACKETS_MSB;
                             regmap_write_data <= total_packets[15:8];
@@ -222,9 +227,10 @@ always_ff @(posedge clk or negedge reset_n) begin
                         else if (ch_fifo_high_water == 1'b1) begin
                             regmap_address <= FIFO_HW_MSB;
                             regmap_write_data <= fifo_high_water[15:8];
-                            ch_fifo_high_water <= 1'b0;
+                            fifo_high_water_executed <= 1'b1;
                         end
                      end
+                     
         CONFIG_READ: begin
                         output_event <= rx_data;
                         output_event[62] <= 1'b1; // flag downstream

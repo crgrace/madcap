@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////
 // File Name: sar_async_adc.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
-// Description:SystemVerilog model of LArPix_v3 10-bit SAR ADC 
+// Description: SystemVerilog model of LArPix_v3 10-bit SAR ADC 
 //
 //      ADC is asynchronous. ADC conversion is triggered by falling edge
 //      of sample.
@@ -34,7 +34,7 @@ assign #(DELAY) done = done_local;
 assign #(DELAY) dout = dout_local;
 
 initial begin
-    debug = 1;
+    debug = 0;
 end // initial
 
 // ADC model (in LArPix, SAR tracks input until falling edge of sample)
@@ -44,8 +44,8 @@ always_ff @(negedge sample) begin
     vdac_r = vref_r;
     //vdac_r = vref_r-vcm_r;
     if (debug) begin
-    $display("%m:"); 
-    $display("ADC: vin_r = %f, vref_r = %f, vcommon_r = %f, vcm_r = %f, vdac_r = %f",vin_r,vref_r,vcommon_r,vcm_r,vdac_r);
+        $display("%m:"); 
+        $display("ADC: vin_r = %f, vref_r = %f, vcommon_r = %f, vcm_r = %f, vdac_r = %f",vin_r,vref_r,vcommon_r,vcm_r,vdac_r);
     end // if debug
     for (i = ADCBITS-1; i >= 0; i = i - 1) begin
         vdac_r = vdac_r/2;

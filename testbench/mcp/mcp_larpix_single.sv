@@ -179,9 +179,10 @@ initial begin
 //`include "burst_debug.mcp"
 //`include "sanity_check.mcp"
 //`include "config_path.mcp"
-//`include "single_larpix.mcp" //TP: not working 10/31/2022
-`include "larpix_minimal.mcp" //TP: Partialy working 10/31/2022
-//`include "cds_minimal.mcp"    //TP: working
+//`include "single_larpix.mcp" 
+//`include "larpix_minimal.mcp" 
+`include "larpix_mailbox.mcp" 
+//`include "cds_minimal.mcp"    
 // `include "hydra_larpix.mcp"
 //   #25000 $display("TEST RESET SYNC");
 //    #25 reset_n = 0;
