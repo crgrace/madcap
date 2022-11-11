@@ -52,6 +52,7 @@ module digital_core
     output logic [3:0] ibias_vref_buffer, // vref buffer ibias
     output logic [3:0] ibias_vcm_buffer,  // vcm buffer ibias
     output logic [3:0] ibias_tpulse,  // tpulse ibias
+    output logic [4*NUMCHANNELS-1:0] adc_ibias_delay, // ADC delay line
     output logic [4:0] ref_current_trim, // trims ref voltage
     output logic override_ref, // high to enable external bandgap
     output logic ref_kickstart, // active high kickstart bit
@@ -139,7 +140,7 @@ logic enable_packet_diagnostics;   // high for bad packet diagnostics
 logic enable_data_stats;   // high to write stats to mailbox
 logic enable_external_trigger;  // high to process external triggers
 logic enable_external_sync;     // high to process external syncs
-logic [15:0] adc_hold_delay;     // how many clock cycles for sampling?
+logic [7:0] adc_hold_delay;     // how many clock cycles for sampling?
 logic [7:0] adc_burst_length;  // how long is max adc burst?
 logic [2:0] reset_length;       // how many cycles to reset CSA?
 logic digital_monitor_enable;
@@ -273,12 +274,15 @@ always_comb begin
     override_ref = config_bits[REFGEN][5];
     ref_kickstart = config_bits[REFGEN][6];
 // DISABLE REFERENCE OVERRIDE AND KICKSTART 
+// we don't use anymore, but don't want to have to modify
+// working analog circuits, so just force to zero
     override_ref = 1'b0; 
     ref_kickstart = 1'b0;
 // END DISABLE REFERENCE OVERRIDE AND KICKSTART
-    vref_dac = config_bits[DAC_VREF][7:0];
-    vcm_dac = config_bits[DAC_VCM][7:0];
-    csa_testpulse_dac = config_bits[CSA_TEST_DAC][7:0]; //DG: mod
+    vref_dac = {{config_bits[DAC_VREF][7:1]},1'b0};
+    vcm_dac = vref_dac >> 1;
+    adc_ibias_delay = {64{config_bits[ADC_IBIAS_DELAY][3:0]}};
+    csa_testpulse_dac = config_bits[CSA_TEST_DAC][7:0]; 
     current_monitor_bank0 = config_bits[IMONITOR0][3:0];
     current_monitor_bank1 = config_bits[IMONITOR0][7:4];
     current_monitor_bank2 = config_bits[IMONITOR1][3:0];
@@ -310,9 +314,8 @@ always_comb begin
     enable_rolling_periodic_trigger = config_bits[ENABLE_TRIG_MODES][4];
     enable_periodic_trigger_veto = config_bits[ENABLE_TRIG_MODES][5];
     enable_hit_veto = config_bits[ENABLE_TRIG_MODES][6];
-    adc_hold_delay[7:0] = config_bits[ADC_HOLD_DELAY][7:0];
+    adc_hold_delay = config_bits[ADC_HOLD_DELAY][7:0];
     shadow_reset_length = config_bits[SHADOW_RESET_LENGTH][7:0];
-    adc_hold_delay[15:8] = config_bits[ADC_HOLD_DELAY+1][7:0];
     adc_burst_length = config_bits[ADC_BURST][7:0];
     enable_dynamic_reset = config_bits[ENABLE_ADC_MODES][0];
     enable_min_delta_adc = config_bits[ENABLE_ADC_MODES][1];

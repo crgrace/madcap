@@ -61,6 +61,7 @@ logic [15:0] ibias_csa; // csa ibia
 logic [3:0] ibias_vref_buffer; // vref buffer ibias
 logic [3:0] ibias_vcm_buffer; // vcm buffer bias
 logic [3:0] ibias_tpulse; // tpulse DAC bias
+logic [4*NUMCHANNELS-1:0] adc_ibias_delay; // ADC delay line
 logic [4:0] ref_current_trim; // trims ref voltage
 logic ref_kickstart; // kickstart bit
 logic override_ref; // override reference generator
@@ -168,6 +169,7 @@ digital_core
     .ibias_vref_buffer              (ibias_vref_buffer),
     .ibias_vcm_buffer               (ibias_vcm_buffer),
     .ibias_tpulse                   (ibias_tpulse),
+    .adc_ibias_delay                (adc_ibias_delay),
     .ref_current_trim               (ref_current_trim),
     .override_ref                   (override_ref),
     .ref_kickstart                  (ref_kickstart),

@@ -69,6 +69,7 @@ logic fifo_high_water_executed;   // high if high water written to regmap
 logic ch_total_packets;     // high if total_packets changes
 logic ch_bad_packets;       // high if bad packets changed
 logic [15:0] fifo_high_water; // max FIFO count since reset
+logic [11:0] fifo_mag;      // number of events in FIFO
 logic [15:0] bad_packets;   // number of dropped packets since reset
 logic [2:0] read_latency;   // counter used to wait for FIFO
 logic global_read_flag;     // high when executing a global read
@@ -77,6 +78,7 @@ logic ld_tx_data_fifo;      // tells uart to load data from FIFO
 
 always_comb begin
     ld_tx_data = ld_tx_data_fifo || send_config_data;
+    fifo_mag = (fifo_counter - 1'b1);
 end // always_comb
 
 always_ff @(posedge clk or negedge reset_n) begin
@@ -87,8 +89,8 @@ always_ff @(posedge clk or negedge reset_n) begin
     else if (ch_fifo_high_water && fifo_high_water_executed) begin
         ch_fifo_high_water <= 1'b0;
     end
-    else if (fifo_counter > fifo_high_water) begin
-        fifo_high_water <= {4'b0,fifo_counter};
+    else if (fifo_mag > fifo_high_water) begin
+        fifo_high_water <= {4'b0,(fifo_mag)};
         ch_fifo_high_water <= 1'b1;
     end
 end // always_ff
@@ -239,8 +241,8 @@ always_ff @(posedge clk or negedge reset_n) begin
                         regmap_address <= rx_data[17:10];
                         read_regmap <= 1'b1;
                         read_latency <= read_latency + 1'b1;
-                        total_packets <= total_packets + 1'b1;
-                        ch_total_packets <= 1'b1;
+                        //total_packets <= total_packets + 1'b1;
+                        //ch_total_packets <= 1'b1;
                         if (rx_data[9:2] == GLOBAL_ID) begin
                             global_read_flag <= 1'b1;
                         end

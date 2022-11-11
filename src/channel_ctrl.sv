@@ -35,7 +35,7 @@ module channel_ctrl
     input logic [7:0] chip_id,  // unique id for each chip
     input logic [5:0] channel_id,// unique identifier for each ADC channel 
     input logic [7:0] adc_burst,// how many conversions to do each hit
-    input logic [15:0] adc_hold_delay,// number of clock cycles for sampling
+    input logic [7:0] adc_hold_delay,// number of clock cycles for sampling
     input logic [31:0] timestamp_32b,     // time stamp to write to event
     input logic unsigned [7:0] reset_length,   // # of cycles to hold CSA in reset
     input logic enable_dynamic_reset,  // high for data-driven reset
@@ -90,7 +90,7 @@ logic [1:0] trigger_type; //00: normal, 01: ext, 10: cross,11: periodic
 logic [1:0] trigger_type_latched; // latched version of trigger type
 // ADC signals
 logic [7:0] sar_mask; // which bit to test in binary search
-logic [15:0] sample_counter;
+logic [7:0] sample_counter;
 logic [31:0] timestamp_latched; // grab timestamp as soon as we have a hit
 logic strobe_en;  // enables clk to be used as ADC strobe
 logic strobe;  // ADC strobe (not used anymore)
@@ -277,7 +277,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
         strobe_en <= 1'b0;
         sar_mask <= 8'b10000000;
         adc_word <= 8'b0;
-        sample_counter <= 16'b0;
+        sample_counter <= 8'b0;
         adc_burst_counter <= 8'b0;
         timestamp_latched <= 32'b0;
         trigger_type_latched <= 2'b0;
