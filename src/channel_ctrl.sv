@@ -18,7 +18,6 @@ module channel_ctrl
     parameter integer unsigned MAIN_FIFO_BITS = 12,
     parameter integer unsigned LOCAL_FIFO_DEPTH = 8) 
     (output logic [WIDTH-2:0] channel_event, // event to shared fifo
-    output logic [7:0] dac_word,   // DAC control word sent to SAR ADC
     output logic [9:0] adc_word, // helpful for debugging (not used by RTL)
     output logic fifo_empty,    // is data eady to write to shared FIFO?
     output logic triggered_natural,  // high to indicate valid hit
@@ -157,14 +156,6 @@ always_comb begin
     endcase
 end // always_comb
 
-//dac_logic
-always_comb begin
-    if (readout_mode)
-        dac_word = 8'b10000000;
-    else
-        dac_word = adc_word | sar_mask;
-end // always_comb
-
 // reset_logic
 always_comb begin
     csa_reset = ( csa_reset_triggered
@@ -201,13 +192,13 @@ always_ff @(posedge clk or negedge reset_n) begin
             end
             else begin  
                 csa_reset_held <= 1'b0;
-                reset_counter <= 3'b000;
+                reset_counter <= 8'h00;
                 csa_reset_flag <= 1'b0;
             end
         end
         else begin 
             csa_reset_held <= 1'b0;
-            reset_counter <= 3'b000;
+            reset_counter <= 8'h00;
         end
     end
 end // always_ff 

@@ -28,7 +28,6 @@ module analog_core
     input logic [NUMCHANNELS-1:0] csa_bypass_enable,
     input logic [NUMCHANNELS-1:0] csa_monitor_select,
     input logic [NUMCHANNELS-1:0] csa_bypass_select,
-    input logic [NUMCHANNELS*ADCBITS-1:0] dac_word,// test words sent to DAC
     input logic [NUMCHANNELS-1:0] sample,      // high to sample CSA output
     input logic [NUMCHANNELS-1:0] csa_reset,   // arming signal
     input real charge_in_r [NUMCHANNELS-1:0]);  // input  signal
@@ -53,7 +52,6 @@ generate
         .hit                (hit[i]),
         .done               (done[i]),
         .charge_in_r        (charge_in_r[i]),
-        .dac_word           (dac_word[ADCBITS*(i+1)-1:ADCBITS*i]),        
         .sample             (sample[i]),
         .threshold_global   (threshold_global),
         .pixel_trim_dac     (pixel_trim_dac[PIXEL_TRIM_DAC_BITS*(i+1)-1:PIXEL_TRIM_DAC_BITS*i]),

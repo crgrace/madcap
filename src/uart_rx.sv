@@ -70,7 +70,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
         rx_d2 <= rx_d1;
         // Unload the rx data
         if (uld_rx_data) begin
-            rx_data  <= rx_reg[WIDTH-1:0];
+            rx_data  <= rx_reg[WIDTH-2:0];
             rx_empty <= 1'b1;
         end
         // Check if just received start of frame
@@ -89,7 +89,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
                 if (rx_cnt > WIDTH) begin
                     rx_busy <= 1'b0;
                     rx_empty <= 1'b0;
-                    rx_data <= rx_reg[WIDTH-1:0];
+                    rx_data <= rx_reg[WIDTH-2:0];
                     if ( (rx_reg[WIDTH-1]) != (~^rx_reg[WIDTH-2:0]))
                         parity_error <= 1'b1;
                     else

@@ -31,11 +31,8 @@ module digital_core
     
     (output logic [3:0] piso,// PRIMARY-IN-SECONDARY-OUT TX UART output bit
     output logic digital_monitor, // digital test port
-    output logic [ADCBITS*NUMCHANNELS-1:0] dac_word,  // words sent to DAC
     output logic [NUMCHANNELS-1:0] sample,   // high to sample CSA output
     output logic [3:0] tx_enable, // high to enable TX (PHY + keepalive)
-    output logic [3:0] tx_powerdown,  // high to power down TX PHY
-                                        // keepalive current remains
     
 // ANALOG CORE CONFIGURATION SIGNALS
 // these are in the same order as the LArPix_v2b config bits google sheet
@@ -163,7 +160,6 @@ logic [7:0] min_delta_adc; // difference in ADC values that triggers
 logic [WIDTH-2:0] input_events [NUMCHANNELS-1:0]; // pre-parity routed 
 logic [63:0] csa_enable; // enable from config bits
 logic [63:0] csa_reset_channel; // reset from channel_ctrl
-logic [7:0] dac_word_channel [NUMCHANNELS-1:0]; // SAR control from channel
 logic [63:0] local_fifo_empty; // when low, event is ready
 logic [63:0] triggered_natural; // low for external or cross trigger
 logic [31:0] timestamp_32b;  //32bit timestamp
@@ -205,7 +201,6 @@ generate
         assign digital_threshold[g_i*8+7:g_i*8] 
             = config_bits[DIGITAL_THRESHOLD+g_i][7:0];
         // distribute internal SAR DAC controls
-        assign dac_word[g_i*8+7:g_i*8] = dac_word_channel[g_i];        
     end
 endgenerate
 
@@ -424,7 +419,6 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         ) 
         channel_ctrl_inst (
         .channel_event          (input_events[i]),
-        .dac_word               (dac_word_channel[i]),
         .adc_word               (adc_word[i]),
         .fifo_empty             (local_fifo_empty[i]),
         .triggered_natural      (triggered_natural[i]),

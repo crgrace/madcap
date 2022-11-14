@@ -40,14 +40,12 @@ parameter VOFFSET = 0.47;         // discriminator threshold offset
 
 logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0];           // bits from ADC
 // control signals
-logic [NUMCHANNELS*ADCBITS-1:0] dac_word;  
 //logic sample [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] sample; 
 //logic csa_reset [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] csa_reset; 
 logic [NUMCHANNELS-1:0] hit; 
 logic [3:0] tx_enable;  // high to enable TX PHY
-logic [3:0] tx_powerdown;  // high to power down TX PHY
 
 // CONFIG BITS
 logic [PIXEL_TRIM_DAC_BITS*NUMCHANNELS-1:0] pixel_trim_dac; 
@@ -132,7 +130,6 @@ analog_core
     .csa_bypass_enable      (csa_bypass_enable),
     .csa_monitor_select     (csa_monitor_select),
     .csa_bypass_select      (csa_bypass_select),
-    .dac_word               (dac_word),
     .sample                 (sample),
     .csa_reset              (csa_reset),   
     .charge_in_r            (charge_in_r)
@@ -153,10 +150,8 @@ digital_core
 */    digital_core_inst (
     .piso                           (piso),
     .digital_monitor                (digital_monitor),
-    .dac_word                       (dac_word),
     .sample                         (sample),
     .tx_enable                      (tx_enable),
-    .tx_powerdown                   (tx_powerdown),
     .pixel_trim_dac                 (pixel_trim_dac),
     .threshold_global               (threshold_global),
     .csa_gain                       (csa_gain),

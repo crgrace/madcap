@@ -47,7 +47,7 @@ logic downstream_flag;          // high if downstream
 logic ld_tx_data_latched;
 logic [3:0] rx_data_flag_uart;
 logic [3:0] clear_rx_data_flag_uart;
-logic [6:0] timeout; // don't get hung up in a wait state
+logic [5:0] timeout; // don't get hung up in a wait state
 
 always_comb begin
     rx_enable = enable_posi;

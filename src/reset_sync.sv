@@ -48,7 +48,7 @@ end // always_ff
 //shift register for sync_config
 always_ff @(negedge clk) begin
     srg_config <= {srg_config[30:0],reset_n};
-    if (srg_config [31:1] == 30'h000000) begin
+    if (srg_config [31:1] == 31'h000000) begin
         all_0_config <= 1'b1;
     end
     else

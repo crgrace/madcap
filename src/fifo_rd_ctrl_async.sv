@@ -25,7 +25,7 @@ enum logic [1:0] // explicit state definitions
             TRANSFER        = 2'h3} State, Next;
 
 // internal register
-logic [6:0] timeout; // keeps state machine from hanging if all TX off
+logic [5:0] timeout; // keeps state machine from hanging if all TX off
 
 always_ff @(posedge clk or negedge reset_n)
     if (!reset_n)
