@@ -27,20 +27,20 @@ module fifo_latch
 
 
 // fifo memory array (latches)
-logic [FIFO_WIDTH:0] fifo_mem [0:FIFO_DEPTH-1];
+logic [FIFO_WIDTH-1:0] fifo_mem [0:FIFO_DEPTH-1];
 
 //internal signals
 logic  [FIFO_BITS:0] read_pointer; // points to location to read from next
 logic [FIFO_BITS:0] write_pointer; // points to location to write to next
 
-//logic gated_read_n;
+logic gated_read_n;
 logic gated_write_n;
 
-//gate_posedge_clk read_en_gatedclk(
-//    .EN(read_n), 
-//    .CLK(clk),
-//    .ENCLK(gated_read_n)
-//    );
+gate_posedge_clk read_en_gatedclk(
+    .EN(read_n), 
+    .CLK(clk),
+    .ENCLK(gated_read_n)
+    );
 
 gate_posedge_clk write_en_gatedclk(
     .EN(write_n), 
@@ -78,7 +78,7 @@ always_ff @ (posedge clk or negedge reset_n)
     if (!reset_n)
         write_pointer <= '0;
 //    else begin
-    else if (!gated_write_n) begin
+    else if (!write_n) begin
         if (!fifo_full) begin
             // increment write pointer; check to see if write pointer has 
             // gone beyond depth of fifo, in that case set it to the 
@@ -93,7 +93,7 @@ always_ff @ (posedge clk or negedge reset_n)
 // implement memory as latches to save die area
 
  always_latch
-    if (!read_n) 
+    if (!gated_read_n) 
     data_out <= fifo_mem[read_pointer];
 
  always_latch
