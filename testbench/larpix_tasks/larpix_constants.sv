@@ -6,9 +6,9 @@
 ///////////////////////////////////////////////////////////////////
 
 `ifndef _larpix_constants_
-//`ifndef SYNTHESIS 
+`ifndef SYNTHESIS 
 `define _larpix_constants_
-//`endif
+`endif
 
 // declare needed variables
 localparam TRUE = 1;
