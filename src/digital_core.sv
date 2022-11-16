@@ -96,7 +96,8 @@ module digital_core
     output logic [3:0] v_cm_lvds_tx2,   // TX2 CM output voltage (lvds mode)
     output logic [3:0] v_cm_lvds_tx3,   // TX3 CM output voltage (lvds mode)
 // INPUTS
-    input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
+    //input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
+    input logic [ADCBITS*NUMCHANNELS-1:0] dout,                 // bits from ADC
     input logic [NUMCHANNELS-1:0] done,   // high when ADC conversion finished
     input logic [NUMCHANNELS-1:0] hit,    // high when discriminator fires
     input logic external_trigger,     // high to trigger channel
@@ -190,6 +191,7 @@ logic [7:0] shadow_reset_length; // just in case...
 logic [7:0] reset_length_channel; // just in case...
 logic external_trigger_sync_active;
 logic external_trigger_gated;
+logic [ADCBITS-1:0] dout_channel [NUMCHANNELS-1:0]; 
 
 // need to use generates for large config words
 // Cadence can't handle two dimensional ports
@@ -200,7 +202,8 @@ generate
             = config_bits[PIXEL_TRIM+g_i][PIXEL_TRIM_DAC_BITS-1:0];
         assign digital_threshold[g_i*8+7:g_i*8] 
             = config_bits[DIGITAL_THRESHOLD+g_i][7:0];
-        // distribute internal SAR DAC controls
+        // distribute ADC bits to internal channels
+        assign dout_channel[g_i] = dout[g_i*10+9:g_i*10];
     end
 endgenerate
 
@@ -430,7 +433,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .comp                   (1'b0),
         .hit                    (hit[i]),
         .chip_id                (chip_id),
-        .dout                   (dout[i]),
+        .dout                   (dout_channel[i]),
         .done                   (done[i]),
         .channel_id             (i[5:0]),
         .adc_burst              (adc_burst_length),

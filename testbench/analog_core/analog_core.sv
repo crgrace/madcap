@@ -19,7 +19,7 @@ module analog_core
     parameter VOUT_DC_CSA = 0.5,        // nominal dc output voltage of CSA
     parameter VDDA = 1.8,              // nominal analog supply
     parameter VOFFSET = 0.47)         // discriminator threshold offset
-    (output logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],             // digital bits from ADC
+    (output logic [ADCBITS*NUMCHANNELS-1:0] dout,             // digital bits from ADC
     output logic [NUMCHANNELS-1:0] hit,  // high when discriminator fires
     output logic [NUMCHANNELS-1:0] done,  // high when ADC conversion finished
     input logic [PIXEL_TRIM_DAC_BITS*NUMCHANNELS-1:0] pixel_trim_dac,
@@ -48,7 +48,7 @@ generate
         .VDDA(VDDA),
         .VOFFSET(VOFFSET)
         ) analog_channel_inst (
-        .dout               (dout[i]), 
+        .dout               (dout[ADCBITS*(i+1)-1:ADCBITS*i]), 
         .hit                (hit[i]),
         .done               (done[i]),
         .charge_in_r        (charge_in_r[i]),

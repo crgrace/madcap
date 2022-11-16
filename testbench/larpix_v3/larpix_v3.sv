@@ -38,7 +38,7 @@ parameter CHIP_ID_W = 8;    // width of chip ID
 parameter VDDA = 1.8;              // nominal analog supply
 parameter VOFFSET = 0.47;         // discriminator threshold offset
 
-logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0];           // bits from ADC
+logic [ADCBITS*NUMCHANNELS-1:0] dout;           // bits from ADC
 // control signals
 //logic sample [NUMCHANNELS-1:0]; 
 logic [NUMCHANNELS-1:0] sample; 
