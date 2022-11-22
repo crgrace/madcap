@@ -35,18 +35,21 @@ logic [FIFO_BITS:0] write_pointer; // points to location to write to next
 
 logic gated_read_n;
 logic gated_write_n;
+logic [FIFO_DEPTH-1 :0] gatedWrClk;
+//logic [FIFO_DEPTH-1 :0] gatedRdClk;
 
+/*
 gate_posedge_clk read_en_gatedclk(
     .EN(read_n), 
     .CLK(clk),
     .ENCLK(gated_read_n)
     );
-
 gate_posedge_clk write_en_gatedclk(
     .EN(write_n), 
     .CLK(clk),
     .ENCLK(gated_write_n)
     );
+*/
 
 // output assignments
 always_comb begin
@@ -92,13 +95,47 @@ always_ff @ (posedge clk or negedge reset_n)
 
 // implement memory as latches to save die area
 
+
+
+genvar j;
+  generate
+  for(j=0; j<FIFO_DEPTH; j=j+1) begin
+    gate_negedge_clk write_en_gatedclk(
+          .CLK(clk),
+          .EN((!write_n) & (write_pointer==j)),
+          .ENCLK(gatedWrClk[j])
+          );
+    //gate_posedge_clk read_en_gatedclk(
+    //      .CLK(clk),
+    //      .EN((!read_n) & (read_pointer==j)),
+    //      .ENCLK(gatedRdClk[j])
+    //      );
+
+    always_latch
+      if (!gatedWrClk[j])
+        fifo_mem[j] <= data_in;
+
+//    always_latch
+//     if (gatedRdClk[j])
+//         data_out <= fifo_mem[j];
+  end
+  endgenerate
+
+
+always_ff  @(negedge clk)
+    if (!read_n) 
+    data_out <= fifo_mem[read_pointer];
+
+/*
+
  always_latch
     if (!gated_read_n) 
     data_out <= fifo_mem[read_pointer];
-
  always_latch
     if (!gated_write_n) 
         fifo_mem[write_pointer] <= data_in;
+*/
+
 
 endmodule // fifo_latch
 
