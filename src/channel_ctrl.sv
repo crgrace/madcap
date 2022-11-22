@@ -446,7 +446,8 @@ always_ff @(posedge clk  or negedge reset_n) begin
 end // always_ff
 
 // local derandomizing FIFO
-fifo_ff
+//TP: Move to latch based FIFO to save area
+fifo_latch
     #(.FIFO_WIDTH(WIDTH-1),
     .FIFO_DEPTH(LOCAL_FIFO_DEPTH),
     .FIFO_BITS(LOCAL_FIFO_BITS)
