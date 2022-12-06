@@ -9,7 +9,7 @@
 `timescale 1ns/1ps
 
 module larpix_v3
-    #(parameter FIFO_DEPTH = 1024,
+    #(parameter FIFO_DEPTH = 2048,
     LOCAL_FIFO_DEPTH = 4)
     (output logic [3:0] piso,// PRIMARY-IN-SECONDARY-OUT TX UART output bit
     output logic digital_monitor, // digital test port

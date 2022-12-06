@@ -104,7 +104,11 @@ parameter GLOBAL_ID = 255;          // global broadcast ID
                                 // during uart burst test
 //`include "./input/testbench/larpix_tasks/larpix_tasks_top.sv"
 //`include "larpix_tasks_top.sv"
+`ifndef XCELIUM_RUN
+//`include "./testbench/mcp/config_test.mcp"
 `include "larpix_constants.sv"
+//`include "uart_tasks.sv"
+`endif
 `include "uart_tasks.sv"
 
 always begin
@@ -133,43 +137,47 @@ initial begin
     uld_rx_data = 0;
     reset_n = 1;
     local_reset_n = 1;
-    #25
+    #1500
     @(posedge clk) 
-    reset_n = 0;
+    #1 reset_n = 0;
     local_reset_n = 0;
     #3500
     //@(negedge clk) 
     @(posedge clk) 
-       reset_n = 1;
-     //#3   reset_n = 1;
+     //  reset_n = 1;
+     #2   reset_n = 1;
     local_reset_n = 1;
 	#1000
     @(posedge clk) 
-    reset_n = 0;
+    #2 reset_n = 0;
     local_reset_n = 0;
     #3500
     //@(negedge clk) 
     @(posedge clk) 
-       reset_n = 1;
-     //#3   reset_n = 1;
+     //  reset_n = 1;
+     #2   reset_n = 1;
     local_reset_n = 1;
     $display("RESET COMPLETE");
 //    #1000
 
 // send word to register 1 of chip 1
-    @(posedge clk)
+    @(negedge clk)
 
 
 
 // function def:
 //    sendWordToLarpix(op,chip_id,register,value);
 
+`ifdef XCELIUM_RUN
+//`include "./testbench/mcp/config_test.mcp"
+//`include "./testbench/mcp/single_larpix.mcp" 
+//`include "./testbench/mcp/larpix_minimal.mcp" 
+`include "./testbench/mcp/larpix_mailbox.mcp" 
+
+`else
 //`include "lightpix_debug.mcp"
 //`include "hydra_broadcast_read.mcp"
-
-//`include "./testbench/mcp/config_test.mcp"
 //`include "config_test.mcp"
-
 //`include "hardwired_test.mcp"
 //`include "ext_trig.mcp"
 //`include "ext_trig_short.mcp"
@@ -183,7 +191,10 @@ initial begin
 //`include "larpix_minimal.mcp" 
 `include "larpix_mailbox.mcp" 
 //`include "cds_minimal.mcp"    
-// `include "hydra_larpix.mcp"
+//`include "hydra_larpix.mcp"
+
+`endif // ifdef XCELIUM_RUN
+
 //   #25000 $display("TEST RESET SYNC");
 //    #25 reset_n = 0;
 //    local_reset_n = 0;
@@ -319,28 +330,24 @@ uart_tx_fpga
     ) uart_tx_inst (
     .tx_out         (posi_predelay),
     .tx_busy        (tx_busy),
-    .tx_powerdown   (),
     .tx_data        (data_to_larpix),
     .ld_tx_data     (ld_tx_data),
-    .tx_enable      (1'b1), 
-    .enable_tx_dynamic_powerdown (1'b0),
-    .tx_dynamic_powerdown_cycles (3'b0), 
-    .reset_n        (local_reset_n),
-    .txclk          (clk)
+    .clk            (clk),
+    .tx_enable      (1'b1),
+    .reset_n        (local_reset_n)
 );
 
 // UART RX for testing TX here (this is in the receive FPGA)
 uart_rx_fpga
     #(.WIDTH(WIDTH)
     ) uart_rx_inst  (
-    .reset_n        (local_reset_n),
-    .clk_rx         (clk),
-    .uld_rx_data    (uld_rx_data),
     .rx_data        (data_from_larpix),
-    .rx_in          (piso),
-    .v3_mode        (1'b1),
     .rx_empty       (rx_empty),
-    .parity_error   (parity_error)
+    .parity_error   (parity_error),
+    .rx_in          (piso),
+    .uld_rx_data    (uld_rx_data),
+    .clk            (clk),
+    .reset_n        (local_reset_n)
 );
 
 
