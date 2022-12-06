@@ -33,8 +33,8 @@ logic [FIFO_WIDTH-1:0] fifo_mem [0:FIFO_DEPTH-1];
 logic  [FIFO_BITS:0] read_pointer; // points to location to read from next
 logic [FIFO_BITS:0] write_pointer; // points to location to write to next
 
-logic gated_read_n;
-logic gated_write_n;
+//logic gated_read_n;
+//logic gated_write_n;
 logic [FIFO_DEPTH-1 :0] gatedWrClk;
 //logic [FIFO_DEPTH-1 :0] gatedRdClk;
 
@@ -50,6 +50,12 @@ gate_posedge_clk write_en_gatedclk(
     .ENCLK(gated_write_n)
     );
 */
+`ifdef  INITIALIZE_MEMORY
+integer i;
+initial
+     for(i =  0;i<FIFO_DEPTH;i =  i+1)
+          fifo_mem[i]  =  {FIFO_WIDTH{1'b0}};
+`endif 
 
 // output assignments
 always_comb begin
@@ -122,9 +128,11 @@ genvar j;
   endgenerate
 
 
-always_ff  @(negedge clk)
-    if (!read_n) 
-    data_out <= fifo_mem[read_pointer];
+always_ff  @(negedge clk or negedge reset_n)
+    if (!reset_n)
+        data_out <= '0;
+    else if (!read_n) 
+        data_out <= fifo_mem[read_pointer];
 
 /*
 
