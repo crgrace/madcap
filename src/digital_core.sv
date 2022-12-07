@@ -49,7 +49,7 @@ module digital_core
     output logic [3:0] ibias_vref_buffer, // vref buffer ibias
     output logic [3:0] ibias_vcm_buffer,  // vcm buffer ibias
     output logic [3:0] ibias_tpulse,  // tpulse ibias
-    output logic [4*NUMCHANNELS-1:0] adc_ibias_delay, // ADC delay line
+    output logic [15:0] adc_ibias_delay, // ADC delay line
     output logic [4:0] ref_current_trim, // trims ref voltage
     output logic override_ref, // high to enable external bandgap
     output logic ref_kickstart, // active high kickstart bit
@@ -279,7 +279,7 @@ always_comb begin
 // END DISABLE REFERENCE OVERRIDE AND KICKSTART
     vref_dac = {{config_bits[DAC_VREF][7:1]},1'b0};
     vcm_dac = vref_dac >> 1;
-    adc_ibias_delay = {64{config_bits[ADC_IBIAS_DELAY][3:0]}};
+    adc_ibias_delay = {4{config_bits[ADC_IBIAS_DELAY][3:0]}};
     csa_testpulse_dac = config_bits[CSA_TEST_DAC][7:0]; 
     current_monitor_bank0 = config_bits[IMONITOR0][3:0];
     current_monitor_bank1 = config_bits[IMONITOR0][7:4];
