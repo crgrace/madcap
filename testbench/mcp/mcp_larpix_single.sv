@@ -142,28 +142,15 @@ initial begin
     #1 reset_n = 0;
     local_reset_n = 0;
     #3500
-    //@(negedge clk) 
     @(posedge clk) 
-     //  reset_n = 1;
-     #2   reset_n = 1;
+    #2   reset_n = 1;
     local_reset_n = 1;
 	#1000
-    @(posedge clk) 
-    #2 reset_n = 0;
-    local_reset_n = 0;
-    #3500
-    //@(negedge clk) 
-    @(posedge clk) 
-     //  reset_n = 1;
-     #2   reset_n = 1;
-    local_reset_n = 1;
     $display("RESET COMPLETE");
 //    #1000
 
 // send word to register 1 of chip 1
     @(negedge clk)
-
-
 
 // function def:
 //    sendWordToLarpix(op,chip_id,register,value);
