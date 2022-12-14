@@ -80,6 +80,7 @@ logic [2:0] voltage_monitor_bank1; // one hot monitor (see docs)
 logic [2:0] voltage_monitor_bank2; // one hot monitor (see docs)
 logic [2:0] voltage_monitor_bank3; // one hot monitor (see docs)
 logic [7:0] voltage_monitor_refgen; // one hot monitor (see docs)
+logic enable_analog_monitor; // high to enable analog monitor buffer
 logic [3:0] tx_slices0; // number of LVDS slices for POSI0 link
 logic [3:0] tx_slices1; // number of LVDS slices for POSI1 link
 logic [3:0] tx_slices2; // number of LVDS slices for POSI2 link
@@ -184,6 +185,7 @@ digital_core
     .voltage_monitor_bank2          (voltage_monitor_bank2),
     .voltage_monitor_bank3          (voltage_monitor_bank3),
     .voltage_monitor_refgen         (voltage_monitor_refgen),
+    .en_analog_monitor              (en_analog_monitor),
     .tx_slices0                     (tx_slices0),
     .tx_slices1                     (tx_slices1),
     .tx_slices2                     (tx_slices2),

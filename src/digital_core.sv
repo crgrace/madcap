@@ -35,7 +35,7 @@ module digital_core
     output logic [3:0] tx_enable, // high to enable TX (PHY + keepalive)
     
 // ANALOG CORE CONFIGURATION SIGNALS
-// these are in the same order as the LArPix_v2b config bits google sheet
+// these are in the same order as the LArPix_v3 config bits google sheet
 
     output logic [PIXEL_TRIM_DAC_BITS*NUMCHANNELS-1:0] pixel_trim_dac,
     output logic [GLOBAL_DAC_BITS-1:0] threshold_global,
@@ -69,6 +69,7 @@ module digital_core
     output logic [2:0] voltage_monitor_bank2, // one hot monitor (see docs)
     output logic [2:0] voltage_monitor_bank3, // one hot monitor (see docs)
     output logic [7:0] voltage_monitor_refgen, // one hot monitor 
+    output logic en_analog_monitor, // high to enable monitor buffer
     output logic [3:0] tx_slices0, // number of LVDS slices for POSI0 link
     output logic [3:0] tx_slices1, // number of LVDS slices for POSI1 link
     output logic [3:0] tx_slices2, // number of LVDS slices for POSI2 link
@@ -305,6 +306,7 @@ always_comb begin
     enable_piso_upstream = config_bits[ENABLE_PISO_UP][3:0];
     enable_piso_downstream = config_bits[ENABLE_PISO_DOWN][3:0];
     enable_posi = config_bits[ENABLE_POSI][3:0];
+    en_analog_monitor = config_bits[ANALOG_MONITOR][0];
     enable_cross_trigger = config_bits[ENABLE_TRIG_MODES][0];
     enable_periodic_reset = config_bits[ENABLE_TRIG_MODES][1];
     enable_rolling_periodic_reset = config_bits[ENABLE_TRIG_MODES][2];

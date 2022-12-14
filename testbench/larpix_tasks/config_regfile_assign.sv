@@ -52,7 +52,7 @@
         config_bits[ENABLE_PISO_UP] <= 8'h0F;
         config_bits[ENABLE_PISO_DOWN] <= 8'h00;
         config_bits[ENABLE_POSI] <= 8'h0F;
-        config_bits[UART_TEST_MODE] <= 8'h00;
+        config_bits[ANALOG_MONITOR] <= 8'h00;
         config_bits[ENABLE_TRIG_MODES] <= 8'h60;
         config_bits[SHADOW_RESET_LENGTH] <= 8'h00;
         config_bits[ADC_BURST] <= 8'h00;
