@@ -167,6 +167,8 @@ initial begin
 `include "./testbench/mcp/larpix_mailbox.mcp" 
 
 `else
+//`include "./verification/ver_config_test.mcp"
+`include "./verification/ver_cds_minimal.mcp"
 //`include "lightpix_debug.mcp"
 //`include "hydra_broadcast_read.mcp"
 //`include "config_test.mcp"
@@ -181,7 +183,7 @@ initial begin
 //`include "config_path.mcp"
 //`include "single_larpix.mcp" 
 //`include "larpix_minimal.mcp" 
-`include "larpix_mailbox.mcp" 
+//`include "larpix_mailbox.mcp" 
 //`include "cds_minimal.mcp"    
 //`include "hydra_larpix.mcp"
 
