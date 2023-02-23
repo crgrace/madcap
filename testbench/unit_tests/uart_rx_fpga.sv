@@ -15,13 +15,15 @@
 //    Packet Definition
 //
 //  bit range     | contents
-//    ------------------------
-//     1:0        | packet declaration (00: data, 01: test.
-//                    10: configuration write, 11: configuration read
+//  --------------------------
+//     1:0        | packet declaration (00: unused, 01: data,
+//                    10: configuration write, 11: configuration read)
 //     9:2        | chip id
 //   15:10        | channel id
-//   47:16        | 32-bit time stamp
-//   55:48        | 8-bit ADC data word
+//   43:16        | 28-bit time stamp
+//   44           | reset sample flag
+//   45           | cds flag
+//   55:46        | 10-bit ADC data word
 //   57:56        | trigger type (00: normal, 01: external, 10: cross, 
 //                    11: periodic)
 //   59:58        | local FIFO status (58: fifo half full,59: fifo full)
@@ -29,13 +31,17 @@
 //   62           | downstream marker bit (1 if packet is downstream)
 //   63           | odd parity bit
 //
+//  In configuration mode:  [17:10] is register address
+//                          [25:18] is register data
+//                          [57:26] is magic number (0x89_50_4E_47)
+//
 //  Output format: packet is sent LSB-first, preceded by a start bit = 0
 //  and ended by a stop bit = 1       
 ///////////////////////////////////////////////////////////////////
 
 module uart_rx_fpga
     #(parameter WIDTH = 64)
-    (output logic [WIDTH-2:0] rx_data,    // data received by UART
+    (output logic [WIDTH-1:0] rx_data,    // data received by UART
     output logic rx_empty,          // high if no data in rx
     output logic parity_error,      // high if last word has bad parity
     input logic rx_in,              // input bit
@@ -70,7 +76,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
         rx_d2 <= rx_d1;
         // Unload the rx data
         if (uld_rx_data) begin
-            rx_data  <= rx_reg[WIDTH-2:0];
+            rx_data  <= rx_reg[WIDTH-1:0];
             rx_empty <= 1'b1;
         end
         // Check if just received start of frame
@@ -89,7 +95,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
                 if (rx_cnt > WIDTH) begin
                     rx_busy <= 1'b0;
                     rx_empty <= 1'b0;
-                    rx_data <= rx_reg[WIDTH-2:0];
+                    rx_data <= rx_reg[WIDTH-1:0];
                     if ( (rx_reg[WIDTH-1]) != (~^rx_reg[WIDTH-2:0]))
                         parity_error <= 1'b1;
                     else

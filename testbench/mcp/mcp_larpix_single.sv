@@ -33,9 +33,9 @@ logic [63:0] scoreBoard [SCOREBOARDSIZE-1:0]; // elements in scoreboard
 
 logic ld_tx_data;
 logic [WIDTH-1:0] data_to_larpix; // sent to DUT from FPGA
-logic [WIDTH-2:0] data_from_larpix; // received by FPGA from DUT
-logic [WIDTH-2:0] sent_data;
-logic [WIDTH-2:0] receivedData;
+logic [WIDTH-1:0] data_from_larpix; // received by FPGA from DUT
+logic [WIDTH-1:0] sent_data;
+logic [WIDTH-1:0] receivedData;
 
 logic posi_predelay;
 //logic [1:0] clk_ctrl; // clock config
@@ -72,7 +72,10 @@ logic rcvd_fifo_full_bit;
 logic rcvd_local_fifo_half_bit;
 logic rcvd_local_fifo_full_bit;
 logic [31:0] rcvd_magic_number;
+logic rcvd_parity_bit;
 logic parity_error;
+logic parity_bit;
+logic expected_parity_bit;
 logic [1:0] local_clk_ctrl; // keep track of what LArPix clock is doing
 
 always_comb begin
@@ -91,9 +94,11 @@ always_comb begin
     rcvd_local_fifo_half_bit    = receivedData[60];
     rcvd_local_fifo_full_bit    = receivedData[61];
     rcvd_downstream_marker_bit  = receivedData[62];
+    rcvd_parity_bit             = receivedData[63];
     rcvd_regmap_addr            = receivedData[17:10];
     rcvd_regmap_data            = receivedData[25:18];
     rcvd_magic_number           = receivedData[57:26];
+    expected_parity_bit = ~^receivedData[62:0];
 end
 
 
@@ -222,8 +227,12 @@ always @(negedge uld_rx_data) begin
         $display("\n--------------------");
         $display("\nData Received: %h",receivedData);
         $display("Packet Number: %0d",packetNumber);
-        if (parity_error) $display("ERROR: PARITY BAD");
-        else $display("Parity good.");
+        $display("Parity Bit = %0d",rcvd_parity_bit);
+        $display("Expected Parity Bit = %0d",expected_parity_bit);
+        if (expected_parity_bit != rcvd_parity_bit) 
+            $display("ERROR: PARITY BAD");
+        else 
+            $display("Parity good.");
     end
     case(rcvd_packet_declare)
         0 : begin
