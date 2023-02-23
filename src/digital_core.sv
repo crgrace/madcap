@@ -177,10 +177,10 @@ logic reset_n_config_sync;  // synced version of reset_n_config
 logic cds_mode; // high for correlated double sampling
 logic read_fifo_n;  // read data from shared fifo (active low)
 logic write_fifo_n;  // write data from shared fifo (active low)
-logic [WIDTH-2:0] output_event; // event to put into the fifo
+logic [WIDTH-1:0] output_event; // event to put into the fifo
 logic [7:0] config_bits [0:REGNUM-1];// regmap config bit outputs
-logic [WIDTH-2:0] tx_data; // fifo data to be transmitted off-chip
-logic [WIDTH-2:0] pre_event; // event (pre-parity) to put into fifo
+logic [WIDTH-1:0] tx_data; // fifo data to be transmitted off-chip
+logic [WIDTH-1:0] pre_event; // event (pre-parity) to put into fifo
 logic load_event;     // high to load event from event builder
 logic sync_timestamp; // timestamp set to 0 when high   
 logic [NUMCHANNELS*8-1:0] digital_threshold; // adc > this?
@@ -487,7 +487,7 @@ event_router
     );
 
 fifo_top
-    #(.FIFO_WIDTH(WIDTH-1),
+    #(.FIFO_WIDTH(WIDTH),
     .FIFO_DEPTH(FIFO_DEPTH),
     .FIFO_BITS(FIFO_BITS)
      ) fifo_top_inst (

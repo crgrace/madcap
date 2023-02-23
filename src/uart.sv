@@ -36,13 +36,13 @@
 module uart
     #(parameter WIDTH = 64,    // width of packet (w/o start & stop bits) 
     parameter FIFO_BITS = 11)
-    (output logic [WIDTH-2:0] rx_data, // data from RX UART
+    (output logic [WIDTH-1:0] rx_data, // data from RX UART
     output logic rx_empty,   // high if no data in rx
     output logic tx_out,     // TX UART output bit
     output logic tx_busy,        // high when tx uart sending data
     input logic rx_in,           // RX UART input bit
     input logic uld_rx_data,     // transfer data to output (rx_data)
-    input logic [WIDTH-2:0] fifo_data,// fifo data to be tx off-chip
+    input logic [WIDTH-1:0] fifo_data,// fifo data to be tx off-chip
     input logic [31:0] timestamp_32b, // 32b timestamp
     input logic ld_tx_data,     // high to transfer data to tx uart
     input logic rx_enable,      // high to enable RX UART
@@ -63,11 +63,12 @@ logic parity_error; // high if parity wrong. Don't do anything.
 
 always_comb begin
     if (enable_fifo_diagnostics)
-        uart_tx_data = {~^{fifo_data[62:44],fifo_counter,fifo_data[31:0]},{fifo_data[62:44],fifo_counter,fifo_data[31:0]}};
+        uart_tx_data = {fifo_data[63:44],fifo_counter,fifo_data[31:0]};
     else if (enable_packet_diagnostics)
-        uart_tx_data = {~^{fifo_data[62:60],total_packets[1:0],fifo_data[57:0]},{fifo_data[62:60],total_packets[1:0],fifo_data[57:0]}};
+        uart_tx_data ={fifo_data[63:60],total_packets[1:0],fifo_data[57:0]};
     else 
-        uart_tx_data = {~^fifo_data,fifo_data};
+        uart_tx_data = fifo_data;
+    //    uart_tx_data = {~^fifo_data,fifo_data};
 end // always_comb        
 
 // transmits off chip
@@ -94,7 +95,7 @@ gate_posedge_clk
 uart_rx
     #(.WIDTH(WIDTH)
     ) uart_rx_inst (
-    .rx_data        (rx_data[WIDTH-2:0]),
+    .rx_data        (rx_data[WIDTH-1:0]),
     .rx_empty       (rx_empty),
     .parity_error   (parity_error),
     .rx_in          (rx_in),

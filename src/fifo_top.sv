@@ -11,7 +11,7 @@
 ///////////////////////////////////////////////////////////////////
 
 module fifo_top
-    #(parameter FIFO_WIDTH = 63, // width of each FIFO word
+    #(parameter FIFO_WIDTH = 64, // width of each FIFO word
     parameter integer unsigned FIFO_DEPTH = 2048,   // FIFO memory size (RAM) -- hardwired
     parameter FIFO_BITS = 11  // number of bits to describe RAM-based fifo addr range
     )

@@ -13,15 +13,15 @@ module external_interface
     parameter REGNUM = 256,
     parameter FIFO_BITS = 11)
     (output logic [3:0] tx_out ,     // LArPix TX UART output bits // TP: changed unpacked to packed to remove genus errors
-    output logic [WIDTH-2:0] output_event, // event to put into the fifo
+    output logic [WIDTH-1:0] output_event, // event to put into the fifo
     output logic [7:0] config_bits [0:REGNUM-1],// regmap config bit outputs
     output logic [3:0] tx_enable,   // high to enable TX PHY
     output logic write_fifo_n,      // write event into fifo (active low) 
     output logic read_fifo_n,       // read event from fifo (active low)
     output logic fifo_ack,          // acknowledge data consumed from FIFO
-    input logic [WIDTH-2:0] tx_data,// fifo data to be transmitted off-chip
+    input logic [WIDTH-1:0] tx_data,// fifo data to be transmitted off-chip
     input logic [7:0] chip_id,      // unique id for each chip
-    input logic [WIDTH-2:0] pre_event, // event from eb (pre-parity) to put into fifo
+    input logic [WIDTH-1:0] pre_event, // event from eb to put into fifo
     input logic fifo_full,            // high if fifo overflows
     input logic fifo_half,            // high if fifo half full
     input logic fifo_empty,           // high if no data waiting in fifo
@@ -44,8 +44,7 @@ module external_interface
     
 // internal nets
 logic [15:0] total_packets; // number of packets that have been generated
-logic [WIDTH-2:0] data_wo_parity; // data without parity bit
-logic [WIDTH-2:0] config_data_wo_parity; // config_data without parity bit
+logic [WIDTH-1:0] data; // data with parity bit
 logic fifo_full_delayed; // delayed one clk
 logic fifo_half_delayed; // delayed one clk
 logic rx_data_flag;
@@ -56,9 +55,9 @@ logic [3:0] ld_tx_data_uart;
 logic [3:0] rx_enable;
 logic [3:0] tx_busy;
 logic tx_busy_any; // high if any tx is busy (gates FIFO reads)
-logic [WIDTH-2:0] rx_data_uart [3:0];
-logic [WIDTH-2:0] tx_data_uart [3:0];
-logic [WIDTH-2:0] rx_data;
+logic [WIDTH-1:0] rx_data_uart [3:0];
+logic [WIDTH-1:0] tx_data_uart [3:0];
+logic [WIDTH-1:0] rx_data;
 logic [7:0] regmap_write_data;
 logic [7:0] regmap_read_data;
 logic [7:0] regmap_address;
@@ -73,16 +72,16 @@ logic send_config_data; // send config data to hydra network
 
 always_ff @(posedge clk or negedge reset_n_clk) begin
     if (!reset_n_clk) begin
-        data_wo_parity <= 0;
+        data <= 0;
     end 
     else begin
         if ( (chip_id == output_event[9:2]) && (output_event[1:0] == 2'b11) )
-            data_wo_parity <= {output_event[62],fifo_full_delayed,fifo_half_delayed,output_event[59:0]};
+            data <= {output_event[63:62],fifo_full_delayed,fifo_half_delayed,output_event[59:0]};
         else if ( (output_event[1:0] == 2'b11) 
                 || (output_event[1:0] == 2'b10)) 
-            data_wo_parity <= output_event;
+            data <= output_event;
         else  
-            data_wo_parity <= tx_data;
+            data <= tx_data;
     end
 end // always
 
@@ -147,7 +146,7 @@ hydra_ctrl
     .enable_piso_upstream   (enable_piso_upstream),
     .enable_piso_downstream (enable_piso_downstream),
     .enable_posi            (enable_posi),
-    .fifo_data              (data_wo_parity),
+    .fifo_data              (data),
     .ld_tx_data             (ld_tx_data),
     .tx_busy                (tx_busy),
     .comms_busy             (comms_busy),

@@ -4,12 +4,12 @@
 // Description: Asynchronous FIFO (controlled by read and write pulses). 
 //              Temporarily stores data until it can be 
 //              processed or sent off chip.
-//              Parity of word is NOT stored in FIFO
+//              Parity of word is stored in FIFO
 //              Adapted from FIFO in B. Zeidman, "Verilog Designer's Library//"
 ///////////////////////////////////////////////////////////////////
 
 module fifo_ff
-    #(parameter FIFO_WIDTH = 63, // width of each FIFO word
+    #(parameter FIFO_WIDTH = 64, // width of each FIFO word
     parameter integer unsigned FIFO_DEPTH = 4,   // number of FIFO memory locations
     parameter FIFO_BITS = $clog2(FIFO_DEPTH)     // number of bits to describe fifo addr range
     )

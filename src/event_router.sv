@@ -14,7 +14,7 @@
 module event_router
     #(parameter WIDTH = 64,
     parameter NUMCHANNELS = 64)
-    (output logic [WIDTH-2:0] channel_event_out,// routed event (pre-parity)
+    (output logic [WIDTH-1:0] channel_event_out,// routed event (w/ parity)
     output logic [NUMCHANNELS-1:0] read_local_fifo_n, // low to read fifo
     output logic load_event,    // event ready to put in FIFO
     input logic [WIDTH-2:0] input_event [NUMCHANNELS-1:0], // data in
@@ -27,6 +27,7 @@ module event_router
     input logic reset_n);      // asynchronous digital reset (active low)
 
 // temp storage
+logic [WIDTH-2:0] channel_event;// routed event (pre-parity)
 logic [NUMCHANNELS-1:0] channel_waiting; // each bit high for waiting chan
 logic [NUMCHANNELS-1:0] fifo_empty_hold; // hold FIFO state so
                         // events do not get stale
@@ -44,6 +45,11 @@ always_comb begin
     for (int i = 0; i < NUMCHANNELS; i++) begin
         total_hits = total_hits + (~local_fifo_empty[i]);
     end // for
+end // always_comb
+
+// calculate parity
+always_comb begin
+    channel_event_out = {~^channel_event,channel_event};
 end // always_comb
 
 // state machine
@@ -88,7 +94,7 @@ end // always_comb
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         load_event <= 1'b0;
-        channel_event_out <= 63'b0;
+        channel_event <= 63'b0;
         channel_waiting <= 64'b0;
         fifo_empty_hold <= 64'b0;
         read_local_fifo_n <= {64{1'b1}};
@@ -104,7 +110,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         case(Next)
             READY:  begin
                 channel_waiting <= 64'b0;
-                channel_event_out <= 63'b0;
+                channel_event <= 63'b0;
                 event_accepted <= 1'b0;
                 event_complete <= 1'b0;
                 event_timer <= 6'b0;    
@@ -146,7 +152,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                 end
                 for (int i = 0; i < 64; i++) begin
                     if ( (channel_waiting[i] == 1'b1) ) begin
-                        channel_event_out <= input_event[i];
+                        channel_event <= input_event[i];
                         channel_waiting[i] <= 1'b0;
                     end
                 end

@@ -9,25 +9,25 @@
 
 module hydra_ctrl
     #(parameter WIDTH = 64)  // width of packet (w/o start & stop bits) 
-    (output logic [WIDTH-2:0] tx_data0,   // data to send out to UART 0
-    output logic [WIDTH-2:0] tx_data1,   // data to send out to UART 1
-    output logic [WIDTH-2:0] tx_data2,   // data to send out to UART 2
-    output logic [WIDTH-2:0] tx_data3,   // data to send out to UART 3
+    (output logic [WIDTH-1:0] tx_data0,   // data to send out to UART 0
+    output logic [WIDTH-1:0] tx_data1,   // data to send out to UART 1
+    output logic [WIDTH-1:0] tx_data2,   // data to send out to UART 2
+    output logic [WIDTH-1:0] tx_data3,   // data to send out to UART 3
     output logic [3:0] uld_rx_data_uart, // distributed unload command
     output logic [3:0] ld_tx_data_uart, // distributed load command
     output logic [3:0] rx_enable,             // high to enable rx UART
     output logic [3:0] tx_enable,             // high to enable tx UART
     output logic tx_busy_any,   // high if any tx is busy
     output logic rx_data_flag,      // high if any rx data ready 
-    output logic [WIDTH-2:0] rx_data, // event to put into the FIFO
-    input logic [WIDTH-2:0] rx_data0,        // rx data from UART 0
-    input logic [WIDTH-2:0] rx_data1,        // rx data from UART 0
-    input logic [WIDTH-2:0] rx_data2,        // rx data from UART 0
-    input logic [WIDTH-2:0] rx_data3,        // rx data from UART 0
+    output logic [WIDTH-1:0] rx_data, // event to put into the FIFO
+    input logic [WIDTH-1:0] rx_data0,        // rx data from UART 0
+    input logic [WIDTH-1:0] rx_data1,        // rx data from UART 0
+    input logic [WIDTH-1:0] rx_data2,        // rx data from UART 0
+    input logic [WIDTH-1:0] rx_data3,        // rx data from UART 0
     input logic [3:0] enable_piso_upstream, // high to enable upstream uart
     input logic [3:0] enable_piso_downstream, // high to enable downstream
     input logic [3:0] enable_posi, // high to enable rx ports
-    input logic [WIDTH-2:0] fifo_data, // input from the fifo
+    input logic [WIDTH-1:0] fifo_data, // input from the fifo
     input logic ld_tx_data,     // load fifo data into UARTs
     input logic [3:0] tx_busy, // high for each UART busy
     input logic comms_busy,    // comms dealing with event
@@ -100,7 +100,7 @@ end // always_comb
 // registered outputs
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
-        rx_data <= 63'b0;
+        rx_data <= 64'b0;
         timeout <= 6'b0;
         clear_rx_data_flag_uart <= 4'b0;
         rx_data_flag <= 1'b0;

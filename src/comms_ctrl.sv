@@ -13,7 +13,7 @@
 module comms_ctrl
     #(parameter WIDTH = 64,
     parameter GLOBAL_ID = 255)      // global broadcast ID
-    (output logic [WIDTH-2:0] output_event,  // event to put into the fifo
+    (output logic [WIDTH-1:0] output_event,  // event to put into the fifo
     output logic [7:0] regmap_write_data, // data to write to regmap
     output logic [7:0] regmap_address, // regmap addr to write
     output logic [15:0] total_packets, // number of packets that have been generated
@@ -25,8 +25,8 @@ module comms_ctrl
     output logic comms_busy,    // comms dealing with event
     output logic send_config_data, // send config data to hydra network
     output logic fifo_ack,          // acknowledge data consumed from FIFO
-    input logic [WIDTH-2:0] rx_data,   // data from rx uart (without parity)
-    input logic [WIDTH-2:0] pre_event, // event from router (pre-parity) 
+    input logic [WIDTH-1:0] rx_data,   // data from rx uart 
+    input logic [WIDTH-1:0] pre_event, // event from router  
     input logic [7:0] chip_id,        // unique id for each chip
     input logic [7:0] regmap_read_data,       // data to read from regmap
     input logic [11:0] fifo_counter,  // number of words in FIFO
@@ -165,7 +165,7 @@ end // always_comb
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         write_fifo_n <= 1'b1;
-        output_event <= 63'b0;
+        output_event <= 64'b0;
         write_regmap <= 1'b0;
         read_regmap <= 1'b0;
         regmap_address <= 8'b0;
@@ -248,7 +248,8 @@ always_ff @(posedge clk or negedge reset_n) begin
                         end
                      end
         CONFIG_READ_LATCH:  begin
-                      //  output_event[62] <= 1'b1; // flag downstream
+                        // add parity
+                        output_event[63] <= ~^output_event[62:0]; 
                         send_config_data <= 1'b1;
                     end
         PASS_ALONG: begin
@@ -273,7 +274,6 @@ always_ff @(posedge clk or negedge reset_n) begin
                         fifo_ack <= 1'b1;
                     end
         WAIT_STATE: begin
-                    //    write_fifo_n <= 1'b0;
                         timeout <= timeout + 1'b1;
                     end
         BAD_PACKET: begin

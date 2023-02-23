@@ -4,14 +4,14 @@
 // Description: Synchronous FIFO  
 //              Temporarily stores data until it can be 
 //              processed or sent off chip.
-//              Parity of word is NOT stored in FIFO
+//              Parity of word is stored in FIFO
 //              Adapted from FIFO in B. Zeidman, "Verilog Designer's Library"
 //              Key different here is this FIFO uses SRAM for memory elements
 //             
 ///////////////////////////////////////////////////////////////////
 
 module fifo_ram
-    #(parameter FIFO_WIDTH = 63, // width of each FIFO word
+    #(parameter FIFO_WIDTH = 64, // width of each FIFO word
     parameter integer unsigned FIFO_DEPTH = 2048,   // number of FIFO memory locations
     parameter FIFO_BITS = 11     // number of bits to describe fifo addr range
     )
@@ -148,7 +148,7 @@ rf2p_512x64_4_50
     .AA         (read_pointer[8:0]),
     .CLKA       (clk_read),
     .CENA       (read_n),
-    .DB         ({1'b0,data_in_falling_edge}),
+    .DB         (data_in_falling_edge),
     .AB         (write_pointer[8:0]),
     .CLKB       (clk_write),
     .CENB       (module_select_write[0])
@@ -161,7 +161,7 @@ rf2p_512x64_4_50
     .AA         (read_pointer[8:0]),
     .CLKA       (clk_read),
     .CENA       (read_n),
-    .DB         ({1'b0,data_in_falling_edge}),
+    .DB         (data_in_falling_edge),
     .AB         (write_pointer[8:0]),
     .CLKB       (clk_write),
     .CENB       (module_select_write[1])
@@ -174,7 +174,7 @@ rf2p_512x64_4_50
     .AA         (read_pointer[8:0]),
     .CLKA       (clk_read),
     .CENA       (read_n),
-    .DB         ({1'b0,data_in_falling_edge}),
+    .DB         (data_in_falling_edge),
     .AB         (write_pointer[8:0]),
     .CLKB       (clk_write),
     .CENB       (module_select_write[2])
@@ -187,7 +187,7 @@ rf2p_512x64_4_50
     .AA         (read_pointer[8:0]),
     .CLKA       (clk_read),
     .CENA       (read_n),
-    .DB         ({1'b0,data_in_falling_edge}),
+    .DB         (data_in_falling_edge),
     .AB         (write_pointer[8:0]),
     .CLKB       (clk_write),
     .CENB       (module_select_write[3])
