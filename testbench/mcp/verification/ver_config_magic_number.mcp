@@ -1,10 +1,11 @@
-// mcp program to test basic configuration  
-$display("RUNNING VER_CONFIG_TEST.MCP");
+// mcp program to test ability of LArPix to reject config packets
+// with parity errors  
+$display("RUNNING VER_CONFIG_MAGIC_NUMBER.MCP");
 $display("run length = 60 us");    
-$display("If test fails, confirm task sendWordToLarpix is configured for correct parity and correct magic number");
+$display("To run test, modify task sendWordToLarpix to use_magic_number = 0");
 $display("sendWordToLarpix defined in larpix_v3/testbench/larpix_tasks");
+$display("Expected result: config reads and writes fail, no packet returned from LArPix");
 $display("If test fails, verify sendWordToLarpix task\n");
-
 
 #100
 $display("write 10d to GLOBAL_THRESH"); 

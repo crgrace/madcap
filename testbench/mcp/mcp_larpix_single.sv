@@ -168,7 +168,9 @@ initial begin
 
 `else
 //`include "./verification/ver_config_test.mcp"
-`include "./verification/ver_cds_minimal.mcp"
+//`include "./verification/ver_config_parity_error.mcp"
+`include "./verification/ver_config_magic_number.mcp"
+//`include "./verification/ver_cds_minimal.mcp"
 //`include "lightpix_debug.mcp"
 //`include "hydra_broadcast_read.mcp"
 //`include "config_test.mcp"

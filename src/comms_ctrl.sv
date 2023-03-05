@@ -68,6 +68,8 @@ logic ch_fifo_high_water;   // high if fifo_counter reaches high water
 logic fifo_high_water_executed;   // high if high water written to regmap
 logic ch_total_packets;     // high if total_packets changes
 logic ch_bad_packets;       // high if bad packets changed
+logic parity_error;         // high if word has bad parity
+logic magic_number;         // breaks magic number out of word for diagnostics
 logic [15:0] fifo_high_water; // max FIFO count since reset
 logic [11:0] fifo_mag;      // number of events in FIFO
 logic [15:0] bad_packets;   // number of dropped packets since reset
@@ -79,6 +81,15 @@ logic ld_tx_data_fifo;      // tells uart to load data from FIFO
 always_comb begin
     ld_tx_data = ld_tx_data_fifo || send_config_data;
     fifo_mag = (fifo_counter - 1'b1);
+    magic_number = rx_data[57:26];
+end // always_comb
+
+// parity checker
+always_comb begin
+    if ((rx_data[WIDTH-1]) != ~^rx_data[WIDTH-2:0])
+        parity_error = 1'b1;
+    else
+        parity_error = 1'b0;
 end // always_comb
 
 always_ff @(posedge clk or negedge reset_n) begin
@@ -121,7 +132,8 @@ always_comb begin
         READY:  if ( (rx_data_flag) 
                     && (((rx_data[1:0] == CONFIG_WRITE_OP)
                     || (rx_data[1:0] == CONFIG_READ_OP))
-                    && (rx_data[57:26] != MAGIC_NUMBER)) ) Next = BAD_PACKET;
+                    && ((rx_data[57:26] != MAGIC_NUMBER)
+                    || (parity_error == 1'b1))) ) Next = BAD_PACKET;
                 else if ((rx_data_flag) && (rx_data[1:0] == 2'b00)) Next = BAD_PACKET; 
                 else if ( (rx_data_flag) && (rx_data[1:0] == CONFIG_WRITE_OP) 
                     && ( (rx_data[9:2] == chip_id) 
