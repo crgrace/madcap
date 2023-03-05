@@ -4,9 +4,11 @@
 // Description: LArPix-v3 synthesized digital core.  
 //              Includes:
 //              UARTs for chip-to-chip communications.
+//              New channel controller for asynchronous ADC.
 //              255-byte Register Map for configuration bits.
 //              2048-word deep latch-based FIFO memory.
 //              Hydra I/O resilient data routing.
+//              Fault protection and mitigation capability.
 //              Event builder.
 //
 //              Note that the "primary" is the chip writing to and reading
@@ -164,7 +166,7 @@ logic [63:0] csa_enable; // enable from config bits
 logic [63:0] csa_reset_channel; // reset from channel_ctrl
 logic [63:0] local_fifo_empty; // when low, event is ready
 logic [63:0] triggered_natural; // low for external or cross trigger
-logic [31:0] timestamp_32b;  //32bit timestamp
+logic [31:0] timestamp_32b;  //32-bit timestamp
 logic [NUMCHANNELS-1:0] read_local_fifo_n; // low to read local fifo
 logic cross_trigger; // high when any channels naturally hit
 logic [NUMCHANNELS-1:0] periodic_trigger;
