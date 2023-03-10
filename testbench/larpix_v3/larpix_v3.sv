@@ -71,6 +71,7 @@ logic [NUMCHANNELS-1:0] csa_monitor_select; // monitor channels
 logic [NUMCHANNELS-1:0] csa_testpulse_enable;
 logic [NUMCHANNELS-1:0] done;                 // high when ADC conversion finished
 logic [TESTPULSE_DAC_BITS-1:0] csa_testpulse_dac;
+logic [3:0] adc_ibias_delay_monitor; // one hot monitor (see docs)
 logic [3:0] current_monitor_bank0; // one hot monitor (see docs)
 logic [3:0] current_monitor_bank1; // one hot monitor (see docs)
 logic [3:0] current_monitor_bank2; // one hot monitor (see docs)
@@ -176,6 +177,7 @@ digital_core
     .csa_monitor_select             (csa_monitor_select),
     .csa_testpulse_enable           (csa_testpulse_enable),
     .csa_testpulse_dac              (csa_testpulse_dac),
+    .adc_ibias_delay_monitor        (adc_ibias_delay_monitor),
     .current_monitor_bank0          (current_monitor_bank0),
     .current_monitor_bank1          (current_monitor_bank1),
     .current_monitor_bank2          (current_monitor_bank2),

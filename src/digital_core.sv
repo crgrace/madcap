@@ -62,6 +62,7 @@ module digital_core
     output logic [NUMCHANNELS-1:0] csa_monitor_select, // monitor channels 
     output logic [NUMCHANNELS-1:0] csa_testpulse_enable,
     output logic [TESTPULSE_DAC_BITS-1:0] csa_testpulse_dac,
+    output logic [3:0] adc_ibias_delay_monitor, // one hot monitor(see docs)
     output logic [3:0] current_monitor_bank0, // one hot monitor (see docs)
     output logic [3:0] current_monitor_bank1, // one hot monitor (see docs)
     output logic [3:0] current_monitor_bank2, // one hot monitor (see docs)
@@ -283,6 +284,7 @@ always_comb begin
     vref_dac = {{config_bits[DAC_VREF][7:1]},1'b0};
     vcm_dac = vref_dac >> 1;
     adc_ibias_delay = {4{config_bits[ADC_IBIAS_DELAY][3:0]}};
+    adc_ibias_delay_monitor = config_bits[ADC_IBIAS_DELAY][7:4];
     csa_testpulse_dac = config_bits[CSA_TEST_DAC][7:0]; 
     current_monitor_bank0 = config_bits[IMONITOR0][3:0];
     current_monitor_bank1 = config_bits[IMONITOR0][7:4];

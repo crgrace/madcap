@@ -27,7 +27,7 @@ begin
 //
 // only modify if you are intending to inject errors into packet
 
-    use_magic_number = 0;
+    use_magic_number = 1;
     use_correct_parity = 1;
     if (debug) $display("in task: sending word to LArPix");
     #10000

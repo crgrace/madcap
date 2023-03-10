@@ -69,6 +69,36 @@ initial begin
 //    posi[1] = 1;
     posi[2] = 1;
     posi[3] = 1;
+
+// uncomment for ver_ext_trig.mcp
+/*
+#10000
+$display("issue external_trigger (expected to be ignored)");
+external_trigger = 1;
+#200
+external_trigger = 0;
+
+#60000
+$display("issue external_trigger (expected to work)");
+external_trigger = 1;
+#200
+external_trigger = 0;
+*/
+
+// uncomment for ver_ext_sync.mcp
+/*
+#10000
+$display("issue external_sync (expected to be ignored)");
+external_trigger = 1;
+#200
+external_trigger = 0;
+
+#60000
+$display("issue external_sync (expected to work)");
+external_trigger = 1;
+#200
+external_trigger = 0;
+*/
 /*
 #10000
 
