@@ -12,6 +12,9 @@
 // If rx_empty is low then data is waiting. It should be read and then
 // uld_rx_data should be asserted to enable rx for another reception.
 //
+// Output is double buffered to make sure the UART RX is faster than the
+// maximum possible input.
+//
 //    Packet Definition
 //
 //  bit range     | contents
@@ -52,6 +55,7 @@ module uart_rx
 
 // Internal Variables 
 logic [WIDTH-1:0] rx_reg;
+logic [WIDTH-1:0] rx_buffer;
 logic rx_sample_cnt;
 logic [7:0] rx_cnt;  
 logic rx_d1;
@@ -63,6 +67,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
     if (!reset_n) begin
         rx_reg <= 0; 
         rx_data <= 0;
+        rx_buffer <= 0;
         rx_sample_cnt <= 1'b0;
         rx_cnt <= 8'b0;
         rx_empty <= 1'b1;
@@ -77,7 +82,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
         rx_d2 <= rx_d1;
         // Unload the rx data
         if (uld_rx_data) begin
-            rx_data  <= rx_reg[WIDTH-1:0];
+            rx_data  <= rx_buffer;
             rx_empty <= 1'b1;
         end
         // Check if just received start of frame
@@ -96,7 +101,7 @@ always_ff @ (posedge clk or negedge reset_n) begin
                 if (rx_cnt > WIDTH) begin
                     rx_busy <= 1'b0;
                     rx_empty <= 1'b0;
-                    rx_data <= rx_reg[WIDTH-1:0];
+                    rx_buffer <= rx_reg[WIDTH-1:0];
                     if ( (rx_reg[WIDTH-1]) != (~^rx_reg[WIDTH-2:0]))
                         parity_error <= 1'b1;
                     else
@@ -106,5 +111,6 @@ always_ff @ (posedge clk or negedge reset_n) begin
     end
 end // always_ff
 endmodule
+
 
 

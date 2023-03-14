@@ -173,7 +173,7 @@ logic cross_trigger; // high when any channels naturally hit
 logic [NUMCHANNELS-1:0] periodic_trigger;
 logic fifo_full;    // high when shared fifo full
 logic fifo_half;    // high when shared fifo more than half full
-logic fifo_empty;    // high when shared fifo empty 
+logic shared_fifo_empty;    // high when shared fifo empty 
 logic [FIFO_BITS:0] fifo_counter; // how full is shared fifo?
 logic reset_n_sync;  // synced version of reset_n
 logic reset_n_config_sync;  // synced version of reset_n_config
@@ -499,7 +499,7 @@ fifo_top
     .fifo_counter       (fifo_counter),
     .fifo_full          (fifo_full),
     .fifo_half          (fifo_half),
-    .fifo_empty         (fifo_empty),
+    .fifo_empty         (shared_fifo_empty),
     .data_in            (output_event),
     .read_n             (read_fifo_n),
     .write_n            (write_fifo_n),
@@ -527,7 +527,7 @@ external_interface
     .pre_event                  (pre_event),
     .fifo_full                  (fifo_full),
     .fifo_half                  (fifo_half),
-    .fifo_empty                 (fifo_empty),
+    .fifo_empty                 (shared_fifo_empty),
     .load_event                 (load_event),
     .load_config_defaults       (load_config_defaults),
     .timestamp_32b              (timestamp_32b),

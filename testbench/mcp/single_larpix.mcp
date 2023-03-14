@@ -69,7 +69,7 @@
   sendWordToLarpix(CONFIG_READ_OP,8'h02,CHIP_ID,0);
 
 //#10000
-//  charge_in_r[2] = -5.6e-15; // two mips (140 mV at CSA)https://lbnl.zoom.us/j/3481438541
+//  charge_in_r[2] = -5.6e-15; // two mips (140 mV at CSA)
 //    $display("SHOULDN'T BE IN HERE");
 //#500  charge_in_r[59] = -2.8e-15; // two mips (140 mV at CSA)
 //#20 charge_in_r[2] = 0.0;

@@ -36,17 +36,19 @@ module hydra_ctrl
     input logic reset_n);      // asynchronous digital reset (active low)
 
 // define states for RX state machine
-enum logic [1:0] // explicit state definitions
-            {READY = 2'h0,
-            LOAD_RX_DATA = 2'h1,
-            WAIT_FOR_COMMS = 2'h2,
-            NEXT_DATA = 2'h3} State, Next;
+enum logic [2:0] // explicit state definitions
+            {READY = 3'h0,
+            WAIT_STATE = 3'h1,
+            LOAD_RX_DATA = 3'h2,
+            WAIT_FOR_COMMS = 3'h3,
+            NEXT_DATA = 3'h4} State, Next;
 
 // local registers
 logic downstream_flag;          // high if downstream   
 logic ld_tx_data_latched;
 logic [3:0] rx_data_flag_uart;
 logic [3:0] clear_rx_data_flag_uart;
+logic [1:0] wait_counter; // make sure time for UART RX to latch data
 logic [5:0] timeout; // don't get hung up in a wait state
 
 always_comb begin
@@ -85,15 +87,17 @@ end // always_ff
 always_comb begin
     Next = READY;
     case (State)
-        READY: if (|rx_data_flag_uart)   Next = LOAD_RX_DATA;
-               else                     Next = READY;
-        LOAD_RX_DATA: Next = WAIT_FOR_COMMS;
-        WAIT_FOR_COMMS: if (comms_busy) Next = WAIT_FOR_COMMS;
-               else if (timeout == 6'h2F) Next = NEXT_DATA;
-               else                     Next = NEXT_DATA;
-        NEXT_DATA: if (rx_data_flag_uart != 4'b0) Next = LOAD_RX_DATA;
-               else                     Next = READY;
-        default:                        Next = READY;
+        READY: if (|rx_data_flag_uart)          Next = WAIT_STATE;
+               else                             Next = READY;
+        WAIT_STATE: if (wait_counter == 2'b10)  Next = LOAD_RX_DATA;
+                else                            Next = WAIT_STATE;
+        LOAD_RX_DATA:                           Next = WAIT_FOR_COMMS;
+        WAIT_FOR_COMMS: if (comms_busy)         Next = WAIT_FOR_COMMS;
+               else if (timeout == 6'h2F)       Next = NEXT_DATA;
+               else                             Next = NEXT_DATA;
+        NEXT_DATA: if (rx_data_flag_uart != 4'b0) Next = WAIT_STATE;
+               else                             Next = READY;
+        default:                                Next = READY;
     endcase
 end // always_comb
 
@@ -104,13 +108,18 @@ always_ff @(posedge clk or negedge reset_n) begin
         timeout <= 6'b0;
         clear_rx_data_flag_uart <= 4'b0;
         rx_data_flag <= 1'b0;
+        wait_counter <= 2'b00;
     end
     else begin
         clear_rx_data_flag_uart <= 4'b0;
         rx_data_flag <= 1'b0;
+        wait_counter <= 2'b00;
         case (Next)
             READY: begin
                 timeout <= 6'b0;
+            end
+            WAIT_STATE: begin
+                wait_counter <= wait_counter + 1'b1;
             end
             LOAD_RX_DATA: begin
         // check each UART for data and then read it if enabled

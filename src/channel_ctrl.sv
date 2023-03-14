@@ -19,7 +19,7 @@ module channel_ctrl
     parameter integer unsigned LOCAL_FIFO_DEPTH = 8) 
     (output logic [WIDTH-2:0] channel_event, // event to shared fifo
     output logic [9:0] adc_word, // helpful for debugging (not used by RTL)
-    output logic fifo_empty,    // is data eady to write to shared FIFO?
+    output logic fifo_empty,    // is data ready to write to shared FIFO?
     output logic triggered_natural,  // high to indicate valid hit
     output logic csa_reset,     // reset CSA
     output logic sample,        // high to sample CSA output

@@ -27,10 +27,10 @@ parameter FIFO_DEPTH = 512;  // number of FIFO memory locations
 parameter FIFO_BITS = 9;    // # of bits to describe fifo addr range
 parameter MIP = -2.8e-15;  // electron MIP gives 70 mV at CSA output
 
-logic piso0 [3:0];  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
-logic piso1 [3:0];  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
-logic piso2 [3:0];  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
-logic piso3 [3:0];  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
+logic [3:0] piso0;  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
+logic [3:0] piso1;  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
+logic [3:0] piso2;  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
+logic [3:0] piso3;  // PRIMARY-IN-SECONDARY-OUT TX UART output bit
 logic posi_fpga; // data output from outside cryostat
 logic th; // tie-high. Models pullup resistor in uart
 logic clk, clk_delay;
@@ -69,7 +69,7 @@ initial begin
 end
 
 // MCP goes here
-mcp_larpix_hydra
+mcp_larpix_single
     #(.WIDTH(WIDTH),
     .WORDWIDTH(WORDWIDTH),
     .REGNUM(REGNUM),
@@ -79,55 +79,56 @@ mcp_larpix_hydra
     .charge_in_r    (charge_in_r),
     .clk            (clk),
     .reset_n        (reset_n),
-    .piso           (piso0[0])
+    .piso           (piso0[3])
 );
 
 // network of 4 LArPix instances
 // DUT (LARPIX full-chip model) LArPix1 is connected to FPGA
-larpix_v2b
-    larpix_v2b_inst0 (
+larpix_v3
+    larpix_v3_inst0 (
     .piso               (piso0),
     .digital_monitor    (digital_monitor0),
     .monitor_out_r      (monitor_out_r0),
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
-    .posi               ({th,piso1[0],th,posi_fpga}),
+//   .posi               ({th,piso1[0],th,posi_fpga}),
+    .posi               ({posi_fpga,th,piso1[3],piso2[2]}),
     .clk                (clk_delay),
     .reset_n            (reset_n)   
     );
 
-larpix_v2b
-    larpix_v2b_inst1 (
+larpix_v3
+    larpix_v3_inst1 (
     .piso               (piso1),
     .digital_monitor    (digital_monitor1),
     .monitor_out_r      (monitor_out_r1),
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
-    .posi               ({piso2[1],piso3[0],th,piso0[2]}),
+    .posi               ({piso0[1],th,th,th}),
     .clk                (clk_delay),
     .reset_n            (reset_n)   
     );
 
-larpix_v2b
-    larpix_v2b_inst2 (
+larpix_v3
+    larpix_v3_inst2 (
     .piso               (piso2),
     .digital_monitor    (digital_monitor2),
     .monitor_out_r      (monitor_out_r2),
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
-    .posi               ({th,th,piso1[3],th}),
+    .posi               ({th,piso0[0],piso3[3],th}),
     .clk                (clk_delay),
     .reset_n            (reset_n)   
     );
 
-larpix_v2b
-    larpix_v2b_inst3 (
+larpix_v3
+    larpix_v3_inst3 (
     .piso               (piso3),
     .digital_monitor    (digital_monitor3),
     .monitor_out_r      (monitor_out_r3),
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
-    .posi               ({th,th,th,piso1[2]}),
+    .posi               ({piso2[1],th,th,th}),
     .clk                (clk),
     .reset_n            (reset_n)   
     );
