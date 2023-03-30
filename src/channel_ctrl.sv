@@ -92,7 +92,7 @@ logic [7:0] sar_mask; // which bit to test in binary search
 logic [7:0] sample_counter;
 logic [31:0] timestamp_latched; // grab timestamp as soon as we have a hit
 logic strobe_en;  // enables clk to be used as ADC strobe
-logic strobe;  // ADC strobe (not used anymore)
+//logic strobe;  // ADC strobe (not used anymore)
 
 // internal registers
 logic [7:0] adc_burst_counter; // current ADC conversion number
@@ -128,7 +128,7 @@ gate_posedge_clk
     .ENCLK(strobe_BAR)
     );
 
-always_comb strobe = ~strobe_BAR;
+//always_comb strobe = ~strobe_BAR; // TP: removed, not used anymore
 //always_comb clk_out = clk; // remove if clk_needed
 always_comb clk_out = 1'b0;
 
