@@ -62,16 +62,16 @@ initial begin
     th = 1;
     external_trigger = 0;
 
-// comment out for external trigger tests
-///*
-#300000
+// uncomment out for external trigger tests
+
+#225000
     for (int trigNum = 0; trigNum < 1; trigNum++) begin
         #100 external_trigger = 1;
         #200 external_trigger = 0;
         $display("EXTERNAL TRIGGER number %0d",trigNum);
     end // for
 end
-//*/
+
 
 // MCP goes here
 mcp_larpix_single
