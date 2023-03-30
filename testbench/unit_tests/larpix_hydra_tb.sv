@@ -58,15 +58,20 @@ always
 initial begin
 //    $sdf_annotate("/home/lxusers/c/crgrace/verilog/verilog_larpix_rev2_syn/par/digital_core.output.sdf",larpix_hydra_tb.larpix_v2_inst0);
 
+
     th = 1;
     external_trigger = 0;
-#1500000
+
+// uncomment out for external trigger tests
+
+#225000
     for (int trigNum = 0; trigNum < 1; trigNum++) begin
-        #100000 external_trigger = 1;
+        #100 external_trigger = 1;
         #200 external_trigger = 0;
         $display("EXTERNAL TRIGGER number %0d",trigNum);
     end // for
 end
+
 
 // MCP goes here
 mcp_larpix_single
