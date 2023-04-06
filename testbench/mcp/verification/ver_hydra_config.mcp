@@ -8,8 +8,6 @@ $display("run length = 300 us");
 $display("Verify basic data transfer through hydra network");
 $display("Hydra network comprises four LArPix chips");
 $display("Expected returned packets:");
-$display("CHIP 0: Chip ID = 4, Reg =  74 (IBIAS_TDAC), Data = 8'h01");
-$display("CHIP 1: Chip ID = 2, Reg =  111 (VMONITOR0), Data = 8'h0F");
 $display("CHIP 2: Chip ID = 15, Reg =  113 (VMONITOR2), Data = 8'h04");
 $display("CHIP 3: Chip ID = 6, Reg =  127 (ANALOG_MONITOR), Data = 8'h08");
 $display("Begin Simulation.\n");
