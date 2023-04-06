@@ -174,10 +174,10 @@ initial begin
 //`include "./verification/ver_bad_packets.mcp"
 //`include "./verification/ver_cds_minimal.mcp"
 //`include "./verification/ver_hydra_debug.mcp"
-//`include "./verification/ver_hydra_config.mcp"
+`include "./verification/ver_hydra_config.mcp"
 //`include "./verification/ver_hydra_storm.mcp"
 //`include "./verification/ver_hydra_ext_trig.mcp"
-`include "./verification/ver_hydra_storm_cds.mcp"
+//`include "./verification/ver_hydra_storm_cds.mcp"
 
 //`include "lightpix_debug.mcp"
 //`include "hydra_broadcast_read.mcp"

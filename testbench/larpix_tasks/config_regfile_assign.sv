@@ -49,7 +49,7 @@
         end
         config_bits[CHIP_ID] <= 8'h01;
         config_bits[DIGITAL] <= 8'h00;
-        config_bits[ENABLE_PISO_UP] <= 8'h0F;
+        config_bits[ENABLE_PISO_UP] <= 8'h00;
         config_bits[ENABLE_PISO_DOWN] <= 8'h00;
         config_bits[ENABLE_POSI] <= 8'h0F;
         config_bits[ANALOG_MONITOR] <= 8'h00;
