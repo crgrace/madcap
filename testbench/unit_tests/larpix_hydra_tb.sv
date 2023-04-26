@@ -52,8 +52,23 @@ real charge_in_r [NUMCHANNELS-1:0];
 logic [63:0] sentTag;
 
 
-always
+always begin
     clk_delay = #12 clk;
+end
+
+`ifdef SDF
+    initial begin
+     $sdf_annotate("/home/lxusers/t/tprakash/LARPIX/TSMC13/verlog/larpix_v3/xcelium/input/digital_core_av_hold_wc_tempus_signoff.sdf", 
+            larpix_hydra_tb.larpix_v3_inst0.digital_core_inst, ,"sdf_boc.log", ,,);
+     $sdf_annotate("/home/lxusers/t/tprakash/LARPIX/TSMC13/verlog/larpix_v3/xcelium/input/digital_core_av_hold_wc_tempus_signoff.sdf", 
+            larpix_hydra_tb.larpix_v3_inst1.digital_core_inst, ,"sdf_boc.log", ,,);
+     $sdf_annotate("/home/lxusers/t/tprakash/LARPIX/TSMC13/verlog/larpix_v3/xcelium/input/digital_core_av_hold_wc_tempus_signoff.sdf", 
+            larpix_hydra_tb.larpix_v3_inst2.digital_core_inst, ,"sdf_boc.log", ,,);
+     $sdf_annotate("/home/lxusers/t/tprakash/LARPIX/TSMC13/verlog/larpix_v3/xcelium/input/digital_core_av_hold_wc_tempus_signoff.sdf", 
+            larpix_hydra_tb.larpix_v3_inst3.digital_core_inst, ,"sdf_boc.log", ,,);
+    end
+`endif
+
 
 initial begin
 //    $sdf_annotate("/home/lxusers/c/crgrace/verilog/verilog_larpix_rev2_syn/par/digital_core.output.sdf",larpix_hydra_tb.larpix_v2_inst0);
@@ -98,7 +113,8 @@ larpix_v3
     .external_trigger   (external_trigger),
 //   .posi               ({th,piso1[0],th,posi_fpga}),
     .posi               ({posi_fpga,th,piso1[3],piso2[2]}),
-    .clk                (clk_delay),
+    //.clk                (clk_delay),
+    .clk                (clk),
     .reset_n            (reset_n)   
     );
 
@@ -110,7 +126,8 @@ larpix_v3
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
     .posi               ({piso0[1],th,th,th}),
-    .clk                (clk_delay),
+    //.clk                (clk_delay),
+    .clk                (clk),
     .reset_n            (reset_n)   
     );
 
@@ -122,7 +139,8 @@ larpix_v3
     .charge_in_r        (charge_in_r),
     .external_trigger   (external_trigger),
     .posi               ({th,piso0[0],piso3[3],th}),
-    .clk                (clk_delay),
+    //.clk                (clk_delay),
+    .clk                (clk),
     .reset_n            (reset_n)   
     );
 
