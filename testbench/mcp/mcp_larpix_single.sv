@@ -155,6 +155,7 @@ initial begin
 //    #1000
 
     @(negedge clk)
+    //@(posedge clk)
 
 // function def:
 //    sendWordToLarpix(op,chip_id,register,value);
@@ -163,7 +164,11 @@ initial begin
 //`include "./testbench/mcp/config_test.mcp"
 //`include "./testbench/mcp/single_larpix.mcp" 
 //`include "./testbench/mcp/larpix_minimal.mcp" 
-`include "./testbench/mcp/larpix_mailbox.mcp" 
+//`include "./testbench/mcp/larpix_mailbox.mcp" 
+//`include "./testbench/mcp/verification/ver_config_test.mcp"
+//`include "./testbench/mcp/verification/ver_config_magic_number.mcp"
+//`include "./testbench/mcp/verification/ver_cds_minimal.mcp"
+`include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
 //`include "./verification/ver_config_test.mcp"
