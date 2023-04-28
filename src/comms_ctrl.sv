@@ -53,7 +53,7 @@ enum logic [3:0] // explicit state definitions
             WAIT_FOR_WRITE = 4'h9,
             WRITE_FIFO = 4'ha,
             WAIT_STATE = 4'hb,
-            BAD_PACKET = 4'hc,
+            DROPPED_PACKET = 4'hc,
             DONE       = 4'hd} State, Next;
 
 // configuration word definitions
@@ -133,8 +133,8 @@ always_comb begin
                     && (((rx_data[1:0] == CONFIG_WRITE_OP)
                     || (rx_data[1:0] == CONFIG_READ_OP))
                     && ((rx_data[57:26] != MAGIC_NUMBER)
-                    || (parity_error == 1'b1))) ) Next = BAD_PACKET;
-                else if ((rx_data_flag) && (rx_data[1:0] == 2'b00)) Next = BAD_PACKET; 
+                    || (parity_error == 1'b1))) ) Next = DROPPED_PACKET;
+                else if ((rx_data_flag) && (rx_data[1:0] == 2'b00)) Next = DROPPED_PACKET; 
                 else if ( (rx_data_flag) && (rx_data[1:0] == CONFIG_WRITE_OP) 
                     && ( (rx_data[9:2] == chip_id) 
                     || (rx_data[9:2] == GLOBAL_ID) ) ) 
@@ -168,7 +168,7 @@ always_comb begin
                         || ch_fifo_high_water)) Next = CONFIG_WRITE_MAILBOX_LSB;
                     else if (!rx_data_flag || (timeout == 4'hF)) Next = READY;
                     else                                Next = WAIT_STATE;
-        BAD_PACKET:                                     Next = READY;
+        DROPPED_PACKET:                                     Next = READY;
         default:                                        Next = READY;
     endcase
 end // always_comb
@@ -222,7 +222,7 @@ always_ff @(posedge clk or negedge reset_n) begin
                             regmap_write_data <= total_packets[7:0];
                         end
                         else if (ch_bad_packets == 1'b1) begin
-                            regmap_address <= BAD_PACKETS;
+                            regmap_address <= DROPPED_PACKETS;
                             regmap_write_data <= bad_packets[7:0];
                             ch_bad_packets <= 1'b0;
                         end
@@ -288,7 +288,7 @@ always_ff @(posedge clk or negedge reset_n) begin
         WAIT_STATE: begin
                         timeout <= timeout + 1'b1;
                     end
-        BAD_PACKET: begin
+        DROPPED_PACKET: begin
                         bad_packets <= bad_packets + 1'b1;
                         ch_bad_packets <= 1'b1;
                     end

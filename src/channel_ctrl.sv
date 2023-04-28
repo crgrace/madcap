@@ -26,8 +26,6 @@ module channel_ctrl
     //output logic strobe,        // high to strobe SAR ADC
     output logic clk_out,       // copy of master clock used in TDC
     input logic channel_enabled, // high if channel enabled
-    input logic async_mode,    // high if asynchronous ADC used
-    input logic comp,           // bit from comparator in SAR
     input logic hit,            // high when discriminator fires
     input logic [9:0] dout,     // ADC output bits
     input logic done,           // async ADC conversion complete    
@@ -88,7 +86,6 @@ logic triggered_channel;    // high if channel triggered (in any way)
 logic [1:0] trigger_type; //00: normal, 01: ext, 10: cross,11: periodic
 logic [1:0] trigger_type_latched; // latched version of trigger type
 // ADC signals
-logic [7:0] sar_mask; // which bit to test in binary search
 logic [7:0] sample_counter;
 logic [31:0] timestamp_latched; // grab timestamp as soon as we have a hit
 logic strobe_en;  // enables clk to be used as ADC strobe
@@ -230,8 +227,7 @@ always_comb begin
                 else if (adc_burst >= adc_burst_counter) Next = CONVERT;
                 else if (reset_counter >= reset_length)   Next = CONVERT;
                 else                        Next = CONVERT;
-        CONVERT: if ((sar_mask <= 8'b0)      
-                    || (done == 1'b1))       Next = SAR_DONE;
+        CONVERT:  if (done == 1'b1)       Next = SAR_DONE;
                 else                        Next = CONVERT;
         SAR_DONE: if ((cds_mode == 1'b1)
                         && (have_reset_sample == 1'b0)) Next = SAVE_RESET_SAMPLE;
@@ -266,7 +262,6 @@ always_ff @(posedge clk  or negedge reset_n) begin
         periodic_reset_triggered <= 1'b0;
         sample <= 1'b1;
         strobe_en <= 1'b0;
-        sar_mask <= 8'b10000000;
         adc_word <= 8'b0;
         sample_counter <= 8'b0;
         adc_burst_counter <= 8'b0;
@@ -294,7 +289,6 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             sample <= 1'b1;
                             adc_burst_counter <= 8'b0;
                             trigger_type_latched <= 2'b0;
-                            sar_mask <= 8'b10000000;
                             adc_word <= 8'b0;
                             first_conversion <= 1'b1;
                             final_conversion <= 1'b0;
@@ -309,7 +303,6 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             end
                         end
             SAMPLE:     begin
-                            sar_mask <= 8'b10000000;
                             adc_word <= 8'b0;
                             sample_counter <= sample_counter + 1'b1;
                             if (adc_burst_counter >= adc_burst)
@@ -321,13 +314,11 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             end
                         end
             GET_RESET_SAMPLE: begin
-                            sar_mask <= 8'b10000000;
                             adc_word <= 8'b0;
                             sample_counter <= sample_counter + 1'b1;
                         end
             RESET_CSA:  begin
-                           // strobe_en <= 1'b1;
-                            //timestamp_latched <= timestamp_32b;
+                            timestamp_latched <= timestamp_32b[27:0];
                             if (mark_first_packet) begin
                                 if (first_conversion) begin 
                                     timestamp_latched[27] <= 1'b1; 
@@ -346,25 +337,13 @@ always_ff @(posedge clk  or negedge reset_n) begin
                             end
                         end
             CONVERT:  begin 
-                            if (!async_mode) begin
-                            //    strobe_en <= 1'b1;                  
-                                if (comp) begin
-                                    adc_word <= adc_word | (sar_mask);
-                                end
-                                sar_mask <= (sar_mask >> 1'b1);
-                            end
                             first_conversion <= 1'b0;
                             last_call <= 1'b0;
                             sample_counter <= 16'b0;
                         end  
             SAR_DONE:  begin
-                            if (async_mode) begin
-                                adc_word <= dout;
-                            end
-                            else if (comp) begin
-                                adc_word <= adc_word | (sar_mask);
-                            end
-                            sample <= 1'b1;
+                           adc_word <= dout;
+                           sample <= 1'b1;
                         end
             SAVE_RESET_SAMPLE: begin
                              have_reset_sample <= 1'b1;

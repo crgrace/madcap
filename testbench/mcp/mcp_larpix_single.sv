@@ -71,6 +71,7 @@ logic rcvd_fifo_half_bit;
 logic rcvd_fifo_full_bit;
 logic rcvd_local_fifo_half_bit;
 logic rcvd_local_fifo_full_bit;
+logic [3:0] rcvd_tally;
 logic [31:0] rcvd_magic_number;
 logic rcvd_parity_bit;
 logic parity_error;
@@ -93,6 +94,7 @@ always_comb begin
     rcvd_fifo_full_bit          = receivedData[59];
     rcvd_local_fifo_half_bit    = receivedData[60];
     rcvd_local_fifo_full_bit    = receivedData[61];
+    rcvd_tally                  = receivedData[61:58];
     rcvd_downstream_marker_bit  = receivedData[62];
     rcvd_parity_bit             = receivedData[63];
     rcvd_regmap_addr            = receivedData[17:10];
@@ -177,12 +179,13 @@ initial begin
 //`include "./verification/ver_ext_trig.mcp"
 //`include "./verification/ver_ext_sync.mcp"
 //`include "./verification/ver_bad_packets.mcp"
+`include "./verification/ver_multi_hit.mcp"
 //`include "./verification/ver_cds_minimal.mcp"
 //`include "./verification/ver_hydra_debug.mcp"
 //`include "./verification/ver_hydra_config.mcp"
 //`include "./verification/ver_hydra_storm.mcp"
 //`include "./verification/ver_hydra_ext_trig.mcp"
-`include "./verification/ver_hydra_storm_cds.mcp"
+//`include "./verification/ver_hydra_storm_cds.mcp"
 
 //`include "lightpix_debug.mcp"
 //`include "hydra_broadcast_read.mcp"
@@ -274,10 +277,11 @@ always @(negedge uld_rx_data) begin
                     2'b11 : $display("trigger_type = PERIODIC");
                 endcase 
               //  $display("trigger_type = %d", rcvd_trigger_type);
-                $display("shared fifo half bit = %d",rcvd_fifo_half_bit);
-                $display("shared fifo full bit = %d",rcvd_fifo_full_bit);
-                $display("local fifo half bit = %d",rcvd_local_fifo_half_bit);
-                $display("local fifo full bit = %d",rcvd_local_fifo_full_bit);
+//                $display("shared fifo half bit = %d",rcvd_fifo_half_bit);
+//                $display("shared fifo full bit = %d",rcvd_fifo_full_bit);
+//                $display("local fifo half bit = %d",rcvd_local_fifo_half_bit);
+//                $display("local fifo full bit = %d",rcvd_local_fifo_full_bit);
+                $display("total packet tally = %d",rcvd_tally);
                 $display("downstream marker bit = %d",rcvd_downstream_marker_bit);
            end
         2 : begin

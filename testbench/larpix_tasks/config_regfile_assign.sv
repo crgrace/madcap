@@ -43,12 +43,12 @@
         config_bits[FIFO_HW_MSB] <= 8'h00;
         config_bits[TOTAL_PACKETS_LSB] <= 8'h00;
         config_bits[TOTAL_PACKETS_MSB] <= 8'h00;
-        config_bits[BAD_PACKETS] <= 8'h00;
+        config_bits[DROPPED_PACKETS] <= 8'h00;
         for (int i = 0; i < 2; i++) begin
             config_bits[ADC_HOLD_DELAY + i] <= 8'h00;
         end
         config_bits[CHIP_ID] <= 8'h01;
-        config_bits[DIGITAL] <= 8'h00;
+        config_bits[DIGITAL] <= 8'h90;
         config_bits[ENABLE_PISO_UP] <= 8'h00;
         config_bits[ENABLE_PISO_DOWN] <= 8'h00;
         config_bits[ENABLE_POSI] <= 8'h0F;

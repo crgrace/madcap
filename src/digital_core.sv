@@ -138,7 +138,7 @@ logic enable_periodic_trigger_veto; // does hit veto periodic trigger?
 logic enable_hit_veto;   // is hit required to go into hold mode?
 logic enable_fifo_diagnostics;   // high for diagnostics
 logic enable_local_fifo_diagnostics;   // high for local diagnostics
-logic enable_packet_diagnostics;   // high for bad packet diagnostics
+logic enable_tally;   // high to embed running tally in packet
 logic enable_data_stats;   // high to write stats to mailbox
 logic enable_external_trigger;  // high to process external triggers
 logic enable_external_sync;     // high to process external syncs
@@ -196,6 +196,7 @@ logic [7:0] reset_length_channel; // just in case...
 logic external_trigger_sync_active;
 logic external_trigger_gated;
 logic [ADCBITS-1:0] dout_channel [NUMCHANNELS-1:0]; 
+logic [3:0] total_packets_lsbs; // 4 LSBs of total packets to embed
 
 // need to use generates for large config words
 // Cadence can't handle two dimensional ports
@@ -303,7 +304,7 @@ always_comb begin
     load_config_defaults = config_bits[DIGITAL][1];
     enable_fifo_diagnostics = config_bits[DIGITAL][2];
     enable_local_fifo_diagnostics = config_bits[DIGITAL][3];
-    enable_packet_diagnostics = config_bits[DIGITAL][4];
+    enable_tally = config_bits[DIGITAL][4];
     enable_external_trigger = config_bits[DIGITAL][5];
     enable_external_sync = config_bits[DIGITAL][6];
     enable_data_stats = config_bits[DIGITAL][7];
@@ -435,8 +436,6 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .sample                 (sample[i]),
         .clk_out                (),
         .channel_enabled        (csa_enable[i]),
-        .async_mode             (1'b1),
-        .comp                   (1'b0),
         .hit                    (hit[i]),
         .chip_id                (chip_id),
         .dout                   (dout_channel[i]),
@@ -483,6 +482,10 @@ event_router
     .input_event        (input_events),
     .local_fifo_empty   (local_fifo_empty),
     .lightpix_mode      (lightpix_mode),
+    .enable_fifo_diagnostics    (enable_fifo_diagnostics),
+    .enable_tally       (enable_tally),
+    .total_packets_lsbs (total_packets_lsbs),
+    .fifo_counter       (fifo_counter),
     .hit_threshold      (hit_threshold),
     .timeout            (timeout),
     .fifo_ack           (fifo_ack),
@@ -519,6 +522,7 @@ external_interface
     .output_event               (output_event),
     .config_bits                (config_bits),
     .tx_enable                  (tx_enable),
+    .total_packets_lsbs         (total_packets_lsbs),
     .write_fifo_n               (write_fifo_n),
     .read_fifo_n                (read_fifo_n),
     .fifo_ack                   (fifo_ack),
@@ -536,8 +540,7 @@ external_interface
     .enable_posi                (enable_posi),
     .rx_in                      (posi),
     .enable_fifo_diagnostics    (enable_fifo_diagnostics),
-    .enable_packet_diagnostics  (enable_packet_diagnostics),
-    .enable_data_stats          (enable_data_stats), 
+    .enable_data_stats          (enable_data_stats),
     .fifo_counter               (fifo_counter),
     .clk                        (clk),
     .reset_n_clk                (reset_n_sync),

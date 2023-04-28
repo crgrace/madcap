@@ -20,6 +20,10 @@ module event_router
     input logic [WIDTH-2:0] input_event [NUMCHANNELS-1:0], // data in
     input logic [NUMCHANNELS-1:0] local_fifo_empty, // when low, event ready
     input logic lightpix_mode, // high to integrate hits for timeout
+    input logic enable_tally, // high to embed running tally in packet
+    input logic enable_fifo_diagnostics, // high to replace MSBs of tstamp
+    input logic [3:0] total_packets_lsbs, // number of packets generated
+    input logic [11:0] fifo_counter, // current shared fifo occupancy
     input logic [6:0] hit_threshold, // how many hits to declare event?
     input logic [7:0] timeout, // number of clk cycles to wait for hits
     input logic fifo_ack,   // comms controller acknowledge FIFO read
@@ -58,8 +62,9 @@ enum logic [2:0] // explicit state definitions
             INTEGRATE_EVENTS = 3'h1,
             READ_EVENT = 3'h2,
             LATCH_EVENT = 3'h3,
-            CLEAN_UP = 3'h4,
-            WAIT_STATE = 3'h5} State, Next;
+            ADD_TALLY = 3'h4,
+            CLEAN_UP = 3'h5,
+            WAIT_STATE = 3'h6} State, Next;
 
 always_ff @(posedge clk or negedge reset_n) begin
     if (!reset_n)
@@ -78,11 +83,14 @@ always_comb begin
                 else                            Next = INTEGRATE_EVENTS;
         READ_EVENT:                             Next = LATCH_EVENT;
         LATCH_EVENT: if (fifo_ack) begin
-                        if (!(&fifo_empty_hold))Next = READ_EVENT;  
+                        if (!(&fifo_empty_hold) && enable_tally)
+                                Next = ADD_TALLY;
+                        else if (!(&fifo_empty_hold)) Next = READ_EVENT;  
                         else if (!event_complete)Next = INTEGRATE_EVENTS;
                         else                    Next = READY;
                     end
                     else                        Next = LATCH_EVENT;
+        ADD_TALLY:                              Next = READ_EVENT;
         CLEAN_UP:                               Next = READY;
         WAIT_STATE: if (wait_counter_done)      Next = READ_EVENT;
                 else                            Next = WAIT_STATE;
@@ -156,7 +164,22 @@ always_ff @(posedge clk or negedge reset_n) begin
                         channel_waiting[i] <= 1'b0;
                     end
                 end
+                if (enable_tally) begin
+                    channel_event[61:58] <= total_packets_lsbs + 1'b1;
+                end
+                if (enable_fifo_diagnostics) begin
+                    channel_event[43:32] <= fifo_counter;
+                end
+
             end // LATCH_EVENT
+            ADD_TALLY: begin
+                if (enable_tally) begin
+                    channel_event[61:58] <= total_packets_lsbs;
+                end
+                if (enable_fifo_diagnostics) begin
+                    channel_event[43:32] <= fifo_counter;
+                end
+            end // ADD_TALLY
             CLEAN_UP: begin // dump local fifos
                 read_local_fifo_n <= fifo_empty_hold;
             end

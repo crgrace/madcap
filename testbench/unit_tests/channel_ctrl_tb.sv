@@ -1,10 +1,8 @@
 ///////////////////////////////////////////////////////////////////
 // File Name: channel_ctrl_tb.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
-// Description: Testbench for larpix-v2 channel_ctrl.sv.
+// Description: Testbench for larpix-v3 channel_ctrl.sv.
 //
-//          The new channel_ctrl.sv combines sar_ctrl, channel_ctrl, 
-//          and event_builder from larpix-v1 and adds a local FIFO
 //
 ///////////////////////////////////////////////////////////////////
 
@@ -58,7 +56,7 @@ logic enable_hit_veto; // if high hit must = 1 to go into hold
 logic clk;        // master clock    
 logic reset_n;   // asynchronous digital reset (active low)
 logic read_local_fifo_n; // low to read local fifo
-logic [NUMCHANNELS-1:0]read_local_fifo_n_concat; // concat version
+logic [NUMCHANNELS-1:0] read_local_fifo_n_concat; // concat version
 logic cds_mode;    // high for CDS mode
 logic fifo_full;  // high when shared fifo is full 
 logic fifo_half; // high when shared fifo is half full 
@@ -168,8 +166,6 @@ channel_ctrl
     .sample                 (sample),
     .strobe                 (strobe),
     .clk_out                (clk_out),
-    .async_mode             (async_mode),
-    .comp                   (comp),
     .hit                    (hit),
     .dout                   (dout),
     .done                   (done),

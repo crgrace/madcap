@@ -16,6 +16,7 @@ module external_interface
     output logic [WIDTH-1:0] output_event, // event to put into the fifo
     output logic [7:0] config_bits [0:REGNUM-1],// regmap config bit outputs
     output logic [3:0] tx_enable,   // high to enable TX PHY
+    output logic [3:0] total_packets_lsbs, // 4 lsbs of total_packets
     output logic write_fifo_n,      // write event into fifo (active low) 
     output logic read_fifo_n,       // read event from fifo (active low)
     output logic fifo_ack,          // acknowledge data consumed from FIFO
@@ -33,7 +34,6 @@ module external_interface
     input logic [3:0] enable_posi, // high to enable rx ports
     input logic [3:0] rx_in,                // rx UART input bit // TP: changed unpacked to packed to remove genus errors 
     input logic enable_fifo_diagnostics, // high to embed fifo counts
-    input logic enable_packet_diagnostics, // high for embeding packet count LSBs
     input logic enable_data_stats, // high to write stats to mailbox
     input logic [FIFO_BITS:0] fifo_counter,  // current shared fifo count
     input logic clk,                  // master clock
@@ -66,6 +66,10 @@ logic read_regmap;
 logic comms_busy;
 logic send_config_data; // send config data to hydra network
 
+
+always_comb begin
+    total_packets_lsbs = total_packets[3:0];
+end // always_comb
 
 // if this is config data from current chip, append fifo info, otherwise
 // just pass it on
@@ -115,10 +119,6 @@ generate
                 .ld_tx_data             (ld_tx_data_uart[i]),
                 .rx_enable              (rx_enable[i]),
                 .tx_enable              (tx_enable[i]),
-                .enable_fifo_diagnostics    (enable_fifo_diagnostics),
-                .enable_packet_diagnostics  (enable_packet_diagnostics),
-                .fifo_counter           (fifo_counter),
-                .total_packets          (total_packets),
                 .clk                    (clk),
                 .reset_n                (reset_n_clk)
             );
