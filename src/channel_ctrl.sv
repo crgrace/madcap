@@ -212,7 +212,9 @@ always_comb begin
         IDLE:   if (channel_enabled) begin
                     if (triggered_channel)      Next = SAMPLE; 
                     else if ((cds_mode == 1'b1)
-                            && (have_reset_sample == 1'b0)) Next = GET_RESET_SAMPLE;
+                            && (have_reset_sample == 1'b0)
+                            && (adc_burst_counter == 1'b0)) 
+                                                Next = GET_RESET_SAMPLE;
                     else                        Next = IDLE;
                 end
                 else                        Next = IDLE;
@@ -221,7 +223,9 @@ always_comb begin
                 else if (adc_burst_counter < adc_burst) Next = RESET_CSA;
                 else if (enable_hit_veto & !hit) Next = IDLE; 
                 else                        Next = RESET_CSA;
-        GET_RESET_SAMPLE: if (sample_counter < adc_hold_delay) Next = GET_RESET_SAMPLE;
+        GET_RESET_SAMPLE: if ((sample_counter < adc_hold_delay)
+                            && (adc_burst_counter < adc_burst)) 
+                                            Next = GET_RESET_SAMPLE;
                 else                        Next = CONVERT;
         RESET_CSA: if (!first_conversion & enable_dynamic_reset)   Next = CONVERT; 
                 else if (adc_burst >= adc_burst_counter) Next = CONVERT;
@@ -230,14 +234,14 @@ always_comb begin
         CONVERT:  if (done == 1'b1)       Next = SAR_DONE;
                 else                        Next = CONVERT;
         SAR_DONE: if ((cds_mode == 1'b1)
-                        && (have_reset_sample == 1'b0)) Next = SAVE_RESET_SAMPLE;
+                        && (have_reset_sample == 1'b0)
+                        && (adc_burst_counter == 1'b0)) Next = SAVE_RESET_SAMPLE;
                   else Next = REQUEST_READOUT;
         SAVE_RESET_SAMPLE: Next = IDLE;
-        REQUEST_READOUT: if ((!local_fifo_full)
-                            && (cds_mode == 1'b0))    Next = TRANSFER_ADC_CODE;
-                        else if ((!local_fifo_full)
-                            && (cds_mode == 1'b1)
-                            && (have_reset_sample == 1'b1)) Next = TRANSFER_RESET_SAMPLE;
+        REQUEST_READOUT: if (!local_fifo_full) begin
+                            if (have_reset_sample == 1'b1) Next = TRANSFER_RESET_SAMPLE;
+                            else              Next = TRANSFER_ADC_CODE;
+                            end
                 else                        Next = REQUEST_READOUT;
         TRANSFER_RESET_SAMPLE:              Next = WAIT_STATE;
         WAIT_STATE:   if (wait_counter >= 3'b100)  Next = TRANSFER_ADC_CODE;
@@ -315,6 +319,7 @@ always_ff @(posedge clk  or negedge reset_n) begin
                         end
             GET_RESET_SAMPLE: begin
                             adc_word <= 8'b0;
+                            timestamp_latched <= timestamp_32b[27:0];
                             sample_counter <= sample_counter + 1'b1;
                         end
             RESET_CSA:  begin

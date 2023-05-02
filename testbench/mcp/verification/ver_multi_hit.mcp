@@ -4,6 +4,10 @@
 
 $display("RUNNING VER_MULTI_HIT.MCP");
 $display("run length = 300 us");
+$display("Expect 16 total hits");
+$display("First 8 hits, then another 8 hits later");
+$display("Hits on channels 0 through 7");
+
 #10000
 $display("write 10d to GLOBAL_THRESH"); 
 sendWordToLarpix(CONFIG_WRITE_OP,8'h01,GLOBAL_THRESH,8'h0a);

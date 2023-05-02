@@ -1,6 +1,3 @@
-
-
-
 // mcp program to test 4-node LArPix Hydra Network packet storm
 
 $display("RUNNING VER_HYDRA_STORM.MCP");
