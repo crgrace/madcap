@@ -79,7 +79,7 @@
         end
         config_bits[ENABLE_ADC_MODES] <= 8'h4C;
         config_bits[MIN_DELTA_ADC] <= 8'b00;
-        config_bits[RESET_THRESHOLD] <= 8'h00;
+        config_bits[RESET_THRESHOLD] <= 8'hFF;
         for (int i = 0; i < 64; i++) begin
             config_bits[DIGITAL_THRESHOLD + i] <= 8'b00;
         end

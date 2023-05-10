@@ -160,7 +160,7 @@ logic fifo_ack;         // acknowledge data consumed from FIFO
 logic enable_dynamic_reset; // high to enable dynamic reset mode
 logic enable_min_delta_adc; // high to enable min delta ADC mode
 logic threshold_polarity; // high to trigger when ABOVE threshold
-logic [7:0] dynamic_reset_threshold; // ADC threshold that triggers 
+logic [9:0] dynamic_reset_threshold; // ADC threshold that triggers 
 logic [7:0] min_delta_adc; // difference in ADC values that triggers
 logic [WIDTH-2:0] input_events [NUMCHANNELS-1:0]; // pre-parity routed 
 logic [63:0] csa_enable; // enable from config bits
@@ -327,7 +327,8 @@ always_comb begin
     threshold_polarity = config_bits[ENABLE_ADC_MODES][2];
     reset_length = config_bits[ENABLE_ADC_MODES][5:3];
     mark_first_packet = config_bits[ENABLE_ADC_MODES][6];
-    dynamic_reset_threshold = config_bits[RESET_THRESHOLD][7:0];
+    dynamic_reset_threshold[7:0] = config_bits[RESET_THRESHOLD][7:0];
+    dynamic_reset_threshold[9:8] = config_bits[ANALOG_MONITOR][2:1];
     min_delta_adc = config_bits[MIN_DELTA_ADC][7:0];
     lightpix_mode = config_bits[LIGHTPIX0][0];
     hit_threshold = config_bits[LIGHTPIX0][7:1];

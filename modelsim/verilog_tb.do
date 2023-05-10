@@ -11,8 +11,8 @@ switch $SIM_LEVEL {
   # compile source
     do {compile_src.do}
 # run vsim
-#    vsim -L tsmc_tcb013ghp channel_ctrl_tb -vopt -voptargs="+acc=npr" 
-    vsim -L tsmc_tcb013ghp larpix_single_tb  -vopt -voptargs="+acc=npr" 
+    vsim -L tsmc_tcb013ghp channel_ctrl_tb -vopt -voptargs="+acc=npr" 
+#    vsim -L tsmc_tcb013ghp larpix_single_tb  -vopt -voptargs="+acc=npr" 
 #    vsim -L tsmc_tcb013ghp larpix_hydra_tb  -vopt -voptargs="+acc=npr" 
     
 #   vsim -L rf2p_512x64_4_50 -L tsmc_cl018g_rvt_neg -L tsmc18_cg_neg -suppress 12027 larpix_single_tb  -vopt -voptargs="+acc -xprop,mode=resolve" 
