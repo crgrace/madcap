@@ -186,7 +186,8 @@ logic [WIDTH-1:0] tx_data; // fifo data to be transmitted off-chip
 logic [WIDTH-1:0] pre_event; // event (pre-parity) to put into fifo
 logic load_event;     // high to load event from event builder
 logic sync_timestamp; // timestamp set to 0 when high   
-logic [NUMCHANNELS*8-1:0] digital_threshold; // adc > this?
+logic [4:0] digital_threshold_msb; // 5-bit shared value
+logic [NUMCHANNELS*8-1:0] digital_threshold_lsb; // per channel value
 logic [NUMCHANNELS-1:0] periodic_reset; // from reset pulser
 logic lightpix_mode; // high to integrate hits for timeout
 logic [6:0] hit_threshold; // how many hits to declare event?
@@ -205,7 +206,8 @@ generate
     for (g_i = 0; g_i < 64; g_i++) begin
         assign pixel_trim_dac[g_i*PIXEL_TRIM_DAC_BITS+(PIXEL_TRIM_DAC_BITS-1):g_i*PIXEL_TRIM_DAC_BITS] 
             = config_bits[PIXEL_TRIM+g_i][PIXEL_TRIM_DAC_BITS-1:0];
-        assign digital_threshold[g_i*8+7:g_i*8] 
+        // assign digital_threshold LSBs. Shared MSBs assigned below
+        assign digital_threshold_lsb[g_i*8+7:g_i*8] 
             = config_bits[DIGITAL_THRESHOLD+g_i][7:0];
         // distribute ADC bits to internal channels
         assign dout_channel[g_i] = dout[g_i*10+9:g_i*10];
@@ -330,6 +332,8 @@ always_comb begin
     dynamic_reset_threshold[7:0] = config_bits[RESET_THRESHOLD][7:0];
     dynamic_reset_threshold[9:8] = config_bits[ANALOG_MONITOR][2:1];
     min_delta_adc = config_bits[MIN_DELTA_ADC][7:0];
+    digital_threshold_msb[4:2] = config_bits[DIGITAL_THRESHOLD][7:5];
+    digital_threshold_msb[1:0] = config_bits[DIGITAL_THRESHOLD+1][6:5];
     lightpix_mode = config_bits[LIGHTPIX0][0];
     hit_threshold = config_bits[LIGHTPIX0][7:1];
     timeout = config_bits[LIGHTPIX1][7:0];
@@ -457,7 +461,7 @@ for (i=0; i<NUMCHANNELS; i=i+1) begin : CHANNELS
         .enable_min_delta_adc   (enable_min_delta_adc),
         .threshold_polarity     (threshold_polarity),
         .dynamic_reset_threshold    (dynamic_reset_threshold),
-        .digital_threshold      (digital_threshold[i*8+7:i*8]),
+        .digital_threshold      ({digital_threshold_msb,digital_threshold_lsb[i*8+4:i*8]}),
         .min_delta_adc          (min_delta_adc),
         .fifo_full              (fifo_full),
         .fifo_half              (fifo_half),

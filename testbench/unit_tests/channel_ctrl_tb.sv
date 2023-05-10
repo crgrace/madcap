@@ -41,7 +41,7 @@ logic periodic_reset; // periodic reset
 logic enable_min_delta_adc; // high for rst based on settling
 logic threshold_polarity; // high for ADC above threshold
 logic [9:0] dynamic_reset_threshold; // rst threshold
-logic [7:0] digital_threshold; // rst threshold
+logic [9:0] digital_threshold; // rst threshold
 logic [7:0] min_delta_adc; // min delta before rst triggered
 logic enable_fifo_diagnostics; // high to embed fifo counts
 logic enable_local_fifo_diagnostics; // high to embed local fifo counts
