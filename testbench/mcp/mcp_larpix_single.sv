@@ -173,7 +173,6 @@ initial begin
 `include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
-`include "v2c_debug.mcp"
 //`include "./verification/ver_config_test.mcp"
 //`include "./verification/ver_config_parity_error.mcp"
 //`include "./verification/ver_digital_threshold_test.mcp"
@@ -185,6 +184,7 @@ initial begin
 //`include "./verification/ver_burst.mcp"
 //`include "./verification/ver_burst_cds.mcp"
 //`include "./verification/ver_cds_minimal.mcp"
+`include "./verification/ver_fifo_drain.mcp"
 //`include "./verification/ver_hydra_debug.mcp"
 //`include "./verification/ver_hydra_config.mcp"
 //`include "./verification/ver_hydra_storm.mcp"
