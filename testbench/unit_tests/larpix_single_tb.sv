@@ -67,8 +67,7 @@ initial begin
     external_trigger = 0;
     posi[0] = 1;
 //    posi[1] = 1;
-    posi[2] = 1;
-    posi[3] = 1;
+  posi[2] = 1;   posi[3] = 1;
 
 // uncomment for ver_ext_trig.mcp
 /*

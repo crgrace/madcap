@@ -173,9 +173,10 @@ initial begin
 `include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
+`include "v2c_debug.mcp"
 //`include "./verification/ver_config_test.mcp"
 //`include "./verification/ver_config_parity_error.mcp"
-`include "./verification/ver_digital_threshold_test.mcp"
+//`include "./verification/ver_digital_threshold_test.mcp"
 //`include "./verification/ver_config_magic_number.mcp"
 //`include "./verification/ver_ext_trig.mcp"
 //`include "./verification/ver_ext_sync.mcp"
