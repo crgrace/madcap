@@ -19,8 +19,8 @@
         config_bits[IBIAS_VREF] <= 8'h08;
         config_bits[IBIAS_VCM] <= 8'h08;
         config_bits[IBIAS_TPULSE] <= 8'h05;
-        config_bits[REFGEN] <= 8'h90;
-        config_bits[DAC_VREF] <= 8'hDB;
+        config_bits[REFGEN] <= 8'h50;
+        config_bits[DAC_VREF] <= 8'hDE;
         config_bits[ADC_IBIAS_DELAY] <= 8'h08;
         for (int i = 0; i < 8; i++) begin
             config_bits[BYPASS_SELECT + i] <= 8'h00;

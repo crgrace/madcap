@@ -61,8 +61,9 @@ logic [3:0] ibias_vcm_buffer; // vcm buffer bias
 logic [3:0] ibias_tpulse; // tpulse DAC bias
 logic [15:0] adc_ibias_delay; // ADC delay line
 logic [4:0] ref_current_trim; // trims ref voltage
-logic ref_kickstart; // kickstart bit
-logic override_ref; // override reference generator
+logic [1:0] adc_comp_trim; // trims ref of delay generator in ADC
+//logic ref_kickstart; // kickstart bit
+//logic override_ref; // override reference generator
 logic [7:0] vref_dac; // sets vref for adc
 logic [7:0] vcm_dac; // sets vcm for adc
 logic [NUMCHANNELS-1:0] csa_bypass_enable; // inject into adc from test pin
@@ -168,8 +169,9 @@ digital_core
     .ibias_tpulse                   (ibias_tpulse),
     .adc_ibias_delay                (adc_ibias_delay),
     .ref_current_trim               (ref_current_trim),
-    .override_ref                   (override_ref),
-    .ref_kickstart                  (ref_kickstart),
+    .adc_comp_trim                  (adc_comp_trim),
+//    .override_ref                   (override_ref),
+//    .ref_kickstart                  (ref_kickstart),
     .vref_dac                       (vref_dac),
     .vcm_dac                        (vcm_dac),
     .csa_bypass_enable              (csa_bypass_enable),

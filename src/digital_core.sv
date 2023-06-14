@@ -53,8 +53,7 @@ module digital_core
     output logic [3:0] ibias_tpulse,  // tpulse ibias
     output logic [15:0] adc_ibias_delay, // ADC delay line
     output logic [4:0] ref_current_trim, // trims ref voltage
-    output logic override_ref, // high to enable external bandgap
-    output logic ref_kickstart, // active high kickstart bit
+    output logic [1:0] adc_comp_trim, // trims ref of delay ramp 
     output logic [7:0] vref_dac, // sets vref for adc
     output logic [7:0] vcm_dac, // sets vcm for adc
     output logic [NUMCHANNELS-1:0] csa_bypass_enable, // inject into adc
@@ -100,7 +99,6 @@ module digital_core
     output logic [3:0] v_cm_lvds_tx2,   // TX2 CM output voltage (lvds mode)
     output logic [3:0] v_cm_lvds_tx3,   // TX3 CM output voltage (lvds mode)
 // INPUTS
-    //input logic [ADCBITS-1:0] dout [NUMCHANNELS-1:0],                 // bits from ADC
     input logic [ADCBITS*NUMCHANNELS-1:0] dout,                 // bits from ADC
     input logic [NUMCHANNELS-1:0] done,   // high when ADC conversion finished
     input logic [NUMCHANNELS-1:0] hit,    // high when discriminator fires
@@ -155,7 +153,6 @@ logic [NUMCHANNELS-1:0] cross_trigger_mask; // high to disable channel
 logic [NUMCHANNELS-1:0] periodic_trigger_mask; // high to disable channel
 logic [23:0] periodic_reset_cycles; // time between periodic reset
 logic [31:0] periodic_trigger_cycles; // time between periodic triggers
-logic [1:0] clk_ctrl;   // divide ratio
 logic fifo_ack;         // acknowledge data consumed from FIFO
 logic enable_dynamic_reset; // high to enable dynamic reset mode
 logic enable_min_delta_adc; // high to enable min delta ADC mode
@@ -276,14 +273,7 @@ always_comb begin
     ibias_vcm_buffer = config_bits[IBIAS_VCM][3:0];
     ibias_tpulse[3:0] = config_bits[IBIAS_TPULSE][3:0];
     ref_current_trim = config_bits[REFGEN][4:0];
-    override_ref = config_bits[REFGEN][5];
-    ref_kickstart = config_bits[REFGEN][6];
-// DISABLE REFERENCE OVERRIDE AND KICKSTART 
-// we don't use anymore, but don't want to have to modify
-// working analog circuits, so just force to zero
-    override_ref = 1'b0; 
-    ref_kickstart = 1'b0;
-// END DISABLE REFERENCE OVERRIDE AND KICKSTART
+    adc_comp_trim = config_bits[REFGEN][6:5];
     vref_dac = {{config_bits[DAC_VREF][7:1]},1'b0};
     vcm_dac = vref_dac >> 1;
     adc_ibias_delay = {4{config_bits[ADC_IBIAS_DELAY][3:0]}};
