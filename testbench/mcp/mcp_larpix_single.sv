@@ -173,14 +173,14 @@ initial begin
 `include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
-//`include "./verification/ver_config_test.mcp"
+`include "./verification/ver_config_test.mcp"
 //`include "./verification/ver_config_parity_error.mcp"
 //`include "./verification/ver_digital_threshold_test.mcp"
 //`include "./verification/ver_config_magic_number.mcp"
 //`include "./verification/ver_ext_trig.mcp"
 //`include "./verification/ver_ext_sync.mcp"
 //`include "./verification/ver_bad_packets.mcp"
-`include "./verification/ver_multi_hit.mcp"
+//`include "./verification/ver_multi_hit.mcp"
 //`include "./verification/ver_burst.mcp"
 //`include "./verification/ver_burst_cds.mcp"
 //`include "./verification/ver_cds_minimal.mcp"
