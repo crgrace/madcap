@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
-`default_nettype none
+`default_nettype wire
+//`default_nettype none
 //
 module larpix_single_tb();
 
