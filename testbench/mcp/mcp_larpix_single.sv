@@ -173,7 +173,7 @@ initial begin
 `include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
-`include "./verification/ver_config_test.mcp"
+//`include "./verification/ver_config_test.mcp"
 //`include "./verification/ver_config_parity_error.mcp"
 //`include "./verification/ver_digital_threshold_test.mcp"
 //`include "./verification/ver_config_magic_number.mcp"
@@ -188,7 +188,7 @@ initial begin
 //`include "./verification/ver_hydra_debug.mcp"
 //`include "./verification/ver_hydra_config.mcp"
 //`include "./verification/ver_hydra_storm.mcp"
-//`include "./verification/ver_hydra_ext_trig.mcp"
+`include "./verification/ver_hydra_ext_trig.mcp"
 //`include "./verification/ver_hydra_storm_cds.mcp"
 
 //`include "lightpix_debug.mcp"
