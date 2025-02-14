@@ -2,12 +2,6 @@
 // File Name: uart_rx.sv
 // Engineer:  Carl Grace (crgrace@lbl.gov)
 // Description: Simple UART receiver
-//              Adapted from orignal design by Deepak Tala
-//
-//              in v2 mode:
-//              RX should use a 2X oversampled clock relative to TX
-//              in v3 mode:
-//              RX should use same clock as TX
 //
 // If rx_empty is low then data is waiting. It should be read and then
 // uld_rx_data should be asserted to enable rx for another reception.
