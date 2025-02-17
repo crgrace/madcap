@@ -170,7 +170,7 @@ initial begin
 //`include "./testbench/mcp/verification/ver_config_test.mcp"
 //`include "./testbench/mcp/verification/ver_config_magic_number.mcp"
 //`include "./testbench/mcp/verification/ver_cds_minimal.mcp"
-`include "./testbench/mcp/verification/ver_hydra_config.mcp"
+//`include "./testbench/mcp/verification/ver_hydra_config.mcp"
 
 `else
 //`include "./verification/ver_config_test.mcp"
@@ -188,7 +188,7 @@ initial begin
 //`include "./verification/ver_hydra_debug.mcp"
 //`include "./verification/ver_hydra_config.mcp"
 //`include "./verification/ver_hydra_storm.mcp"
-`include "./verification/ver_hydra_ext_trig.mcp"
+//`include "./verification/ver_hydra_ext_trig.mcp"
 //`include "./verification/ver_hydra_storm_cds.mcp"
 
 //`include "lightpix_debug.mcp"
@@ -204,7 +204,7 @@ initial begin
 //`include "sanity_check.mcp"
 //`include "config_path.mcp"
 //`include "single_larpix.mcp" 
-//`include "larpix_minimal.mcp" 
+`include "larpix_minimal.mcp" 
 //`include "larpix_mailbox.mcp" 
 //`include "cds_minimal.mcp"    
 //`include "hydra_larpix.mcp"
@@ -280,11 +280,6 @@ always @(negedge uld_rx_data) begin
                     2'b10 : $display("trigger_type = CROSS");
                     2'b11 : $display("trigger_type = PERIODIC");
                 endcase 
-              //  $display("trigger_type = %d", rcvd_trigger_type);
-//                $display("shared fifo half bit = %d",rcvd_fifo_half_bit);
-//                $display("shared fifo full bit = %d",rcvd_fifo_full_bit);
-//                $display("local fifo half bit = %d",rcvd_local_fifo_half_bit);
-//                $display("local fifo full bit = %d",rcvd_local_fifo_full_bit);
                 $display("total packet tally = %d",rcvd_tally);
                 $display("downstream marker bit = %d",rcvd_downstream_marker_bit);
            end

@@ -71,7 +71,7 @@ initial begin
   posi[2] = 1;   posi[3] = 1;
 
 // uncomment for ver_ext_trig.mcp
-
+/*
 #10000
 $display("issue external_trigger (expected to be ignored)");
 external_trigger = 1;
@@ -83,7 +83,7 @@ $display("issue external_trigger (expected to work)");
 external_trigger = 1;
 #200
 external_trigger = 0;
-
+*/
 
 // uncomment for ver_ext_sync.mcp
 /*
@@ -141,7 +141,7 @@ mcp_larpix_single
     .charge_in_r    (charge_in_r),
     .clk            (clk),
     .reset_n        (reset_n),
-    .piso           (piso[1])
+    .piso           (piso[0])
 );
 
 // single LArPix
